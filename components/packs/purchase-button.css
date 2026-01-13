@@ -1,0 +1,85 @@
+.purchase-button {
+  --border-right: 4px;
+  --text-stroke-color: rgba(255, 255, 255, 0.6);
+  --animation-color: #37ff8b;
+  --fs-size: 1.25rem;
+
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 280px;
+  padding: 1rem 2rem;
+  margin: 0;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: var(--fs-size);
+  font-family: inherit;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--text-stroke-color);
+  transition: border-color 0.3s ease, background 0.3s ease;
+}
+
+.purchase-button:hover {
+  border-color: var(--animation-color);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.purchase-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.button-text {
+  position: relative;
+  z-index: 1;
+}
+
+.hover-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  color: var(--animation-color);
+  width: 0%;
+  border-right: var(--border-right) solid var(--animation-color);
+  border-radius: 12px 0 0 12px;
+  overflow: hidden;
+  transition: width 0.5s ease;
+  -webkit-text-stroke: 1px var(--animation-color);
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(4px);
+}
+
+.purchase-button:hover .hover-text {
+  width: 100%;
+  border-radius: 12px;
+  filter: drop-shadow(0 0 20px var(--animation-color));
+}
+
+.loading-text {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: white;
+  -webkit-text-stroke: 0;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .purchase-button {
+    width: 240px;
+    --fs-size: 1rem;
+    padding: 0.875rem 1.5rem;
+  }
+}

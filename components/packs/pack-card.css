@@ -1,0 +1,363 @@
+:root {
+  --glitter-url: url("https://assets.codepen.io/13471/silver-glitter-background.png");
+}
+
+.pack-card-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  perspective: 1000px;
+}
+
+.pack-card {
+  position: relative;
+  width: 100%;
+  max-width: 280px;
+  height: 380px;
+  border-radius: 20px;
+  background: var(--card-gradient);
+  transform-style: preserve-3d;
+  transform: rotateX(var(--tilt-x)) rotateY(var(--tilt-y));
+  transition: transform 0.1s ease-out, box-shadow 0.3s ease;
+  cursor: pointer;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+}
+
+.pack-card.is-hovering {
+  box-shadow: 0 35px 60px -15px rgba(0, 0, 0, 0.6), 0 0 40px var(--glow-color),
+    0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+}
+
+/* Holographic Rainbow Effect */
+.pack-card-holo {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    125deg,
+    transparent 0%,
+    rgba(255, 0, 0, 0.1) 15%,
+    rgba(255, 154, 0, 0.1) 30%,
+    rgba(208, 222, 33, 0.1) 40%,
+    rgba(79, 220, 74, 0.1) 50%,
+    rgba(63, 218, 216, 0.1) 60%,
+    rgba(47, 201, 226, 0.1) 70%,
+    rgba(28, 127, 238, 0.1) 80%,
+    rgba(95, 21, 242, 0.1) 90%,
+    transparent 100%
+  );
+  background-size: 200% 200%;
+  mix-blend-mode: overlay;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  animation: holo-shift 6s ease infinite;
+  pointer-events: none;
+}
+
+.pack-card.is-hovering .pack-card-holo {
+  opacity: 1;
+}
+
+/* Glitter Effect */
+.pack-card-glitter {
+  position: absolute;
+  inset: 0;
+  background-image: var(--glitter-url), var(--glitter-url),
+    linear-gradient(
+      125deg,
+      transparent 40%,
+      rgba(255, 255, 255, 0.8) 50%,
+      transparent 60%
+    );
+  background-size: 50% 50%, 60% 60%, 300% 300%;
+  background-blend-mode: multiply, multiply, overlay;
+  mix-blend-mode: color-dodge;
+  filter: brightness(1.5) contrast(0.9);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  animation: glitter-shift 6s ease infinite;
+  pointer-events: none;
+}
+
+.pack-card.is-hovering .pack-card-glitter {
+  opacity: 0.6;
+}
+
+/* Shine Effect */
+.pack-card-shine {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.4) 45%,
+    rgba(255, 255, 255, 0.6) 50%,
+    rgba(255, 255, 255, 0.4) 55%,
+    transparent 60%
+  );
+  background-size: 200% 200%;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  animation: shine-shift 6s ease infinite;
+  pointer-events: none;
+}
+
+.pack-card.is-hovering .pack-card-shine {
+  opacity: 1;
+}
+
+/* Content */
+.pack-card-content {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 1.5rem;
+  padding-top: 3rem;
+  text-align: center;
+  color: white;
+}
+
+.pack-card-badge {
+  position: absolute;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.25rem 0.75rem;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(4px);
+  border-radius: 999px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.pack-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 65px;
+  height: 65px;
+  margin-bottom: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2),
+    inset 0 0 32px rgba(255, 255, 255, 0.05);
+}
+
+.pack-card-title {
+  margin: 0 0 0.25rem;
+  font-size: 1.5rem;
+  font-weight: 800;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.pack-card-price {
+  font-size: 2.5rem;
+  font-weight: 900;
+  background: linear-gradient(to bottom, #ffffff 0%, #cccccc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: none;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.pack-card-description {
+  margin: 0.75rem 0;
+  font-size: 0.85rem;
+  opacity: 0.9;
+  line-height: 1.4;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Odds Bar */
+.pack-card-odds {
+  width: 100%;
+  margin-top: auto;
+  padding-top: 1rem;
+}
+
+.odds-bar {
+  width: 100%;
+  height: 6px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.odds-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.5s ease;
+}
+
+.odds-fill.odds-rare {
+  background: linear-gradient(90deg, var(--accent-color), white);
+}
+
+.odds-label {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  opacity: 0.8;
+}
+
+/* Bottom Wave */
+.pack-card-bottom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  pointer-events: none;
+}
+
+.pack-card-wave {
+  width: 100%;
+  height: 100%;
+  color: white;
+}
+
+/* Button */
+.pack-card-button {
+  width: 100%;
+  max-width: 280px;
+  font-weight: 700;
+  transition: all 0.2s ease;
+}
+
+.pack-card-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.pack-card-holo,
+.pack-card-glitter,
+.pack-card-shine {
+  border-radius: inherit;
+}
+
+.neon-button {
+  --neon-color: #37ff8b;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 60%;
+  padding: 0.875rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--neon-color);
+  background: transparent;
+  border: 2px solid var(--neon-color);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.neon-button:hover {
+  color: #000;
+  background: var(--neon-color);
+  box-shadow: 0 0 10px var(--neon-color), 0 0 40px var(--neon-color),
+    0 0 80px var(--neon-color);
+}
+
+.neon-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+@media (max-width: 640px) {
+  .neon-button {
+    width: 240px;
+  }
+}
+
+/* Animations */
+@keyframes holo-shift {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes glitter-shift {
+  0%,
+  100% {
+    background-position: 50% 50%, 50% 50%, 0% 50%;
+  }
+  50% {
+    background-position: 51% 51%, 49% 49%, 100% 50%;
+  }
+}
+
+@keyframes shine-shift {
+  0%,
+  100% {
+    background-position: -50% 50%;
+  }
+  50% {
+    background-position: 150% 50%;
+  }
+}
+
+/* Legendary Special Effect */
+.pack-card-wrapper:has(.pack-card[style*="legendary"]) .pack-card::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  background: linear-gradient(45deg, #fbbf24, #f59e0b, #fcd34d, #fbbf24);
+  background-size: 300% 300%;
+  border-radius: 22px;
+  z-index: -1;
+  animation: legendary-glow 3s ease infinite;
+}
+
+@keyframes legendary-glow {
+  0%,
+  100% {
+    background-position: 0% 50%;
+    opacity: 0.7;
+  }
+  50% {
+    background-position: 100% 50%;
+    opacity: 1;
+  }
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .pack-card {
+    width: 240px;
+    height: 320px;
+  }
+
+  .pack-card-button {
+    width: 240px;
+  }
+
+  .pack-card-price {
+    font-size: 2rem;
+  }
+
+  .pack-card-title {
+    font-size: 1.25rem;
+  }
+}
