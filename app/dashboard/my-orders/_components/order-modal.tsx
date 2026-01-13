@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Sparkles } from "lucide-react";
 import { SerializedProduct } from "@/types/product";
 import { cn } from "@/lib/utils";
+import { getTierConfig, getTierBadgeClass } from "@/lib/tier-config";
 import "./order-modal.css";
 
 interface Order {
@@ -24,45 +25,12 @@ interface OrderModalProps {
   onClose: () => void;
 }
 
-const tierConfig: Record<string, { gradient: string; glowColor: string }> = {
-  COMMON: {
-    gradient: "linear-gradient(135deg, #64748b 0%, #475569 50%, #64748b 100%)",
-    glowColor: "rgba(100, 116, 139, 0.4)",
-  },
-  UNCOMMON: {
-    gradient: "linear-gradient(135deg, #22c55e 0%, #16a34a 50%, #22c55e 100%)",
-    glowColor: "rgba(34, 197, 94, 0.4)",
-  },
-  RARE: {
-    gradient: "linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #3b82f6 100%)",
-    glowColor: "rgba(59, 130, 246, 0.4)",
-  },
-  ULTRA_RARE: {
-    gradient: "linear-gradient(135deg, #a855f7 0%, #9333ea 50%, #a855f7 100%)",
-    glowColor: "rgba(168, 85, 247, 0.4)",
-  },
-  SECRET_RARE: {
-    gradient: "linear-gradient(135deg, #eab308 0%, #ca8a04 50%, #eab308 100%)",
-    glowColor: "rgba(234, 179, 8, 0.4)",
-  },
-  BANGER: {
-    gradient: "linear-gradient(135deg, #f97316 0%, #ea580c 50%, #f97316 100%)",
-    glowColor: "rgba(249, 115, 22, 0.4)",
-  },
-  GRAIL: {
-    gradient:
-      "linear-gradient(135deg, #ec4899 0%, #db2777 30%, #f59e0b 70%, #fbbf24 100%)",
-    glowColor: "rgba(236, 72, 153, 0.5)",
-  },
-};
-
 export function OrderModal({ order, isOpen, onClose }: OrderModalProps) {
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const [isHovering, setIsHovering] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
-  const tier = order?.selectedTier || "COMMON";
-  const style = tierConfig[tier] || tierConfig.COMMON;
+  const tier = getTierConfig(order?.selectedTier);
   const isRevealed = order?.status === "COMPLETED" && order?.product;
 
   useEffect(() => {
@@ -140,8 +108,9 @@ export function OrderModal({ order, isOpen, onClose }: OrderModalProps) {
                 {
                   "--tilt-x": `${tilt.x}deg`,
                   "--tilt-y": `${tilt.y}deg`,
-                  "--card-gradient": style.gradient,
-                  "--glow-color": style.glowColor,
+                  "--card-gradient":
+                    "linear-gradient(135deg, #3f3f46 0%, #27272a 50%, #3f3f46 100%)",
+                  "--glow-color": "rgba(63, 63, 70, 0.4)",
                 } as React.CSSProperties
               }
               onMouseMove={handleMouseMove}
@@ -166,8 +135,8 @@ export function OrderModal({ order, isOpen, onClose }: OrderModalProps) {
                     className="w-full h-full object-cover rounded-xl"
                   />
                 ) : (
-                  <div className="w-full h-full bg-white/10 flex items-center justify-center rounded-xl">
-                    <Sparkles className="h-16 w-16 text-white/40" />
+                  <div className="w-full h-full bg-zinc-800 flex items-center justify-center rounded-xl">
+                    <Sparkles className="h-16 w-16 text-zinc-600" />
                   </div>
                 )}
               </div>

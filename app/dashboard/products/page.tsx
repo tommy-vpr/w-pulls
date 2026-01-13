@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ProductsTable } from "@/components/products-table";
+import { ProductsTable } from "./_components/products-table";
 import { getProductsAction } from "@/app/actions/product.actions";
+import { ProductsFilters } from "./_components/product-filter";
 
 export const dynamic = "force-dynamic";
 
@@ -77,18 +78,27 @@ export default async function ProductsPage({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Products</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-gray-200">
+            Products
+          </h1>
           <p className="text-sm text-muted-foreground">
             Manage your product catalog
           </p>
         </div>
-        <Button asChild>
+        <Button
+          asChild
+          className="group/btn relative h-10 px-6 rounded-md bg-gradient-to-br from-violet-600 to-purple-600 font-medium text-white text-sm shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] disabled:opacity-50 disabled:cursor-not-allowed
+          hover:opacity-85 transition"
+        >
           <Link href="/dashboard/products/new">
             <Plus className="mr-2 h-4 w-4" />
             Add Product
           </Link>
         </Button>
       </div>
+
+      {/* Filter */}
+      <ProductsFilters />
 
       {/* Table */}
       <ProductsTable products={products} />
@@ -97,71 +107,62 @@ export default async function ProductsPage({
       {pagination && pagination.totalPages > 1 && (
         <div className="flex items-center justify-center gap-1">
           {/* Previous Button */}
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-9 w-9"
-            disabled={page <= 1}
-            asChild={page > 1}
-          >
-            {page > 1 ? (
-              <Link href={buildUrl(page - 1)}>
-                <ChevronLeft className="h-4 w-4" />
-              </Link>
-            ) : (
-              <span>
-                <ChevronLeft className="h-4 w-4" />
-              </span>
-            )}
-          </Button>
+          {page > 1 ? (
+            <Link
+              href={buildUrl(page - 1)}
+              className="inline-flex items-center justify-center h-9 w-9 rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 transition-colors"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Link>
+          ) : (
+            <span className="inline-flex items-center justify-center h-9 w-9 rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-600 cursor-not-allowed">
+              <ChevronLeft className="h-4 w-4" />
+            </span>
+          )}
 
           {/* Page Numbers */}
           {getPageNumbers(page, pagination.totalPages).map((pageNum, idx) =>
             pageNum === "..." ? (
               <span
                 key={`ellipsis-${idx}`}
-                className="px-3 py-2 text-sm text-muted-foreground"
+                className="px-3 py-2 text-sm text-zinc-600"
               >
                 ...
               </span>
-            ) : (
-              <Button
+            ) : page === pageNum ? (
+              <span
                 key={pageNum}
-                variant={page === pageNum ? "default" : "outline"}
-                size="icon"
-                className="h-9 w-9"
-                asChild={page !== pageNum}
+                className="inline-flex items-center justify-center h-9 w-9 rounded-lg bg-white text-zinc-900 font-medium"
               >
-                {page === pageNum ? (
-                  <span>{pageNum}</span>
-                ) : (
-                  <Link href={buildUrl(pageNum)}>{pageNum}</Link>
-                )}
-              </Button>
+                {pageNum}
+              </span>
+            ) : (
+              <Link
+                key={pageNum}
+                href={buildUrl(pageNum)}
+                className="inline-flex items-center justify-center h-9 w-9 rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 transition-colors"
+              >
+                {pageNum}
+              </Link>
             )
           )}
 
           {/* Next Button */}
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-9 w-9"
-            disabled={page >= pagination.totalPages}
-            asChild={page < pagination.totalPages}
-          >
-            {page < pagination.totalPages ? (
-              <Link href={buildUrl(page + 1)}>
-                <ChevronRight className="h-4 w-4" />
-              </Link>
-            ) : (
-              <span>
-                <ChevronRight className="h-4 w-4" />
-              </span>
-            )}
-          </Button>
+          {page < pagination.totalPages ? (
+            <Link
+              href={buildUrl(page + 1)}
+              className="inline-flex items-center justify-center h-9 w-9 rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 transition-colors"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Link>
+          ) : (
+            <span className="inline-flex items-center justify-center h-9 w-9 rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-600 cursor-not-allowed">
+              <ChevronRight className="h-4 w-4" />
+            </span>
+          )}
 
           {/* Page Info */}
-          <span className="ml-4 text-sm text-muted-foreground">
+          <span className="ml-4 text-sm text-zinc-500">
             Page {page} of {pagination.totalPages}
           </span>
         </div>

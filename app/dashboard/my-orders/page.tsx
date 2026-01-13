@@ -7,7 +7,6 @@ import {
 import { OrdersGrid } from "./_components/orders-grid";
 // import { OrdersStats } from "./_components/orders-stats";
 import { OrdersFilter } from "./_components/orders-filter";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Package } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -38,14 +37,12 @@ export default async function MyOrdersPage({
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="p-2 rounded-xl bg-primary/10">
-          <Package className="h-6 w-6 text-primary" />
+        <div className="p-2.5 rounded-xl bg-zinc-800 border border-zinc-700">
+          <Package className="h-6 w-6 text-zinc-300" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold">My Orders</h1>
-          <p className="text-muted-foreground text-sm">
-            Track your mystery pack pulls
-          </p>
+          <h1 className="text-2xl font-bold text-zinc-100">My Orders</h1>
+          <p className="text-zinc-500 text-sm">Track your mystery pack pulls</p>
         </div>
       </div>
 
@@ -60,26 +57,28 @@ export default async function MyOrdersPage({
       <OrdersFilter currentStatus={status} />
 
       {/* Orders Grid */}
-      <Suspense fallback={<GridLoading />}>
-        {ordersResult.success && ordersResult.data ? (
-          ordersResult.data.orders.length > 0 ? (
-            <OrdersGrid
-              orders={ordersResult.data.orders}
-              pagination={{
-                page: ordersResult.data.page,
-                totalPages: ordersResult.data.totalPages,
-                total: ordersResult.data.total,
-              }}
-            />
+      <div className="w-full max-w-7xl mx-auto">
+        <Suspense fallback={<GridLoading />}>
+          {ordersResult.success && ordersResult.data ? (
+            ordersResult.data.orders.length > 0 ? (
+              <OrdersGrid
+                orders={ordersResult.data.orders}
+                pagination={{
+                  page: ordersResult.data.page,
+                  totalPages: ordersResult.data.totalPages,
+                  total: ordersResult.data.total,
+                }}
+              />
+            ) : (
+              <EmptyState />
+            )
           ) : (
-            <EmptyState />
-          )
-        ) : (
-          <div className="text-center py-10 text-muted-foreground">
-            Failed to load orders
-          </div>
-        )}
-      </Suspense>
+            <div className="text-center py-10 text-zinc-500">
+              Failed to load orders
+            </div>
+          )}
+        </Suspense>
+      </div>
     </div>
   );
 }
@@ -88,7 +87,7 @@ function StatsLoading() {
   return (
     <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
       {[...Array(4)].map((_, i) => (
-        <Skeleton key={i} className="h-24 rounded-xl" />
+        <div key={i} className="h-24 rounded-xl bg-zinc-800/50 animate-pulse" />
       ))}
     </div>
   );
@@ -98,7 +97,7 @@ function GridLoading() {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {[...Array(6)].map((_, i) => (
-        <Skeleton key={i} className="h-64 rounded-xl" />
+        <div key={i} className="h-64 rounded-xl bg-zinc-800/50 animate-pulse" />
       ))}
     </div>
   );
@@ -107,11 +106,13 @@ function GridLoading() {
 function EmptyState() {
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center">
-      <div className="p-4 rounded-full bg-muted mb-4">
-        <Package className="h-8 w-8 text-muted-foreground" />
+      <div className="p-4 rounded-full bg-zinc-800 border border-zinc-700 mb-4">
+        <Package className="h-8 w-8 text-zinc-500" />
       </div>
-      <h3 className="text-lg font-semibold mb-1">No orders yet</h3>
-      <p className="text-muted-foreground text-sm max-w-sm">
+      <h3 className="text-lg font-semibold text-zinc-100 mb-1">
+        No orders yet
+      </h3>
+      <p className="text-zinc-500 text-sm max-w-sm">
         You haven't opened any mystery packs yet. Head to the packs page to get
         started!
       </p>

@@ -154,7 +154,7 @@ export default function RevealStage({
     if (typeof window !== "undefined") {
       chargingSoundRef.current = new Audio("/charging-sound.mp3");
       chargingSoundRef.current.loop = true;
-      chargingSoundRef.current.volume = 0.5;
+      chargingSoundRef.current.volume = 0.6;
 
       winningSoundRef.current = new Audio("/winning-sound.mp3");
       winningSoundRef.current.volume = 0.7;

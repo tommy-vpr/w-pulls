@@ -48,8 +48,6 @@ export function SettingsForm({ user }: SettingsFormProps) {
 }
 
 // Avatar Section
-// In components/settings/settings-form.tsx - AvatarSection
-
 function AvatarSection({ user }: { user: SettingsUser }) {
   const [isPending, startTransition] = useTransition();
   const [isRemoving, startRemoveTransition] = useTransition();
@@ -107,8 +105,10 @@ function AvatarSection({ user }: { user: SettingsUser }) {
   };
 
   return (
-    <div className="rounded-xl border  p-6">
-      <h2 className="text-lg font-semibold mb-4">Profile Picture</h2>
+    <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
+      <h2 className="text-lg font-semibold text-zinc-100 mb-4">
+        Profile Picture
+      </h2>
 
       <div className="flex items-center gap-6">
         {/* Avatar */}
@@ -117,7 +117,7 @@ function AvatarSection({ user }: { user: SettingsUser }) {
             <img
               src={preview}
               alt={user.name || "Avatar"}
-              className="h-24 w-24 rounded-full object-cover ring-2 ring-violet-500/20"
+              className="h-24 w-24 rounded-full object-cover ring-2 ring-violet-500/30"
             />
           ) : (
             <div className="h-24 w-24 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold">
@@ -148,10 +148,10 @@ function AvatarSection({ user }: { user: SettingsUser }) {
         </div>
 
         <div className="flex-1">
-          <p className="text-sm text-neutral-400">
+          <p className="text-sm text-zinc-400">
             Click the avatar to upload a new image. Recommended size: 256x256px.
           </p>
-          <p className="text-xs text-neutral-500 mt-1">
+          <p className="text-xs text-zinc-500 mt-1">
             Supported formats: JPG, PNG, GIF, WebP (max 5MB)
           </p>
 
@@ -175,7 +175,7 @@ function AvatarSection({ user }: { user: SettingsUser }) {
             <p
               className={cn(
                 "text-sm mt-2",
-                message.type === "success" ? "text-green-400" : "text-red-400"
+                message.type === "success" ? "text-emerald-400" : "text-red-400"
               )}
             >
               {message.text}
@@ -211,47 +211,51 @@ function ProfileSection({ user }: { user: SettingsUser }) {
   };
 
   return (
-    <div className="rounded-xl border  p-6">
-      <h2 className="text-lg font-semibold text-white mb-4">
+    <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
+      <h2 className="text-lg font-semibold text-zinc-100 mb-4">
         Profile Information
       </h2>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <LabelInputContainer>
-          <Label htmlFor="name">Full Name</Label>
+          <Label htmlFor="name" className="text-zinc-300">
+            Full Name
+          </Label>
           <div className="relative">
-            <IconUser className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500" />
+            <IconUser className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
             <Input
               id="name"
               name="name"
               defaultValue={user.name || ""}
               placeholder="Your name"
-              className="pl-10"
+              className="pl-10 bg-zinc-800/50 border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-violet-500/50"
             />
           </div>
         </LabelInputContainer>
 
         <LabelInputContainer>
-          <Label htmlFor="email">Email Address</Label>
+          <Label htmlFor="email" className="text-zinc-300">
+            Email Address
+          </Label>
           <div className="relative">
-            <IconMail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500" />
+            <IconMail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
             <Input
               id="email"
               name="email"
               type="email"
               defaultValue={user.email || ""}
               placeholder="you@example.com"
-              className="pl-10"
+              className="pl-10 bg-zinc-800/50 border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-violet-500/50"
             />
           </div>
         </LabelInputContainer>
 
         <div className="flex items-center gap-4 pt-2">
-          <div className="text-xs text-neutral-500">
-            <span className="text-neutral-400">Role:</span> {user.role}
+          <div className="text-xs text-zinc-500">
+            <span className="text-zinc-400">Role:</span> {user.role}
           </div>
-          <div className="text-xs text-neutral-500">
-            <span className="text-neutral-400">Joined:</span>{" "}
+          <div className="text-xs text-zinc-500">
+            <span className="text-zinc-400">Joined:</span>{" "}
             {format(user.createdAt, "MMMM d, yyyy")}
           </div>
         </div>
@@ -261,8 +265,8 @@ function ProfileSection({ user }: { user: SettingsUser }) {
             className={cn(
               "p-3 rounded-lg text-sm",
               message.type === "success"
-                ? "bg-green-500/10 border border-green-500/20 text-green-400"
-                : "bg-red-500/10 border border-red-500/20 text-red-400"
+                ? "bg-emerald-900/30 border border-emerald-700/50 text-emerald-400"
+                : "bg-red-900/30 border border-red-700/50 text-red-400"
             )}
           >
             {message.text}
@@ -272,7 +276,7 @@ function ProfileSection({ user }: { user: SettingsUser }) {
         <button
           type="submit"
           disabled={isPending}
-          className="group/btn relative h-10 px-6 rounded-md bg-gradient-to-br from-violet-600 to-purple-600 font-medium text-white text-sm shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] disabled:opacity-50 disabled:cursor-not-allowed"
+          className="cursor-pointer group/btn relative h-10 px-6 rounded-md bg-gradient-to-br from-violet-600 to-purple-600 font-medium text-white text-sm shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isPending ? (
             <Loader2 className="h-4 w-4 animate-spin mx-auto" />
@@ -315,52 +319,60 @@ function PasswordSection() {
   };
 
   return (
-    <div className="rounded-xl border  p-6">
-      <h2 className="text-lg font-semibold text-white mb-4">Change Password</h2>
+    <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
+      <h2 className="text-lg font-semibold text-zinc-100 mb-4">
+        Change Password
+      </h2>
 
       <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
         <LabelInputContainer>
-          <Label htmlFor="currentPassword">Current Password</Label>
+          <Label htmlFor="currentPassword" className="text-zinc-300">
+            Current Password
+          </Label>
           <div className="relative">
-            <IconLock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500" />
+            <IconLock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
             <Input
               id="currentPassword"
               name="currentPassword"
               type="password"
               placeholder="••••••••"
-              className="pl-10"
+              className="pl-10 bg-zinc-800/50 border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-violet-500/50"
               required
             />
           </div>
         </LabelInputContainer>
 
         <LabelInputContainer>
-          <Label htmlFor="newPassword">New Password</Label>
+          <Label htmlFor="newPassword" className="text-zinc-300">
+            New Password
+          </Label>
           <div className="relative">
-            <IconLock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500" />
+            <IconLock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
             <Input
               id="newPassword"
               name="newPassword"
               type="password"
               placeholder="••••••••"
-              className="pl-10"
+              className="pl-10 bg-zinc-800/50 border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-violet-500/50"
               required
               minLength={8}
             />
           </div>
-          <p className="text-xs text-neutral-500">Minimum 8 characters</p>
+          <p className="text-xs text-zinc-500">Minimum 8 characters</p>
         </LabelInputContainer>
 
         <LabelInputContainer>
-          <Label htmlFor="confirmPassword">Confirm New Password</Label>
+          <Label htmlFor="confirmPassword" className="text-zinc-300">
+            Confirm New Password
+          </Label>
           <div className="relative">
-            <IconLock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500" />
+            <IconLock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
             <Input
               id="confirmPassword"
               name="confirmPassword"
               type="password"
               placeholder="••••••••"
-              className="pl-10"
+              className="pl-10 bg-zinc-800/50 border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-violet-500/50"
               required
               minLength={8}
             />
@@ -372,8 +384,8 @@ function PasswordSection() {
             className={cn(
               "p-3 rounded-lg text-sm",
               message.type === "success"
-                ? "bg-green-500/10 border border-green-500/20 text-green-400"
-                : "bg-red-500/10 border border-red-500/20 text-red-400"
+                ? "bg-emerald-900/30 border border-emerald-700/50 text-emerald-400"
+                : "bg-red-900/30 border border-red-700/50 text-red-400"
             )}
           >
             {message.text}
@@ -383,7 +395,7 @@ function PasswordSection() {
         <button
           type="submit"
           disabled={isPending}
-          className="group/btn relative h-10 px-6 rounded-md bg-gradient-to-br from-violet-600 to-purple-600 font-medium text-white text-sm shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] disabled:opacity-50 disabled:cursor-not-allowed"
+          className="cursor-pointer group/btn relative h-10 px-6 rounded-md bg-gradient-to-br from-violet-600 to-purple-600 font-medium text-white text-sm shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isPending ? (
             <Loader2 className="h-4 w-4 animate-spin mx-auto" />
@@ -415,25 +427,25 @@ function DangerZone() {
   };
 
   return (
-    <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-6">
+    <div className="rounded-xl border border-red-900/50 bg-red-950/20 p-6">
       <h2 className="text-lg font-semibold text-red-400 mb-2 flex items-center gap-2">
         <IconAlertTriangle className="h-5 w-5" />
         Danger Zone
       </h2>
-      <p className="text-sm text-neutral-400 mb-4">
+      <p className="text-sm text-zinc-400 mb-4">
         Once you delete your account, there is no going back. Please be certain.
       </p>
 
       {!showConfirm ? (
         <button
           onClick={() => setShowConfirm(true)}
-          className="group/btn relative h-10 px-6 rounded-md bg-red-500/10 border border-red-500/20 font-medium text-red-400 text-sm hover:bg-red-500/20 transition-colors"
+          className="group/btn relative h-10 px-6 rounded-md bg-red-900/30 border border-red-800/50 font-medium text-red-400 text-sm hover:bg-red-900/50 transition-colors"
         >
           <IconTrash className="inline h-4 w-4 mr-2" />
           Delete Account
         </button>
       ) : (
-        <div className="space-y-4 p-4 rounded-lg border border-red-500/30 bg-red-500/10">
+        <div className="space-y-4 p-4 rounded-lg border border-red-800/50 bg-red-950/30">
           <p className="text-sm text-red-300">
             Type <span className="font-mono font-bold">DELETE</span> to confirm
             account deletion.
@@ -442,7 +454,7 @@ function DangerZone() {
             value={confirmText}
             onChange={(e) => setConfirmText(e.target.value)}
             placeholder="Type DELETE to confirm"
-            className="border-red-500/30 focus-visible:ring-red-500"
+            className="bg-zinc-900/50 border-red-800/50 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-red-500/50"
           />
           <div className="flex gap-3">
             <button
@@ -450,14 +462,14 @@ function DangerZone() {
                 setShowConfirm(false);
                 setConfirmText("");
               }}
-              className="h-10 px-6 rounded-md border border-neutral-700 font-medium text-neutral-300 text-sm hover:bg-neutral-800 transition-colors"
+              className="h-10 px-6 rounded-md border border-zinc-700 font-medium text-zinc-300 text-sm hover:bg-zinc-800 transition-colors"
             >
               Cancel
             </button>
             <button
               onClick={handleDelete}
               disabled={confirmText !== "DELETE" || isPending}
-              className="h-10 px-6 rounded-md bg-red-500 font-medium text-white text-sm hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="cursor-pointer h-10 px-6 rounded-md bg-red-600 font-medium text-white text-sm hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin mx-auto" />

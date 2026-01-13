@@ -46,7 +46,7 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold">Orders</h1>
+        <h1 className="text-3xl font-bold text-gray-200">Orders</h1>
         <p className="text-muted-foreground">
           View and manage all mystery pack orders
         </p>

@@ -10,15 +10,6 @@ import {
   Calendar,
   ExternalLink,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { getProductByIdAction } from "@/app/actions/product.actions";
 import prisma from "@/lib/prisma";
 import { formatDistanceToNow } from "date-fns";
@@ -78,50 +69,73 @@ export default async function ProductDetailPage({
     OTHER: "Other",
   };
 
+  const actionConfig: Record<string, { bg: string; text: string }> = {
+    CREATED: { bg: "bg-emerald-900/40", text: "text-emerald-400" },
+    UPDATED: { bg: "bg-blue-900/40", text: "text-blue-400" },
+    DELETED: { bg: "bg-red-900/40", text: "text-red-400" },
+    INVENTORY_INCREASED: { bg: "bg-green-900/40", text: "text-green-400" },
+    INVENTORY_DECREASED: { bg: "bg-orange-900/40", text: "text-orange-400" },
+    PRICE_CHANGED: { bg: "bg-purple-900/40", text: "text-purple-400" },
+    STATUS_CHANGED: { bg: "bg-yellow-900/40", text: "text-yellow-400" },
+    TIER_CHANGED: { bg: "bg-pink-900/40", text: "text-pink-400" },
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" asChild>
-            <Link href="/dashboard/products">
-              <ArrowLeft className="h-5 w-5" />
-            </Link>
-          </Button>
+          <Link
+            href="/dashboard/products"
+            className="inline-flex items-center justify-center h-10 w-10 rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 transition-colors"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Link>
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold tracking-tight">
+              <h1 className="text-2xl font-bold tracking-tight text-zinc-100">
                 {product.title}
               </h1>
-              <Badge variant={product.isActive ? "success" : "secondary"}>
+              <span
+                className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                  product.isActive
+                    ? "bg-emerald-900/30 text-emerald-400 border border-emerald-700/50"
+                    : "bg-zinc-800 text-zinc-400 border border-zinc-700"
+                }`}
+              >
                 {product.isActive ? "Active" : "Draft"}
-              </Badge>
+              </span>
             </div>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-zinc-500">
               Slug:{" "}
-              <code className="rounded bg-muted px-1">{product.slug}</code>
+              <code className="rounded bg-zinc-800 px-1.5 py-0.5 text-zinc-400">
+                {product.slug}
+              </code>
             </p>
           </div>
         </div>
-        <Button asChild>
-          <Link href={`/dashboard/products/${product.id}/edit`}>
-            <Pencil className="mr-2 h-4 w-4" />
-            Edit Product
-          </Link>
-        </Button>
+        <Link
+          href={`/dashboard/products/${product.id}/edit`}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white text-zinc-900 font-medium hover:bg-zinc-200 transition-colors"
+        >
+          <Pencil className="h-4 w-4" />
+          Edit Product
+        </Link>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
           {/* Image */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Product Image</CardTitle>
-            </CardHeader>
-            <CardContent>
+          <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
+            <div className="px-6 py-4 border-b border-zinc-800">
+              <h2 className="text-lg font-semibold text-zinc-100">
+                Product Image
+              </h2>
+            </div>
+            <div className="p-6">
               {product.imageUrl ? (
-                <div className="relative aspect-video w-full flex justify-center items-center overflow-hidden rounded-lg bg-muted">
+                <div className="relative aspect-video w-full flex justify-center items-center overflow-hidden rounded-lg bg-zinc-800">
                   <img
                     src={product.imageUrl}
                     alt={product.title}
@@ -129,178 +143,205 @@ export default async function ProductDetailPage({
                   />
                 </div>
               ) : (
-                <div className="flex aspect-video w-full items-center justify-center rounded-lg border border-dashed bg-muted/50">
+                <div className="flex aspect-video w-full items-center justify-center rounded-lg border border-dashed border-zinc-700 bg-zinc-800/50">
                   <div className="text-center">
-                    <Package className="mx-auto h-12 w-12 text-muted-foreground" />
-                    <p className="mt-2 text-sm text-muted-foreground">
+                    <Package className="mx-auto h-12 w-12 text-zinc-600" />
+                    <p className="mt-2 text-sm text-zinc-500">
                       No image uploaded
                     </p>
                   </div>
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Description */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Description</CardTitle>
-            </CardHeader>
-            <CardContent>
+          <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
+            <div className="px-6 py-4 border-b border-zinc-800">
+              <h2 className="text-lg font-semibold text-zinc-100">
+                Description
+              </h2>
+            </div>
+            <div className="p-6">
               {product.description ? (
-                <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                <p className="text-sm leading-relaxed whitespace-pre-wrap text-zinc-300">
                   {product.description}
                 </p>
               ) : (
-                <p className="text-sm text-muted-foreground italic">
+                <p className="text-sm text-zinc-500 italic">
                   No description provided
                 </p>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
 
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Pricing */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <DollarSign className="h-4 w-4" />
+          <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
+            <div className="px-6 py-4 border-b border-zinc-800">
+              <h2 className="text-lg font-semibold text-zinc-100 flex items-center gap-2">
+                <DollarSign className="h-4 w-4 text-zinc-400" />
                 Pricing
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">
+              </h2>
+            </div>
+            <div className="p-6">
+              <div className="text-3xl font-bold text-zinc-100">
                 {formatPrice(product.price)}
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Inventory */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Layers className="h-4 w-4" />
+          <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
+            <div className="px-6 py-4 border-b border-zinc-800">
+              <h2 className="text-lg font-semibold text-zinc-100 flex items-center gap-2">
+                <Layers className="h-4 w-4 text-zinc-400" />
                 Inventory
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+              </h2>
+            </div>
+            <div className="p-6">
               <div className="text-3xl font-bold">
                 <span
                   className={
                     product.inventory <= 0
-                      ? "text-destructive"
+                      ? "text-red-400"
                       : product.inventory <= 10
-                      ? "text-amber-600"
-                      : ""
+                      ? "text-amber-400"
+                      : "text-zinc-100"
                   }
                 >
                   {product.inventory}
                 </span>
               </div>
-              <p className="text-sm text-muted-foreground">units in stock</p>
-            </CardContent>
-          </Card>
+              <p className="text-sm text-zinc-500">units in stock</p>
+            </div>
+          </div>
 
           {/* Organization */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Tag className="h-4 w-4" />
+          <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
+            <div className="px-6 py-4 border-b border-zinc-800">
+              <h2 className="text-lg font-semibold text-zinc-100 flex items-center gap-2">
+                <Tag className="h-4 w-4 text-zinc-400" />
                 Organization
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+              </h2>
+            </div>
+            <div className="p-6 space-y-4">
               <div>
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                <p className="text-xs font-medium text-zinc-500 uppercase tracking-wide">
                   Category
                 </p>
                 <p className="mt-1">
                   {product.category ? (
-                    <Badge variant="secondary">
+                    <span className="inline-flex items-center rounded-md bg-zinc-800 px-2 py-1 text-xs font-medium text-zinc-300 border border-zinc-700">
                       {categoryLabels[product.category] || product.category}
-                    </Badge>
+                    </span>
                   ) : (
-                    <span className="text-muted-foreground">—</span>
+                    <span className="text-zinc-600">—</span>
                   )}
                 </p>
               </div>
               <div>
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                <p className="text-xs font-medium text-zinc-500 uppercase tracking-wide">
                   SKU
                 </p>
-                <p className="mt-1 font-mono text-sm">
-                  {product.sku || (
-                    <span className="text-muted-foreground">—</span>
-                  )}
+                <p className="mt-1 font-mono text-sm text-zinc-300">
+                  {product.sku || <span className="text-zinc-600">—</span>}
                 </p>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Timestamps */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
+          <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
+            <div className="px-6 py-4 border-b border-zinc-800">
+              <h2 className="text-lg font-semibold text-zinc-100 flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-zinc-400" />
                 Timestamps
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+              </h2>
+            </div>
+            <div className="p-6 space-y-4">
               <div>
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                <p className="text-xs font-medium text-zinc-500 uppercase tracking-wide">
                   Created
                 </p>
-                <p className="mt-1 text-sm">{formatDate(product.createdAt)}</p>
+                <p className="mt-1 text-sm text-zinc-300">
+                  {formatDate(product.createdAt)}
+                </p>
               </div>
               <div>
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                <p className="text-xs font-medium text-zinc-500 uppercase tracking-wide">
                   Last Updated
                 </p>
-                <p className="mt-1 text-sm">{formatDate(product.updatedAt)}</p>
+                <p className="mt-1 text-sm text-zinc-300">
+                  {formatDate(product.updatedAt)}
+                </p>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Product ID */}
-          <Card>
-            <CardContent className="pt-6">
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                Product ID
-              </p>
-              <p className="mt-1 font-mono text-xs break-all">{product.id}</p>
-            </CardContent>
-          </Card>
+          <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
+            <p className="text-xs font-medium text-zinc-500 uppercase tracking-wide">
+              Product ID
+            </p>
+            <p className="mt-1 font-mono text-xs text-zinc-400 break-all">
+              {product.id}
+            </p>
+          </div>
 
           {/* Audit */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Change History</CardTitle>
-            </CardHeader>
-            <CardContent>
+          <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
+            <div className="px-6 py-4 border-b border-zinc-800">
+              <h2 className="text-lg font-semibold text-zinc-100">
+                Change History
+              </h2>
+            </div>
+            <div className="p-6">
               <div className="space-y-3">
-                {audits.map((audit) => (
-                  <div
-                    key={audit.id}
-                    className="flex items-center gap-3 text-sm"
-                  >
-                    <Badge variant="outline">{audit.action}</Badge>
-                    {audit.field && (
-                      <span className="text-muted-foreground">
-                        {audit.field}: {audit.oldValue} → {audit.newValue}
-                      </span>
-                    )}
-                    <span className="text-xs text-muted-foreground ml-auto">
-                      {formatDistanceToNow(audit.createdAt, {
-                        addSuffix: true,
-                      })}
-                    </span>
-                  </div>
-                ))}
+                {audits.length === 0 ? (
+                  <p className="text-sm text-zinc-500">No changes recorded</p>
+                ) : (
+                  audits.map((audit) => {
+                    const config = actionConfig[audit.action] || {
+                      bg: "bg-zinc-800",
+                      text: "text-zinc-400",
+                    };
+                    return (
+                      <div
+                        key={audit.id}
+                        className="flex items-center gap-3 text-sm"
+                      >
+                        <span
+                          className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${config.bg} ${config.text} border border-current/20`}
+                        >
+                          {audit.action}
+                        </span>
+                        {audit.field && (
+                          <span className="text-zinc-500">
+                            {audit.field}:{" "}
+                            <span className="text-red-400/70">
+                              {audit.oldValue}
+                            </span>
+                            <span className="text-zinc-600 mx-1">→</span>
+                            <span className="text-emerald-400/70">
+                              {audit.newValue}
+                            </span>
+                          </span>
+                        )}
+                        <span className="text-xs text-zinc-600 ml-auto">
+                          {formatDistanceToNow(audit.createdAt, {
+                            addSuffix: true,
+                          })}
+                        </span>
+                      </div>
+                    );
+                  })
+                )}
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </div>
     </div>

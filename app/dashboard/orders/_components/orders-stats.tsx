@@ -8,7 +8,6 @@ import {
   DollarSign,
   TrendingUp,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { OrderStats } from "@/lib/repositories/order.repository";
 
 interface OrdersStatsProps {
@@ -22,8 +21,9 @@ export function OrdersStats({ stats }: OrdersStatsProps) {
       value: stats.totalOrders.toLocaleString(),
       icon: Package,
       description: `${stats.todayOrders} today`,
-      color: "text-blue-500",
-      bgColor: "bg-blue-500/10",
+      color: "text-blue-400",
+      bgColor: "bg-blue-900/30",
+      borderColor: "border-blue-700/50",
     },
     {
       title: "Completed",
@@ -32,16 +32,18 @@ export function OrdersStats({ stats }: OrdersStatsProps) {
       description: `${(
         (stats.completedOrders / stats.totalOrders) * 100 || 0
       ).toFixed(1)}% success rate`,
-      color: "text-green-500",
-      bgColor: "bg-green-500/10",
+      color: "text-emerald-400",
+      bgColor: "bg-emerald-900/30",
+      borderColor: "border-emerald-700/50",
     },
     {
       title: "Pending",
       value: stats.pendingOrders.toLocaleString(),
       icon: Clock,
       description: "Awaiting payment",
-      color: "text-yellow-500",
-      bgColor: "bg-yellow-500/10",
+      color: "text-amber-400",
+      bgColor: "bg-amber-900/30",
+      borderColor: "border-amber-700/50",
     },
     {
       title: "Total Revenue",
@@ -51,30 +53,32 @@ export function OrdersStats({ stats }: OrdersStatsProps) {
       })}`,
       icon: DollarSign,
       description: `$${stats.todayRevenue.toFixed(2)} today`,
-      color: "text-emerald-500",
-      bgColor: "bg-emerald-500/10",
+      color: "text-emerald-400",
+      bgColor: "bg-emerald-900/30",
+      borderColor: "border-emerald-700/50",
     },
   ];
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       {statCards.map((stat) => (
-        <Card key={stat.title}>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+        <div
+          key={stat.title}
+          className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-sm font-medium text-zinc-400">
               {stat.title}
-            </CardTitle>
-            <div className={`p-2 rounded-lg ${stat.bgColor}`}>
+            </span>
+            <div
+              className={`p-2 rounded-lg ${stat.bgColor} border ${stat.borderColor}`}
+            >
               <stat.icon className={`h-4 w-4 ${stat.color}`} />
             </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stat.value}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {stat.description}
-            </p>
-          </CardContent>
-        </Card>
+          </div>
+          <div className="text-2xl font-bold text-zinc-100">{stat.value}</div>
+          <p className="text-xs text-zinc-500 mt-1">{stat.description}</p>
+        </div>
       ))}
     </div>
   );

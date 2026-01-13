@@ -3,21 +3,9 @@ import {
   calculatePackEV,
   calculatePackMargin,
   getTierStats,
-  TIER_ORDER,
 } from "@/lib/packs/ev";
 import prisma from "@/lib/prisma";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-
-const tierColors: Record<string, string> = {
-  COMMON: "#71717a",
-  UNCOMMON: "#22c55e",
-  RARE: "#3b82f6",
-  ULTRA_RARE: "#a855f7",
-  SECRET_RARE: "#eab308",
-  BANGER: "#f97316",
-  GRAIL: "#ec4899",
-};
+import { TIER_ORDER, getTierConfig } from "@/lib/tier-config";
 
 export const dynamic = "force-dynamic";
 
@@ -49,71 +37,78 @@ export default async function PacksAdminPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold">Pack Analytics</h1>
-        <p className="text-muted-foreground">
-          Expected values and profit margins
-        </p>
+        <h1 className="text-3xl font-bold text-zinc-100">Pack Analytics</h1>
+        <p className="text-zinc-500">Expected values and profit margins</p>
       </div>
 
       {/* Tier Inventory */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Inventory by Tier</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
+        <div className="px-6 py-4 border-b border-zinc-800">
+          <h2 className="text-lg font-semibold text-zinc-100">
+            Inventory by Tier
+          </h2>
+        </div>
+        <div className="p-6">
           <div className="grid grid-cols-7 gap-4">
-            {TIER_ORDER.map((tier) => (
-              <div key={tier} className="text-center">
-                <p className="text-xs text-muted-foreground uppercase">
-                  {tier.replace("_", " ")}
-                </p>
-                <p className="text-2xl font-bold">{tierStats[tier].count}</p>
-                <p className="text-sm text-muted-foreground">
-                  ${tierStats[tier].avgPrice.toFixed(2)} avg
-                </p>
-              </div>
-            ))}
+            {TIER_ORDER.map((tier) => {
+              const config = getTierConfig(tier);
+              return (
+                <div key={tier} className="text-center">
+                  <p
+                    className={`text-xs uppercase font-medium ${config.color}`}
+                  >
+                    {config.label}
+                  </p>
+                  ...
+                </div>
+              );
+            })}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Pack Stats */}
       <div className="grid gap-6 md:grid-cols-2">
         {packStats.map((pack) => (
-          <Card key={pack.id}>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>{pack.name}</CardTitle>
-                <Badge
-                  variant={
-                    pack.marginPercentage > 20
-                      ? "success"
-                      : pack.marginPercentage > 0
-                      ? "warning"
-                      : "destructive"
-                  }
-                >
-                  {pack.marginPercentage.toFixed(1)}% margin
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
+          <div
+            key={pack.id}
+            className="rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden"
+          >
+            <div className="px-6 py-4 border-b border-zinc-800 flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-zinc-100">
+                {pack.name}
+              </h2>
+              <span
+                className={`inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium border ${
+                  pack.marginPercentage > 20
+                    ? "bg-emerald-900/30 text-emerald-400 border-emerald-700/50"
+                    : pack.marginPercentage > 0
+                    ? "bg-amber-900/30 text-amber-400 border-amber-700/50"
+                    : "bg-red-900/30 text-red-400 border-red-700/50"
+                }`}
+              >
+                {pack.marginPercentage.toFixed(1)}% margin
+              </span>
+            </div>
+            <div className="p-6 space-y-4">
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
-                  <p className="text-xs text-muted-foreground">Pack Price</p>
-                  <p className="text-xl font-bold">{pack.displayPrice}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">
-                    Expected Value
+                  <p className="text-xs text-zinc-500">Pack Price</p>
+                  <p className="text-xl font-bold text-zinc-100">
+                    {pack.displayPrice}
                   </p>
-                  <p className="text-xl font-bold">${pack.ev.toFixed(2)}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Profit/Pack</p>
+                  <p className="text-xs text-zinc-500">Expected Value</p>
+                  <p className="text-xl font-bold text-zinc-100">
+                    ${pack.ev.toFixed(2)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-zinc-500">Profit/Pack</p>
                   <p
                     className={`text-xl font-bold ${
-                      pack.margin > 0 ? "text-green-500" : "text-red-500"
+                      pack.margin > 0 ? "text-emerald-400" : "text-red-400"
                     }`}
                   >
                     ${pack.margin.toFixed(2)}
@@ -122,31 +117,49 @@ export default async function PacksAdminPage() {
               </div>
 
               <div>
-                <p className="text-xs text-muted-foreground mb-2">Tier Odds</p>
-                <div className="flex gap-1">
+                <p className="text-xs text-zinc-500 mb-2">Tier Odds</p>
+                <div className="flex gap-1 rounded overflow-hidden">
                   {TIER_ORDER.map(
                     (tier) =>
                       pack.allowedTiers.includes(tier) &&
                       pack.odds[tier] > 0 && (
                         <div
                           key={tier}
-                          className="h-2 rounded"
+                          className="h-2"
                           style={{
                             width: `${pack.odds[tier]}%`,
-                            backgroundColor: tierColors[tier],
+                            backgroundColor: getTierConfig(tier).hexColor,
                           }}
                           title={`${tier}: ${pack.odds[tier]}%`}
                         />
                       )
                   )}
                 </div>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {TIER_ORDER.map(
+                    (tier) =>
+                      pack.allowedTiers.includes(tier) &&
+                      pack.odds[tier] > 0 && (
+                        <span
+                          className={`text-xs ${getTierConfig(tier).color}`}
+                        >
+                          {getTierConfig(tier).label}: {pack.odds[tier]}%
+                        </span>
+                      )
+                  )}
+                </div>
               </div>
 
-              <p className="text-xs text-muted-foreground">
-                Min Tier: <Badge variant="outline">{pack.minTier}</Badge>
-              </p>
-            </CardContent>
-          </Card>
+              <div className="pt-3 border-t border-zinc-800">
+                <p className="text-xs text-zinc-500">
+                  Min Tier:{" "}
+                  <span className={`... ${getTierConfig(pack.minTier).color}`}>
+                    {getTierConfig(pack.minTier).label}
+                  </span>
+                </p>
+              </div>
+            </div>
+          </div>
         ))}
       </div>
     </div>

@@ -4,7 +4,6 @@ import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useCallback, useState, useTransition } from "react";
 import { Search, X, Calendar } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -122,12 +121,12 @@ export function OrdersFilters() {
       <div className="flex flex-1 flex-col gap-4 md:flex-row md:items-center">
         {/* Search */}
         <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
           <Input
             placeholder="Search orders..."
             value={search}
             onChange={(e) => handleSearch(e.target.value)}
-            className="pl-9"
+            className="pl-9 bg-zinc-800/50 border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-violet-500/50"
           />
         </div>
 
@@ -136,12 +135,16 @@ export function OrdersFilters() {
           value={searchParams.get("status") || "all"}
           onValueChange={handleStatusChange}
         >
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="cursor-pointer w-[180px] bg-zinc-800/50 border-zinc-700 text-zinc-100 focus:ring-violet-500/50">
             <SelectValue placeholder="Filter by status" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-zinc-900 border-zinc-800">
             {statusOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
+              <SelectItem
+                key={option.value}
+                value={option.value}
+                className="text-zinc-300 focus:text-zinc-100 focus:bg-zinc-800"
+              >
                 {option.label}
               </SelectItem>
             ))}
@@ -151,23 +154,26 @@ export function OrdersFilters() {
         {/* Date From */}
         <Popover>
           <PopoverTrigger asChild>
-            <Button
-              variant="outline"
+            <button
               className={cn(
-                "w-[180px] justify-start text-left font-normal",
-                !dateFrom && "text-muted-foreground"
+                "inline-flex items-center gap-2 w-[180px] px-3 py-2 rounded-lg border border-zinc-700 bg-zinc-800/50 text-sm text-left transition-colors hover:bg-zinc-800",
+                !dateFrom ? "text-zinc-500" : "text-zinc-100"
               )}
             >
-              <Calendar className="mr-2 h-4 w-4" />
+              <Calendar className="h-4 w-4" />
               {dateFrom ? format(dateFrom, "PP") : "From date"}
-            </Button>
+            </button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
+          <PopoverContent
+            className="w-auto p-0 bg-zinc-900 border-zinc-800"
+            align="start"
+          >
             <CalendarComponent
               mode="single"
               selected={dateFrom}
               onSelect={handleDateFromChange}
               initialFocus
+              className="bg-zinc-900"
             />
           </PopoverContent>
         </Popover>
@@ -175,23 +181,26 @@ export function OrdersFilters() {
         {/* Date To */}
         <Popover>
           <PopoverTrigger asChild>
-            <Button
-              variant="outline"
+            <button
               className={cn(
-                "w-[180px] justify-start text-left font-normal",
-                !dateTo && "text-muted-foreground"
+                "inline-flex items-center gap-2 w-[180px] px-3 py-2 rounded-lg border border-zinc-700 bg-zinc-800/50 text-sm text-left transition-colors hover:bg-zinc-800",
+                !dateTo ? "text-zinc-500" : "text-zinc-100"
               )}
             >
-              <Calendar className="mr-2 h-4 w-4" />
+              <Calendar className="h-4 w-4" />
               {dateTo ? format(dateTo, "PP") : "To date"}
-            </Button>
+            </button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
+          <PopoverContent
+            className="w-auto p-0 bg-zinc-900 border-zinc-800"
+            align="start"
+          >
             <CalendarComponent
               mode="single"
               selected={dateTo}
               onSelect={handleDateToChange}
               initialFocus
+              className="bg-zinc-900"
             />
           </PopoverContent>
         </Popover>
@@ -199,15 +208,13 @@ export function OrdersFilters() {
 
       {/* Clear Filters */}
       {hasFilters && (
-        <Button
-          variant="ghost"
-          size="sm"
+        <button
           onClick={clearFilters}
-          className="text-muted-foreground"
+          className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors"
         >
-          <X className="mr-2 h-4 w-4" />
+          <X className="h-4 w-4" />
           Clear filters
-        </Button>
+        </button>
       )}
     </div>
   );

@@ -2,8 +2,6 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SerializedProduct } from "@/types/product";
 import { cn } from "@/lib/utils";
@@ -18,6 +16,7 @@ import {
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { OrderModal } from "./order-modal";
+import { getTierConfig, getTierBadgeClass } from "@/lib/tier-config";
 
 interface Order {
   id: string;
@@ -39,55 +38,34 @@ interface OrdersGridProps {
   };
 }
 
-const tierConfig: Record<
-  string,
-  { color: string; bgColor: string; borderColor: string }
-> = {
-  COMMON: {
-    color: "text-slate-600",
-    bgColor: "bg-slate-300",
-    borderColor: "border-slate-500/30",
-  },
-  UNCOMMON: {
-    color: "text-green-600",
-    bgColor: "bg-green-300",
-    borderColor: "border-green-500/30",
-  },
-  RARE: {
-    color: "text-blue-600",
-    bgColor: "bg-blue-300",
-    borderColor: "border-blue-500/30",
-  },
-  ULTRA_RARE: {
-    color: "text-purple-600",
-    bgColor: "bg-purple-300",
-    borderColor: "border-purple-500/30",
-  },
-  SECRET_RARE: {
-    color: "text-yellow-600",
-    bgColor: "bg-yellow-300",
-    borderColor: "border-yellow-500/30",
-  },
-  BANGER: {
-    color: "text-orange-600",
-    bgColor: "bg-orange-300",
-    borderColor: "border-orange-500/30",
-  },
-  GRAIL: {
-    color: "text-pink-600",
-    bgColor: "bg-gradient-to-r from-pink-500/10 to-yellow-500/10",
-    borderColor: "border-pink-500/30",
-  },
-};
-
 const statusConfig: Record<
   string,
-  { icon: React.ElementType; color: string; label: string }
+  { icon: React.ElementType; color: string; bgColor: string; label: string }
 > = {
-  COMPLETED: { icon: CheckCircle, color: "text-green-400", label: "Revealed" },
-  PENDING: { icon: Clock, color: "text-amber-400", label: "Pending" },
-  FAILED: { icon: XCircle, color: "text-red-400", label: "Failed" },
-  REFUNDED: { icon: RotateCcw, color: "text-blue-400", label: "Refunded" },
+  COMPLETED: {
+    icon: CheckCircle,
+    color: "text-emerald-400",
+    bgColor: "bg-emerald-900/40",
+    label: "Revealed",
+  },
+  PENDING: {
+    icon: Clock,
+    color: "text-amber-400",
+    bgColor: "bg-amber-900/40",
+    label: "Pending",
+  },
+  FAILED: {
+    icon: XCircle,
+    color: "text-red-400",
+    bgColor: "bg-red-900/40",
+    label: "Failed",
+  },
+  REFUNDED: {
+    icon: RotateCcw,
+    color: "text-blue-400",
+    bgColor: "bg-blue-900/40",
+    label: "Refunded",
+  },
 };
 
 export function OrdersGrid({ orders, pagination }: OrdersGridProps) {
@@ -105,7 +83,6 @@ export function OrdersGrid({ orders, pagination }: OrdersGridProps) {
   const handleCardClick = (order: Order) => {
     setSelectedOrder(order);
     setIsModalOpen(true);
-    console.log("Modal Opened");
   };
 
   const handleCloseModal = () => {
@@ -128,26 +105,28 @@ export function OrdersGrid({ orders, pagination }: OrdersGridProps) {
       {/* Pagination */}
       {pagination.totalPages > 1 && (
         <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-zinc-500">
             Showing {orders.length} of {pagination.total} orders
           </p>
           <div className="flex items-center gap-2">
             <Button
-              variant="outline"
+              variant="ghost"
               size="icon"
               onClick={() => handlePageChange(pagination.page - 1)}
               disabled={pagination.page <= 1}
+              className="h-9 w-9 border border-zinc-800 bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 disabled:opacity-50"
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <span className="text-sm px-3">
+            <span className="text-sm text-zinc-400 px-3 min-w-[80px] text-center">
               {pagination.page} / {pagination.totalPages}
             </span>
             <Button
-              variant="outline"
+              variant="ghost"
               size="icon"
               onClick={() => handlePageChange(pagination.page + 1)}
               disabled={pagination.page >= pagination.totalPages}
+              className="h-9 w-9 border border-zinc-800 bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 disabled:opacity-50"
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
@@ -166,36 +145,17 @@ export function OrdersGrid({ orders, pagination }: OrdersGridProps) {
 }
 
 function OrderCard({ order, onClick }: { order: Order; onClick: () => void }) {
-  const tier = order.selectedTier
-    ? tierConfig[order.selectedTier] || tierConfig.COMMON
-    : tierConfig.COMMON;
+  const tier = getTierConfig(order.selectedTier);
   const status = statusConfig[order.status] || statusConfig.PENDING;
-  const isHighTier = order.selectedTier
-    ? ["ULTRA_RARE", "SECRET_RARE", "BANGER", "GRAIL"].includes(
-        order.selectedTier
-      )
-    : false;
   const isRevealed = order.status === "COMPLETED" && order.product;
 
   return (
-    <Card
+    <div
       onClick={onClick}
-      className={cn(
-        "overflow-hidden border transition-all hover:shadow-lg cursor-pointer hover:scale-[1.02]",
-        tier.borderColor,
-        isHighTier && "ring-1 ring-offset-2 ring-offset-background",
-        isHighTier && order.selectedTier === "GRAIL" && "ring-pink-500/50",
-        isHighTier && order.selectedTier === "BANGER" && "ring-orange-500/50",
-        isHighTier &&
-          order.selectedTier === "SECRET_RARE" &&
-          "ring-yellow-500/50",
-        isHighTier &&
-          order.selectedTier === "ULTRA_RARE" &&
-          "ring-purple-500/50"
-      )}
+      className="group overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/50 transition-all cursor-pointer hover:border-zinc-700 hover:bg-zinc-800/50 hover:shadow-lg hover:shadow-black/20"
     >
       {/* Product Image */}
-      <div className={cn("relative aspect-square", tier.bgColor)}>
+      <div className="relative aspect-square bg-zinc-800">
         {isRevealed && order.product?.imageUrl ? (
           <img
             src={order.product.imageUrl}
@@ -204,29 +164,29 @@ function OrderCard({ order, onClick }: { order: Order; onClick: () => void }) {
           />
         ) : (
           <div className="h-full w-full flex items-center justify-center">
-            <Sparkles className={cn("h-12 w-12", tier.color, "opacity-50")} />
+            <Sparkles className="h-12 w-12 text-zinc-600 opacity-40" />
           </div>
         )}
 
         {/* Tier Badge */}
         {order.selectedTier && (
-          <Badge
+          <span
             className={cn(
-              "absolute top-2 left-2 border-0",
-              tier.bgColor,
-              tier.color
+              "absolute top-3 left-3 inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium border backdrop-blur-sm",
+              getTierBadgeClass(order.selectedTier)
             )}
           >
-            {order.selectedTier.replace("_", " ")}
-          </Badge>
+            {tier.label}
+          </span>
         )}
 
         {/* Status Badge */}
         <div
           className={cn(
-            "absolute top-2 right-2 flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium",
-            "bg-background/80 backdrop-blur-sm",
-            status.color
+            "absolute top-3 right-3 flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium",
+            status.bgColor,
+            status.color,
+            "border border-current/20 backdrop-blur-sm"
           )}
         >
           {status.label}
@@ -234,38 +194,47 @@ function OrderCard({ order, onClick }: { order: Order; onClick: () => void }) {
       </div>
 
       {/* Content */}
-      <CardContent className="p-4 space-y-3">
+      <div className="p-4 space-y-3">
         <div>
-          <p className="text-xs text-muted-foreground">{order.packName}</p>
-          <h3 className="font-semibold truncate">
+          <p className="text-xs text-zinc-500">{order.packName}</p>
+          <h3 className="font-semibold text-zinc-100 truncate group-hover:text-white transition-colors">
             {isRevealed ? order.product!.title : "Mystery Card"}
           </h3>
         </div>
 
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs text-muted-foreground">Value</p>
-            <p className="font-bold text-primary">
+            <p className="text-xs text-zinc-500">Value</p>
+            <p
+              className={cn(
+                "font-bold",
+                isRevealed ? "text-emerald-400" : "text-zinc-500"
+              )}
+            >
               {isRevealed
                 ? `$${Number(order.product!.price).toFixed(2)}`
                 : "???"}
             </p>
           </div>
           <div className="text-right">
-            <p className="text-xs text-muted-foreground">Paid</p>
-            <p className="font-medium">${(order.amount / 100).toFixed(2)}</p>
+            <p className="text-xs text-zinc-500">Paid</p>
+            <p className="font-medium text-zinc-300">
+              ${(order.amount / 100).toFixed(2)}
+            </p>
           </div>
         </div>
 
-        <div className="pt-2 border-t flex items-center justify-between">
-          <p className="text-xs text-muted-foreground">
+        <div className="pt-3 border-t border-zinc-800 flex items-center justify-between">
+          <p className="text-xs text-zinc-600">
             {formatDistanceToNow(new Date(order.createdAt), {
               addSuffix: true,
             })}
           </p>
-          <span className="text-xs text-muted-foreground">Click to view</span>
+          <span className="text-xs text-zinc-600 group-hover:text-zinc-400 transition-colors">
+            Click to view
+          </span>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 interface OrdersFilterProps {
@@ -28,7 +27,7 @@ export function OrdersFilter({ currentStatus }: OrdersFilterProps) {
       params.set("status", status);
     }
 
-    params.delete("page"); // Reset to page 1
+    params.delete("page");
     router.push(`?${params.toString()}`);
   };
 
@@ -37,20 +36,18 @@ export function OrdersFilter({ currentStatus }: OrdersFilterProps) {
   return (
     <div className="flex gap-2 flex-wrap">
       {filters.map((filter) => (
-        <Button
+        <button
           key={filter.value}
-          variant="ghost"
-          size="sm"
           onClick={() => handleFilter(filter.value)}
           className={cn(
-            "rounded-full px-4 transition-all",
+            "px-4 py-2 text-sm font-medium rounded-lg transition-all",
             activeStatus === filter.value
-              ? "bg-primary text-primary-foreground hover:bg-primary/90"
-              : "bg-muted hover:bg-muted/80"
+              ? "bg-white text-zinc-900 shadow-sm"
+              : "bg-zinc-800 text-zinc-400 border border-zinc-700 hover:bg-zinc-700 hover:text-zinc-200"
           )}
         >
           {filter.label}
-        </Button>
+        </button>
       ))}
     </div>
   );

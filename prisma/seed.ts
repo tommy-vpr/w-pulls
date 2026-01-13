@@ -1,10 +1,12 @@
-import { PrismaClient, ProductTier, ProductCategory } from "@prisma/client";
-import fs from "fs";
-import path from "path";
+import { PrismaClient, ProductTier } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-/* ----------------------------- CONFIG ----------------------------- */
+/* ------------------------------------------------------------------ */
+/* CONFIG                                                             */
+/* ------------------------------------------------------------------ */
+
+const CATEGORY = "POKEMON" as const;
 
 const TIER_COUNTS: Record<ProductTier, number> = {
   COMMON: 30,
@@ -27,18 +29,28 @@ const PRICE_RANGES: Record<ProductTier, [number, number]> = {
 };
 
 const INVENTORY_RANGES: Record<ProductTier, [number, number]> = {
-  COMMON: [20, 50],
-  UNCOMMON: [15, 30],
-  RARE: [8, 15],
-  ULTRA_RARE: [4, 8],
-  SECRET_RARE: [2, 5],
-  BANGER: [1, 2],
+  COMMON: [30, 60],
+  UNCOMMON: [20, 40],
+  RARE: [10, 20],
+  ULTRA_RARE: [5, 10],
+  SECRET_RARE: [3, 6],
+  BANGER: [1, 3],
   GRAIL: [1, 1],
 };
 
-const CATEGORIES = Object.values(ProductCategory);
+const TIER_IMAGE_MAP: Record<ProductTier, string> = {
+  COMMON: "/images/common.png",
+  UNCOMMON: "/images/uncommon.png",
+  RARE: "/images/rare.png",
+  ULTRA_RARE: "/images/ultra_rare.png",
+  SECRET_RARE: "/images/secret_rare.png",
+  BANGER: "/images/banger.png",
+  GRAIL: "/images/grail.png",
+};
 
-/* ----------------------------- HELPERS ----------------------------- */
+/* ------------------------------------------------------------------ */
+/* HELPERS                                                            */
+/* ------------------------------------------------------------------ */
 
 function randomBetween(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -61,71 +73,58 @@ function slugify(str: string) {
     .replace(/(^-|-$)/g, "");
 }
 
-/* ------------------------ IMAGE LOADING ---------------------------- */
-
-const IMAGE_BASE_PATH = path.join(process.cwd(), "public", "images");
-
-const IMAGE_POOLS: Record<ProductTier, string[]> = Object.values(
-  ProductTier
-).reduce((acc, tier) => {
-  const dir = path.join(IMAGE_BASE_PATH, tier.toLowerCase());
-  if (!fs.existsSync(dir)) {
-    acc[tier] = [];
-    return acc;
-  }
-
-  acc[tier] = fs
-    .readdirSync(dir)
-    .filter((f) => f.endsWith(".png"))
-    .map((f) => `/images/${tier.toLowerCase()}/${f}`);
-
-  return acc;
-}, {} as Record<ProductTier, string[]>);
-
-function randomImage(tier: ProductTier) {
-  const pool = IMAGE_POOLS[tier];
-  if (!pool || pool.length === 0) return null;
-  return pool[Math.floor(Math.random() * pool.length)];
-}
-
-/* ------------------------------ SEED ------------------------------- */
+/* ------------------------------------------------------------------ */
+/* SEED                                                               */
+/* ------------------------------------------------------------------ */
 
 async function main() {
-  console.log("🌱 Seeding products with tier-based images...");
+  console.log("🌱 Seeding POKEMON products only...");
+
+  /**
+   * ⚠️ DESTRUCTIVE OPERATION
+   * This deletes ALL existing products.
+   * Comment this out if you want additive seeding.
+   */
+  await prisma.product.deleteMany({});
+  console.log("🧹 Cleared existing products");
 
   for (const tier of Object.values(ProductTier)) {
     const count = TIER_COUNTS[tier];
 
     for (let i = 0; i < count; i++) {
-      const title = `${tier.replace("_", " ")} Card #${i + 1}`;
+      const title = `${tier.replace("_", " ")} Pokémon Card #${i + 1}`;
       const slug = slugify(`${title}-${i}`);
-      const sku = `${tier}-${i}-${Date.now()}`;
+      const sku = `POKEMON-${tier}-${i}-${Date.now()}`;
 
       await prisma.product.create({
         data: {
           title,
           slug,
-          description: `Seeded ${tier.replace("_", " ")} product`,
+          description: `Seeded Pokémon ${tier.replace("_", " ")} card`,
           tier,
-          category: CATEGORIES[Math.floor(Math.random() * CATEGORIES.length)],
+          category: CATEGORY,
           price: randomPrice(tier),
           inventory: randomInventory(tier),
-          imageUrl: randomImage(tier),
+          imageUrl: TIER_IMAGE_MAP[tier],
           sku,
           isActive: true,
         },
       });
     }
 
-    console.log(`✅ ${tier}: ${count} products`);
+    console.log(`✅ ${tier}: ${count} Pokémon products`);
   }
 
-  console.log("🎉 Seeding complete");
+  console.log("🎉 Pokémon seeding complete");
 }
+
+/* ------------------------------------------------------------------ */
+/* RUN                                                                */
+/* ------------------------------------------------------------------ */
 
 main()
   .catch((e) => {
-    console.error(e);
+    console.error("❌ Seed failed:", e);
     process.exit(1);
   })
   .finally(async () => {

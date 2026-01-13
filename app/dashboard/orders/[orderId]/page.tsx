@@ -15,18 +15,9 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { getOrderById } from "@/lib/actions/order.actions";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { OrderActions } from "./_components/order-actions";
 import { cn } from "@/lib/utils";
+import { getTierBadgeClass, getTierConfig } from "@/lib/tier-config";
 
 interface OrderDetailPageProps {
   params: Promise<{ orderId: string }>;
@@ -43,38 +34,32 @@ export async function generateMetadata({
 
 const statusConfig: Record<
   string,
-  { label: string; icon: any; className: string }
+  { label: string; icon: any; className: string; timelineClassName: string }
 > = {
   PENDING: {
     label: "Pending",
     icon: Clock,
-    className: "bg-yellow-500/10 text-yellow-500 border-yellow-500/20",
+    className: "bg-amber-900/30 text-amber-400 border-amber-700/50",
+    timelineClassName: "bg-amber-900/30 text-amber-400",
   },
   COMPLETED: {
     label: "Completed",
     icon: CheckCircle,
-    className: "bg-green-500/10 text-green-500 border-green-500/20",
+    className: "bg-emerald-900/30 text-emerald-400 border-emerald-700/50",
+    timelineClassName: "bg-emerald-900/30 text-emerald-400",
   },
   FAILED: {
     label: "Failed",
     icon: XCircle,
-    className: "bg-red-500/10 text-red-500 border-red-500/20",
+    className: "bg-red-900/30 text-red-400 border-red-700/50",
+    timelineClassName: "bg-red-900/30 text-red-400",
   },
   REFUNDED: {
     label: "Refunded",
     icon: RotateCcw,
-    className: "bg-gray-500/10 text-gray-500 border-gray-500/20",
+    className: "bg-zinc-800 text-zinc-400 border-zinc-700",
+    timelineClassName: "bg-zinc-800 text-zinc-400",
   },
-};
-
-const tierConfig: Record<string, string> = {
-  COMMON: "bg-slate-500/10 text-slate-400",
-  UNCOMMON: "bg-green-500/10 text-green-400",
-  RARE: "bg-blue-500/10 text-blue-400",
-  ULTRA_RARE: "bg-purple-500/10 text-purple-400",
-  SECRET_RARE: "bg-yellow-500/10 text-yellow-400",
-  BANGER: "bg-orange-500/10 text-orange-400",
-  GRAIL: "bg-pink-500/10 text-pink-400",
 };
 
 export default async function OrderDetailPage({
@@ -90,28 +75,35 @@ export default async function OrderDetailPage({
   const order = result.data;
   const status = statusConfig[order.status] || statusConfig.PENDING;
   const StatusIcon = status.icon;
+  const tier = getTierConfig(order.selectedTier);
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" asChild>
-            <Link href="/dashboard/orders">
-              <ArrowLeft className="h-4 w-4" />
-            </Link>
-          </Button>
+          <Link
+            href="/dashboard/orders"
+            className="inline-flex items-center justify-center h-10 w-10 rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Link>
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold">Order Details</h1>
-              <Badge variant="outline" className={status.className}>
+              <h1 className="text-2xl font-bold text-zinc-100">
+                Order Details
+              </h1>
+              <span
+                className={cn(
+                  "inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium border",
+                  status.className
+                )}
+              >
                 <StatusIcon className="mr-1 h-3 w-3" />
                 {status.label}
-              </Badge>
+              </span>
             </div>
-            <p className="text-muted-foreground font-mono text-sm">
-              {order.id}
-            </p>
+            <p className="text-zinc-500 font-mono text-sm">{order.id}</p>
           </div>
         </div>
         <OrderActions order={order} />
@@ -121,17 +113,17 @@ export default async function OrderDetailPage({
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
           {/* Product Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Package className="h-5 w-5" />
+          <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
+            <div className="px-6 py-4 border-b border-zinc-800 flex items-center gap-2">
+              <Package className="h-5 w-5 text-zinc-400" />
+              <h2 className="text-lg font-semibold text-zinc-100">
                 Product Details
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+              </h2>
+            </div>
+            <div className="p-6">
               <div className="flex gap-4">
-                {order.product.imageUrl ? (
-                  <div className="relative h-32 w-32 overflow-hidden rounded-lg bg-muted shrink-0">
+                {order.product?.imageUrl ? (
+                  <div className="relative h-32 w-32 overflow-hidden rounded-lg bg-zinc-800 border border-zinc-700 shrink-0">
                     <Image
                       src={order.product.imageUrl}
                       alt={order.product.title}
@@ -140,152 +132,160 @@ export default async function OrderDetailPage({
                     />
                   </div>
                 ) : (
-                  <div className="h-32 w-32 rounded-lg bg-muted flex items-center justify-center shrink-0">
-                    <Package className="h-8 w-8 text-muted-foreground" />
+                  <div className="h-32 w-32 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center shrink-0">
+                    <Package className="h-8 w-8 text-zinc-600" />
                   </div>
                 )}
                 <div className="flex-1 space-y-2">
                   <div className="flex items-start justify-between">
                     <div>
-                      <h3 className="font-semibold text-lg">
-                        {order.product.title}
+                      <h3 className="font-semibold text-lg text-zinc-100">
+                        {order.product?.title || "Unknown Product"}
                       </h3>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-zinc-500">
                         From: {order.packName}
                       </p>
                     </div>
-                    <Button variant="outline" size="sm" asChild>
-                      <Link href={`/dashboard/products/${order.product.id}`}>
-                        <ExternalLink className="mr-2 h-3 w-3" />
+                    {order.product && (
+                      <Link
+                        href={`/dashboard/products/${order.product.id}`}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-zinc-700 bg-zinc-800 text-sm text-zinc-300 hover:bg-zinc-700 hover:text-zinc-100 transition-colors"
+                      >
+                        <ExternalLink className="h-3 w-3" />
                         View Product
                       </Link>
-                    </Button>
+                    )}
                   </div>
                   <div className="flex items-center gap-4">
-                    <Badge
-                      variant="outline"
-                      className={cn(
-                        "font-medium",
-                        tierConfig[order.selectedTier] || tierConfig.COMMON
-                      )}
-                    >
-                      {order.selectedTier.replace("_", " ")}
-                    </Badge>
-                    <span className="text-2xl font-bold">
-                      ${Number(order.product.price).toFixed(2)}
+                    {order.selectedTier && (
+                      <span
+                        className={cn(
+                          "inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium border",
+                          getTierBadgeClass(order.selectedTier)
+                        )}
+                      >
+                        {tier.label}
+                      </span>
+                    )}
+                    <span className="text-2xl font-bold text-zinc-100">
+                      ${Number(order.product?.price || 0).toFixed(2)}
                     </span>
                   </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Customer Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
+          <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
+            <div className="px-6 py-4 border-b border-zinc-800 flex items-center gap-2">
+              <User className="h-5 w-5 text-zinc-400" />
+              <h2 className="text-lg font-semibold text-zinc-100">
                 Customer Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+              </h2>
+            </div>
+            <div className="p-6 space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <p className="text-sm text-muted-foreground">Name</p>
-                  <p className="font-medium">
+                  <p className="text-sm text-zinc-500">Name</p>
+                  <p className="font-medium text-zinc-100">
                     {order.customerName || order.user?.name || "Guest"}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Email</p>
-                  <p className="font-medium">
+                  <p className="text-sm text-zinc-500">Email</p>
+                  <p className="font-medium text-zinc-100">
                     {order.customerEmail || order.user?.email || "—"}
                   </p>
                 </div>
               </div>
               {order.user && (
                 <>
-                  <Separator />
+                  <div className="border-t border-zinc-800" />
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-muted-foreground">
-                        Registered User
+                      <p className="text-sm text-zinc-500">Registered User</p>
+                      <p className="font-mono text-sm text-zinc-400">
+                        {order.user.id}
                       </p>
-                      <p className="font-mono text-sm">{order.user.id}</p>
                     </div>
-                    <Button variant="outline" size="sm" asChild>
-                      <Link href={`/dashboard/users/${order.user.id}`}>
-                        View Profile
-                      </Link>
-                    </Button>
+                    <Link
+                      href={`/dashboard/users/${order.user.id}`}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-zinc-700 bg-zinc-800 text-sm text-zinc-300 hover:bg-zinc-700 hover:text-zinc-100 transition-colors"
+                    >
+                      View Profile
+                    </Link>
                   </div>
                 </>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Payment Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CreditCard className="h-5 w-5" />
+          <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
+            <div className="px-6 py-4 border-b border-zinc-800 flex items-center gap-2">
+              <CreditCard className="h-5 w-5 text-zinc-400" />
+              <h2 className="text-lg font-semibold text-zinc-100">
                 Payment Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+              </h2>
+            </div>
+            <div className="p-6 space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <p className="text-sm text-muted-foreground">Amount Paid</p>
-                  <p className="text-2xl font-bold">
+                  <p className="text-sm text-zinc-500">Amount Paid</p>
+                  <p className="text-2xl font-bold text-zinc-100">
                     ${(order.amount / 100).toFixed(2)}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">
-                    Payment Status
-                  </p>
-                  <Badge variant="outline" className={status.className}>
+                  <p className="text-sm text-zinc-500">Payment Status</p>
+                  <span
+                    className={cn(
+                      "inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium border mt-1",
+                      status.className
+                    )}
+                  >
                     <StatusIcon className="mr-1 h-3 w-3" />
                     {status.label}
-                  </Badge>
+                  </span>
                 </div>
               </div>
               {order.stripeSessionId && (
                 <>
-                  <Separator />
+                  <div className="border-t border-zinc-800" />
                   <div>
-                    <p className="text-sm text-muted-foreground">
-                      Stripe Session ID
-                    </p>
-                    <p className="font-mono text-sm break-all">
+                    <p className="text-sm text-zinc-500">Stripe Session ID</p>
+                    <p className="font-mono text-sm text-zinc-400 break-all">
                       {order.stripeSessionId}
                     </p>
                   </div>
                 </>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
 
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Timeline Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Order Timeline</CardTitle>
-            </CardHeader>
-            <CardContent>
+          <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
+            <div className="px-6 py-4 border-b border-zinc-800">
+              <h2 className="text-lg font-semibold text-zinc-100">
+                Order Timeline
+              </h2>
+            </div>
+            <div className="p-6">
               <div className="space-y-4">
                 <div className="flex gap-3">
                   <div className="flex flex-col items-center">
-                    <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                      <Package className="h-4 w-4 text-primary" />
+                    <div className="h-8 w-8 rounded-full bg-violet-900/30 flex items-center justify-center">
+                      <Package className="h-4 w-4 text-violet-400" />
                     </div>
-                    <div className="w-px h-full bg-border" />
+                    <div className="w-px h-full bg-zinc-800" />
                   </div>
                   <div className="pb-4">
-                    <p className="font-medium">Order Created</p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="font-medium text-zinc-100">Order Created</p>
+                    <p className="text-sm text-zinc-500">
                       {format(
                         new Date(order.createdAt),
                         "MMM d, yyyy 'at' h:mm a"
@@ -297,13 +297,15 @@ export default async function OrderDetailPage({
                 {order.status === "COMPLETED" && (
                   <div className="flex gap-3">
                     <div className="flex flex-col items-center">
-                      <div className="h-8 w-8 rounded-full bg-green-500/10 flex items-center justify-center">
-                        <CheckCircle className="h-4 w-4 text-green-500" />
+                      <div className="h-8 w-8 rounded-full bg-emerald-900/30 flex items-center justify-center">
+                        <CheckCircle className="h-4 w-4 text-emerald-400" />
                       </div>
                     </div>
                     <div>
-                      <p className="font-medium">Payment Completed</p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="font-medium text-zinc-100">
+                        Payment Completed
+                      </p>
+                      <p className="text-sm text-zinc-500">
                         {format(
                           new Date(order.updatedAt),
                           "MMM d, yyyy 'at' h:mm a"
@@ -316,13 +318,15 @@ export default async function OrderDetailPage({
                 {order.status === "FAILED" && (
                   <div className="flex gap-3">
                     <div className="flex flex-col items-center">
-                      <div className="h-8 w-8 rounded-full bg-red-500/10 flex items-center justify-center">
-                        <XCircle className="h-4 w-4 text-red-500" />
+                      <div className="h-8 w-8 rounded-full bg-red-900/30 flex items-center justify-center">
+                        <XCircle className="h-4 w-4 text-red-400" />
                       </div>
                     </div>
                     <div>
-                      <p className="font-medium">Payment Failed</p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="font-medium text-zinc-100">
+                        Payment Failed
+                      </p>
+                      <p className="text-sm text-zinc-500">
                         {format(
                           new Date(order.updatedAt),
                           "MMM d, yyyy 'at' h:mm a"
@@ -335,13 +339,15 @@ export default async function OrderDetailPage({
                 {order.status === "REFUNDED" && (
                   <div className="flex gap-3">
                     <div className="flex flex-col items-center">
-                      <div className="h-8 w-8 rounded-full bg-gray-500/10 flex items-center justify-center">
-                        <RotateCcw className="h-4 w-4 text-gray-500" />
+                      <div className="h-8 w-8 rounded-full bg-zinc-800 flex items-center justify-center">
+                        <RotateCcw className="h-4 w-4 text-zinc-400" />
                       </div>
                     </div>
                     <div>
-                      <p className="font-medium">Order Refunded</p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="font-medium text-zinc-100">
+                        Order Refunded
+                      </p>
+                      <p className="text-sm text-zinc-500">
                         {format(
                           new Date(order.updatedAt),
                           "MMM d, yyyy 'at' h:mm a"
@@ -350,45 +356,65 @@ export default async function OrderDetailPage({
                     </div>
                   </div>
                 )}
+
+                {order.status === "PENDING" && (
+                  <div className="flex gap-3">
+                    <div className="flex flex-col items-center">
+                      <div className="h-8 w-8 rounded-full bg-amber-900/30 flex items-center justify-center">
+                        <Clock className="h-4 w-4 text-amber-400" />
+                      </div>
+                    </div>
+                    <div>
+                      <p className="font-medium text-zinc-100">
+                        Awaiting Payment
+                      </p>
+                      <p className="text-sm text-zinc-500">
+                        Waiting for confirmation
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Quick Info Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Quick Info</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
+          <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
+            <div className="px-6 py-4 border-b border-zinc-800">
+              <h2 className="text-lg font-semibold text-zinc-100">
+                Quick Info
+              </h2>
+            </div>
+            <div className="p-6 space-y-3">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Pack ID</span>
-                <span className="font-mono text-sm">
+                <span className="text-zinc-500">Pack ID</span>
+                <span className="font-mono text-sm text-zinc-400">
                   {order.packId.slice(0, 8)}...
                 </span>
               </div>
-              <Separator />
+              <div className="border-t border-zinc-800" />
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Product ID</span>
-                <span className="font-mono text-sm">
-                  {order.productId.slice(0, 8)}...
+                <span className="text-zinc-500">Product ID</span>
+                <span className="font-mono text-sm text-zinc-400">
+                  {order.productId?.slice(0, 8) || "—"}...
                 </span>
               </div>
-              <Separator />
+              <div className="border-t border-zinc-800" />
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Created</span>
-                <span className="text-sm">
+                <span className="text-zinc-500">Created</span>
+                <span className="text-sm text-zinc-300">
                   {format(new Date(order.createdAt), "PP")}
                 </span>
               </div>
-              <Separator />
+              <div className="border-t border-zinc-800" />
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Updated</span>
-                <span className="text-sm">
+                <span className="text-zinc-500">Updated</span>
+                <span className="text-sm text-zinc-300">
                   {format(new Date(order.updatedAt), "PP")}
                 </span>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </div>
     </div>
