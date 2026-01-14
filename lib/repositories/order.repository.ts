@@ -1,5 +1,7 @@
+// lib/repositories/order.repository.ts
+
 import prisma from "@/lib/prisma";
-import { Order, OrderStatus, Prisma } from "@prisma/client";
+import { Order, OrderStatus, ProductTier, Prisma } from "@prisma/client";
 import { PaginationParams, PaginatedResult } from "@/types/product";
 
 export interface OrderFilters {
@@ -15,9 +17,12 @@ export interface OrderWithProduct extends Order {
   product: {
     id: string;
     title: string;
+    description: string | null;
     imageUrl: string | null;
     price: Prisma.Decimal;
-  };
+    tier: ProductTier;
+    category: string;
+  } | null;
   user: {
     id: string;
     name: string | null;
@@ -35,6 +40,23 @@ export interface OrderStats {
   todayRevenue: number;
 }
 
+// Standard product select to reuse
+const productSelect = {
+  id: true,
+  title: true,
+  description: true,
+  imageUrl: true,
+  price: true,
+  tier: true,
+  category: true,
+} as const;
+
+const userSelect = {
+  id: true,
+  name: true,
+  email: true,
+} as const;
+
 export class OrderRepository {
   /**
    * Find order by ID with product details
@@ -43,21 +65,8 @@ export class OrderRepository {
     return prisma.order.findUnique({
       where: { id },
       include: {
-        product: {
-          select: {
-            id: true,
-            title: true,
-            imageUrl: true,
-            price: true,
-          },
-        },
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
+        product: { select: productSelect },
+        user: { select: userSelect },
       },
     });
   }
@@ -143,21 +152,8 @@ export class OrderRepository {
         take: limit,
         orderBy: { createdAt: "desc" },
         include: {
-          product: {
-            select: {
-              id: true,
-              title: true,
-              imageUrl: true,
-              price: true,
-            },
-          },
-          user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-            },
-          },
+          product: { select: productSelect },
+          user: { select: userSelect },
         },
       }),
       prisma.order.count({ where }),
@@ -213,7 +209,7 @@ export class OrderRepository {
       completedOrders,
       pendingOrders,
       failedOrders,
-      totalRevenue: (revenueResult._sum.amount || 0) / 100, // Convert cents to dollars
+      totalRevenue: (revenueResult._sum.amount || 0) / 100,
       todayOrders,
       todayRevenue: (todayRevenueResult._sum.amount || 0) / 100,
     };
@@ -237,21 +233,8 @@ export class OrderRepository {
       take: limit,
       orderBy: { createdAt: "desc" },
       include: {
-        product: {
-          select: {
-            id: true,
-            title: true,
-            imageUrl: true,
-            price: true,
-          },
-        },
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
+        product: { select: productSelect },
+        user: { select: userSelect },
       },
     });
   }

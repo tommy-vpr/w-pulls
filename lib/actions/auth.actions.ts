@@ -1,3 +1,4 @@
+// lib/actions/auth.actions.ts
 "use server";
 
 import { signIn, signOut } from "@/lib/auth";
@@ -54,6 +55,7 @@ export async function signUpAction(formData: FormData) {
     // User created, sign in failed - still success
   }
 
+  // New users always go to user dashboard
   redirect("/dashboard");
 }
 
@@ -90,13 +92,51 @@ export async function signInAction(formData: FormData) {
     select: { role: true },
   });
 
-  // Admin always goes to dashboard
-  if (user?.role === "ADMIN") {
-    redirect("/dashboard");
+  // Determine redirect URL
+  const redirectUrl = getRedirectUrl(user?.role, callbackUrl);
+  redirect(redirectUrl);
+}
+
+/**
+ * Determine where to redirect after sign in
+ */
+function getRedirectUrl(
+  role: string | undefined,
+  callbackUrl: string | null
+): string {
+  const isAdmin = role === "ADMIN";
+
+  // If there's a callback URL, validate it
+  if (callbackUrl) {
+    // Don't allow non-admins to access admin routes
+    if (callbackUrl.startsWith("/admin") && !isAdmin) {
+      return "/dashboard";
+    }
+
+    // Respect valid callback URLs
+    if (isValidCallbackUrl(callbackUrl)) {
+      return callbackUrl;
+    }
   }
 
-  // User goes to callbackUrl or /packs
-  redirect(callbackUrl || "/packs");
+  // Default redirects
+  return isAdmin ? "/admin" : "/dashboard";
+}
+
+/**
+ * Validate callback URL to prevent open redirect
+ */
+function isValidCallbackUrl(url: string): boolean {
+  // Only allow relative URLs starting with /
+  if (!url.startsWith("/")) return false;
+
+  // Don't allow auth routes as callback
+  if (url.startsWith("/auth")) return false;
+
+  // Don't allow protocol-relative URLs
+  if (url.startsWith("//")) return false;
+
+  return true;
 }
 
 export async function signOutAction() {

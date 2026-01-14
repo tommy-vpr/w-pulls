@@ -1,3 +1,4 @@
+// components/admin/admin-sidebar.tsx
 "use client";
 
 import Link from "next/link";
@@ -5,20 +6,21 @@ import { usePathname } from "next/navigation";
 import {
   Package,
   LayoutDashboard,
-  Settings,
-  Gift,
   Activity,
+  DollarSign,
+  Users,
+  BarChart3,
   LogOut,
   ChevronUp,
   User,
-  DollarSign,
-  Sparkles,
+  Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { signOutAction } from "@/lib/actions/auth.actions";
 import { useState } from "react";
 import { getInitials } from "@/lib/utils/initials";
 import Image from "next/image";
+import { useSession } from "next-auth/react";
 
 interface SidebarUser {
   id: string;
@@ -28,72 +30,32 @@ interface SidebarUser {
   role?: string;
 }
 
-interface SidebarProps {
+interface AdminSidebarProps {
   user: SidebarUser;
 }
 
 const navItems = [
-  {
-    label: "Admin Dashboard",
-    href: "/admin",
-    icon: LayoutDashboard,
-    adminOnly: true,
-  },
-  {
-    label: "Activity",
-    href: "/admin/activity",
-    icon: Activity,
-    adminOnly: true,
-  },
-  {
-    label: "Products",
-    href: "/admin/products",
-    icon: Package,
-    adminOnly: true,
-  },
-  {
-    label: "Orders",
-    href: "/admin/orders/",
-    icon: DollarSign,
-    adminOnly: true,
-  },
-  {
-    label: "User Dashboard",
-    href: "/dashboard",
-    icon: Package,
-    adminOnly: false,
-  },
-  {
-    label: "My Orders",
-    href: "/dashboard/orders",
-    icon: Package,
-    adminOnly: false,
-  },
-  {
-    label: "Profile",
-    href: "/dashboard/profile",
-    icon: User,
-    adminOnly: false,
-  },
-  {
-    label: "Settings",
-    href: "/dashboard/settings",
-    icon: Settings,
-    adminOnly: false,
-  },
+  { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+  { label: "Activity", href: "/admin/activity", icon: Activity },
+  { label: "Products", href: "/admin/products", icon: Package },
+  { label: "Orders", href: "/admin/orders", icon: DollarSign },
+  { label: "Analytics", href: "/admin/analytics", icon: BarChart3 },
+  { label: "profile", href: "/admin/profile", icon: User },
+  { label: "settings", href: "/admin/settings", icon: Settings },
+  { label: "Users", href: "/admin/users", icon: Users },
 ];
 
-export function Sidebar({ user }: SidebarProps) {
-  const pathname = usePathname();
-  const [menuOpen, setMenuOpen] = useState(false);
-  const isAdmin = user?.role === "ADMIN";
+// export function AdminSidebar({ user }: AdminSidebarProps) {
+export function AdminSidebar() {
+  const { data: session } = useSession();
+  const pathname = usePathname(); // ✅ always called
+  const [menuOpen, setMenuOpen] = useState(false); // ✅ always called
 
-  // Filter nav items based on user role
-  const filteredNavItems = navItems.filter(
-    (item) => !item.adminOnly || isAdmin
-  );
+  const user = session?.user;
 
-  console.log(isAdmin);
+  if (!user) {
+    return null; // ✅ safe now
+  }
 
   return (
     <aside className="fixed inset-y-0 left-0 z-50 hidden w-64 lg:flex lg:flex-col bg-[#0a0a0f] border-r border-purple-500/20">
@@ -105,10 +67,7 @@ export function Sidebar({ user }: SidebarProps) {
 
       {/* Logo */}
       <div className="relative flex h-16 items-center border-b border-purple-500/20 px-6">
-        <Link
-          href="/dashboard"
-          className="flex items-center gap-2 font-bold group"
-        >
+        <Link href="/admin" className="flex items-center gap-2 font-bold group">
           <div className="relative">
             <Image
               src={"/images/logo.png"}
@@ -117,40 +76,23 @@ export function Sidebar({ user }: SidebarProps) {
               alt="W-Pulls"
               className="relative z-10 invert"
             />
-            {/* Logo glow */}
             <div className="absolute inset-0 blur-lg bg-purple-500/30 group-hover:bg-cyan-500/30 transition-colors duration-500" />
           </div>
         </Link>
 
-        {/* Role Badge */}
-        <div
-          className={cn(
-            "ml-auto px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider",
-            isAdmin
-              ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/25"
-              : "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30"
-          )}
-        >
-          {isAdmin ? "Admin" : "User"}
+        {/* Admin Badge */}
+        <div className="ml-auto px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/25">
+          Admin
         </div>
       </div>
 
       {/* Navigation */}
       <nav className="flex-1 space-y-1 p-4 overflow-y-auto scrollbar-thin scrollbar-thumb-purple-500/20">
-        {isAdmin && (
-          <div className="px-3 py-2 mb-2">
-            <span className="text-[10px] font-semibold uppercase tracking-widest text-purple-400/60 flex items-center gap-2">
-              <Sparkles className="h-3 w-3" />
-              Admin Panel
-            </span>
-          </div>
-        )}
-
-        {filteredNavItems.map((item) => {
+        {navItems.map((item) => {
           const isActive =
-            item.href === "/dashboard"
-              ? pathname === "/dashboard"
-              : pathname === item.href || pathname.startsWith(`${item.href}/`);
+            item.href === "/admin"
+              ? pathname === "/admin"
+              : pathname.startsWith(item.href);
 
           return (
             <Link
@@ -161,17 +103,14 @@ export function Sidebar({ user }: SidebarProps) {
                 isActive ? "text-white" : "text-gray-400 hover:text-white"
               )}
             >
-              {/* Active background glow */}
               {isActive && (
                 <>
                   <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-purple-600/20 to-cyan-600/20" />
                   <div className="absolute inset-0 rounded-lg border border-purple-500/30 shadow-lg shadow-purple-500/10" />
-                  {/* Left accent bar */}
                   <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-full bg-gradient-to-b from-cyan-400 to-purple-500 shadow-lg shadow-cyan-400/50" />
                 </>
               )}
 
-              {/* Hover glow effect */}
               <div
                 className={cn(
                   "absolute inset-0 rounded-lg bg-gradient-to-r from-purple-600/0 to-cyan-600/0 transition-all duration-300",
@@ -180,7 +119,6 @@ export function Sidebar({ user }: SidebarProps) {
                 )}
               />
 
-              {/* Icon with glow */}
               <div className="relative z-10">
                 <item.icon
                   className={cn(
@@ -194,25 +132,33 @@ export function Sidebar({ user }: SidebarProps) {
 
               <span className="relative z-10">{item.label}</span>
 
-              {/* Active indicator dot */}
               {isActive && (
                 <div className="absolute right-3 h-1.5 w-1.5 rounded-full bg-cyan-400 shadow-lg shadow-cyan-400/50 animate-pulse" />
               )}
             </Link>
           );
         })}
-      </nav>
 
-      {/* Decorative scanner line */}
-      <div className="absolute left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent animate-scan pointer-events-none" />
+        {/* Divider */}
+        <div className="my-4 border-t border-purple-500/20" />
+
+        {/* Switch to User View */}
+        <Link
+          href="/dashboard"
+          className="group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-400 hover:text-white transition-all duration-300"
+        >
+          <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-purple-600/0 to-cyan-600/0 group-hover:from-purple-600/10 group-hover:to-cyan-600/10 transition-all" />
+          <User className="h-4 w-4 relative z-10 text-gray-500 group-hover:text-purple-400" />
+          <span className="relative z-10">Switch to User View</span>
+        </Link>
+      </nav>
 
       {/* User Menu */}
       <div className="relative border-t border-purple-500/20 p-4">
         <button
           onClick={() => setMenuOpen(!menuOpen)}
-          className="group flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-300 hover:bg-purple-500/10"
+          className="cursor-pointer group flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-300 hover:bg-purple-500/10"
         >
-          {/* Avatar with neon ring */}
           <div className="relative">
             {user?.image ? (
               <img
@@ -225,15 +171,11 @@ export function Sidebar({ user }: SidebarProps) {
                 {getInitials(user)}
               </div>
             )}
-            {/* Avatar glow ring */}
-            <div className="absolute -inset-0.5 rounded-full bg-gradient-to-r from-purple-500 to-cyan-500 opacity-50 blur-sm group-hover:opacity-75 transition-opacity" />
-            <div className="absolute -inset-0.5 rounded-full bg-gradient-to-r from-purple-500 to-cyan-500 opacity-20" />
-
-            {/* Online indicator */}
+            {/* <div className="absolute -inset-0.5 rounded-full bg-gradient-to-r from-purple-500 to-cyan-500 opacity-50 blur-sm group-hover:opacity-75 transition-opacity" />
+            <div className="absolute -inset-0.5 rounded-full bg-gradient-to-r from-purple-500 to-cyan-500 opacity-20" /> */}
             <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-[#0a0a0f] bg-emerald-500 shadow-lg shadow-emerald-500/50" />
           </div>
 
-          {/* Name & Email */}
           <div className="min-w-0 flex-1 text-left">
             <p className="truncate font-semibold text-white">
               {user.name || "User"}
@@ -249,10 +191,8 @@ export function Sidebar({ user }: SidebarProps) {
           />
         </button>
 
-        {/* Dropdown Menu */}
         {menuOpen && (
           <div className="absolute bottom-full left-4 right-4 mb-2 rounded-lg border border-purple-500/30 bg-[#0a0a0f]/95 backdrop-blur-xl shadow-2xl shadow-purple-500/10 overflow-hidden">
-            {/* Dropdown glow */}
             <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 to-cyan-900/20 pointer-events-none" />
 
             <Link
@@ -279,7 +219,7 @@ export function Sidebar({ user }: SidebarProps) {
             <form action={signOutAction}>
               <button
                 type="submit"
-                className="group relative flex w-full items-center gap-3 px-4 py-3 text-sm text-red-400 hover:text-red-300 transition-colors"
+                className="cursor-pointer group relative flex w-full items-center gap-3 px-4 py-3 text-sm text-red-400 hover:text-red-300 transition-colors"
               >
                 <div className="absolute inset-0 bg-red-600/0 group-hover:bg-red-600/10 transition-all" />
                 <LogOut className="h-4 w-4 relative z-10" />
@@ -290,7 +230,6 @@ export function Sidebar({ user }: SidebarProps) {
         )}
       </div>
 
-      {/* Bottom decorative element */}
       <div className="h-1 bg-gradient-to-r from-purple-600 via-cyan-500 to-pink-500 opacity-75" />
     </aside>
   );

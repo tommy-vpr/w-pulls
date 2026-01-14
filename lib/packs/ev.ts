@@ -152,30 +152,40 @@ export function calculatePackEV(params: {
 /**
  * Tier inventory stats (audit + admin UI)
  */
-export function getTierStats(
-  products: Product[]
-): Record<
-  ProductTier,
-  { count: number; avgPrice: number; totalValue: number }
-> {
+export function getTierStats(products: Product[]) {
   const stats = Object.fromEntries(
-    TIER_ORDER.map((t) => [t, { count: 0, avgPrice: 0, totalValue: 0 }])
+    TIER_ORDER.map((t) => [
+      t,
+      {
+        productCount: 0, // number of SKUs
+        inventoryCount: 0, // total units
+        totalValue: 0,
+        avgPrice: 0,
+      },
+    ])
   ) as Record<
     ProductTier,
-    { count: number; avgPrice: number; totalValue: number }
+    {
+      productCount: number;
+      inventoryCount: number;
+      totalValue: number;
+      avgPrice: number;
+    }
   >;
 
   for (const p of products) {
     if (!p.isActive || p.inventory <= 0) continue;
+
     const price = Number(p.price);
-    stats[p.tier].count += 1;
+
+    stats[p.tier].productCount += 1;
+    stats[p.tier].inventoryCount += p.inventory;
     stats[p.tier].totalValue += price * p.inventory;
   }
 
   for (const tier of TIER_ORDER) {
-    if (stats[tier].count > 0) {
-      stats[tier].avgPrice = stats[tier].totalValue / stats[tier].count;
-    }
+    const { inventoryCount, totalValue } = stats[tier];
+    stats[tier].avgPrice = inventoryCount > 0 ? totalValue / inventoryCount : 0;
   }
 
   return stats;

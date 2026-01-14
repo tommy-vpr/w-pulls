@@ -30,8 +30,11 @@ export interface SerializedOrder {
   product: {
     id: string;
     title: string;
+    description: string | null;
     imageUrl: string | null;
     price: string;
+    tier: string;
+    category: string;
   } | null;
   user: {
     id: string;
@@ -65,8 +68,11 @@ export class OrderService {
         ? {
             id: order.product.id,
             title: order.product.title,
+            description: order.product.description,
             imageUrl: order.product.imageUrl,
             price: order.product.price.toString(),
+            tier: order.product.tier,
+            category: order.product.category,
           }
         : null,
       user: order.user,

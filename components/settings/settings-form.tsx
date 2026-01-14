@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useTransition, useRef } from "react";
+import { useSession } from "next-auth/react";
+
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -49,6 +51,7 @@ export function SettingsForm({ user }: SettingsFormProps) {
 
 // Avatar Section
 function AvatarSection({ user }: { user: SettingsUser }) {
+  const { update } = useSession();
   const [isPending, startTransition] = useTransition();
   const [isRemoving, startRemoveTransition] = useTransition();
   const [preview, setPreview] = useState<string | null>(user.image);
@@ -78,7 +81,9 @@ function AvatarSection({ user }: { user: SettingsUser }) {
       if (result?.error) {
         setMessage({ type: "error", text: result.error });
         setPreview(user.image);
-      } else {
+      } else if (result.success) {
+        // Update session with new image
+        await update({ image: result.data?.image });
         setMessage({ type: "success", text: "Avatar updated successfully" });
       }
       setTimeout(() => setMessage(null), 3000);
@@ -90,7 +95,9 @@ function AvatarSection({ user }: { user: SettingsUser }) {
       const result = await removeAvatarAction();
       if (result?.error) {
         setMessage({ type: "error", text: result.error });
-      } else {
+      } else if (result.success) {
+        // Update session with null image
+        await update({ image: null });
         setPreview(null);
         setMessage({ type: "success", text: "Avatar removed" });
       }
@@ -189,6 +196,7 @@ function AvatarSection({ user }: { user: SettingsUser }) {
 
 // Profile Section
 function ProfileSection({ user }: { user: SettingsUser }) {
+  const { update } = useSession();
   const [isPending, startTransition] = useTransition();
   const [message, setMessage] = useState<{
     type: "success" | "error";
@@ -203,7 +211,12 @@ function ProfileSection({ user }: { user: SettingsUser }) {
       const result = await updateProfileAction(formData);
       if (result?.error) {
         setMessage({ type: "error", text: result.error });
-      } else {
+      } else if (result.success) {
+        // Update session with new name/email
+        await update({
+          name: result.data?.name,
+          email: result.data?.email,
+        });
         setMessage({ type: "success", text: "Profile updated successfully" });
       }
       setTimeout(() => setMessage(null), 3000);

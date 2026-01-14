@@ -11,14 +11,14 @@ import sharp from "sharp";
 export async function updateProfileAction(formData: FormData) {
   const session = await auth();
   if (!session?.user?.id) {
-    return { error: "Unauthorized" };
+    return { success: false, error: "Unauthorized" };
   }
 
   const name = formData.get("name") as string;
   const email = formData.get("email") as string;
 
   if (!name || !email) {
-    return { error: "Name and email are required" };
+    return { success: false, error: "Name and email are required" };
   }
 
   // Check if email is already taken by another user
@@ -28,20 +28,27 @@ export async function updateProfileAction(formData: FormData) {
     });
 
     if (existingUser && existingUser.id !== session.user.id) {
-      return { error: "Email already in use" };
+      return { success: false, error: "Email already in use" };
     }
   }
 
   try {
-    await prisma.user.update({
+    const updatedUser = await prisma.user.update({
       where: { id: session.user.id },
       data: { name, email },
     });
 
-    return { success: true };
+    return {
+      success: true,
+      data: {
+        name: updatedUser.name,
+        email: updatedUser.email,
+        image: updatedUser.image,
+      },
+    };
   } catch (error) {
     console.error("Update profile error:", error);
-    return { error: "Failed to update profile" };
+    return { success: false, error: "Failed to update profile" };
   }
 }
 
@@ -100,12 +107,12 @@ export async function updatePasswordAction(formData: FormData) {
 export async function updateAvatarAction(formData: FormData) {
   const session = await auth();
   if (!session?.user?.id) {
-    return { error: "Unauthorized" };
+    return { success: false, error: "Unauthorized" };
   }
 
   const file = formData.get("avatar") as File;
   if (!file || file.size === 0) {
-    return { error: "No file provided" };
+    return { success: false, error: "No file provided" };
   }
 
   // Validate file type
@@ -140,7 +147,7 @@ export async function updateAvatarAction(formData: FormData) {
     const imageUrl = await uploadToGCS(processedBuffer, filename, "image/webp");
 
     // Update user
-    await prisma.user.update({
+    const updatedUser = await prisma.user.update({
       where: { id: session.user.id },
       data: { image: imageUrl },
     });
@@ -156,10 +163,15 @@ export async function updateAvatarAction(formData: FormData) {
       }
     }
 
-    return { success: true, imageUrl };
+    return {
+      success: true,
+      data: {
+        image: updatedUser.image,
+      },
+    };
   } catch (error) {
     console.error("Update avatar error:", error);
-    return { error: "Failed to upload avatar" };
+    return { success: false, error: "Failed to upload avatar" };
   }
 }
 
@@ -167,7 +179,7 @@ export async function updateAvatarAction(formData: FormData) {
 export async function removeAvatarAction() {
   const session = await auth();
   if (!session?.user?.id) {
-    return { error: "Unauthorized" };
+    return { success: false, error: "Unauthorized" };
   }
 
   try {
@@ -190,10 +202,15 @@ export async function removeAvatarAction() {
       data: { image: null },
     });
 
-    return { success: true };
+    return {
+      success: true,
+      data: {
+        image: null,
+      },
+    };
   } catch (error) {
     console.error("Remove avatar error:", error);
-    return { error: "Failed to remove avatar" };
+    return { success: false, error: "Failed to remove avatar" };
   }
 }
 
