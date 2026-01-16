@@ -169,7 +169,7 @@ function HoloCardFace({
   return (
     <div
       ref={cardRef}
-      className="holo-face w-full h-full rounded-xl"
+      className="holo-face w-full h-full"
       data-rarity={normalizedRarity}
       style={
         {
@@ -188,11 +188,16 @@ function HoloCardFace({
       onTouchMove={handleInteract}
       onTouchEnd={handleInteractEnd}
     >
-      <img src={imageUrl} alt={alt} className="w-full h-full object-cover" />
-      <div className="holo-face__foil" />
-      <div className="holo-face__extra" />
-      <div className="holo-face__shine" />
-      <div className="holo-face__glare" />
+      {/* Image wrapper with overflow hidden for rounded corners */}
+      {/* Clipped surface */}
+      <div className="absolute inset-0 rounded-xl overflow-hidden">
+        <img src={imageUrl} alt={alt} className="w-full h-full object-cover" />
+
+        <div className="holo-face__foil" />
+        <div className="holo-face__extra" />
+        <div className="holo-face__shine" />
+        <div className="holo-face__glare" />
+      </div>
     </div>
   );
 }
@@ -207,7 +212,7 @@ export default function PackRevealTest() {
       position: "absolute",
       left: "50%",
       width: "260px",
-      height: "360px",
+      height: "380px",
       zIndex: 15,
       perspective: "1000px",
       filter: `drop-shadow(0 25px 50px ${MOCK_TIER.hexColor}40)`,
@@ -250,7 +255,8 @@ export default function PackRevealTest() {
     width: "100%",
     height: "100%",
     backfaceVisibility: "hidden",
-    borderRadius: "12px",
+    // borderRadius: "12px",
+    // overflow: "hidden",
   };
 
   const getPackTopStyles = (): React.CSSProperties => {
@@ -512,7 +518,9 @@ export default function PackRevealTest() {
           <div style={getCardInnerStyles()}>
             {/* Back Face */}
             <div style={cardFaceStyles}>
-              <CardBack tier={MOCK_TIER} />
+              <div className="absolute inset-0 rounded-xl overflow-hidden">
+                <CardBack tier={MOCK_TIER} />
+              </div>
             </div>
 
             {/* Front Face with Holo Effect */}
