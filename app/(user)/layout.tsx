@@ -1,5 +1,4 @@
 import { requireAuth } from "@/lib/auth-utils";
-import { Sidebar } from "@/components/dashboard/sidebar";
 import { UserSidebar } from "@/components/dashboard/user-sidebar";
 
 export default async function UserLayout({

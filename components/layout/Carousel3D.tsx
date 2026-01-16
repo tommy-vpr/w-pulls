@@ -11,6 +11,7 @@ interface Carousel3DProps {
   duration?: number;
   beamColor?: string;
   cardBack?: string;
+  className?: string;
 }
 
 export const Carousel3D: React.FC<Carousel3DProps> = ({
@@ -21,13 +22,13 @@ export const Carousel3D: React.FC<Carousel3DProps> = ({
   duration = 20,
   beamColor = "#44adf9",
   cardBack = "/images/card-back.png",
+  className = "",
 }) => {
   const angle = 360 / images.length;
 
   return (
     <div
-      className="relative flex min-h-screen flex-col items-center justify-center carousel-wrapper
-      bg-radial from-slate-900 to-bg-accent-foreground"
+      className={`relative flex flex-col items-center carousel-wrapper ${className}`}
     >
       {/* TILT WRAPPER (camera angle) */}
       <div
@@ -235,97 +236,6 @@ export const Carousel3D: React.FC<Carousel3DProps> = ({
             ))}
           </div>
         </div>
-      </div>
-
-      {/* LIGHT BEAM BASE - Below carousel */}
-      <div
-        className="absolute flex justify-center left-1/2 -translate-x-1/2 z-10 pointer-events-none"
-        style={{
-          bottom: "-20%",
-          width: depth * 2.5,
-          height: depth * 3,
-          transformStyle: "flat",
-        }}
-      >
-        <img
-          src="/images/light-base-bottom.webp"
-          alt=""
-          className="w-3/4 h-3/4 object-contain mt-auto"
-        />
-
-        {/* <div
-          className="absolute left-1/2 -translate-x-1/2"
-          style={{
-            bottom: "25%",
-            width: 40,
-            height: 40,
-            borderRadius: "50%",
-            background: `radial-gradient(circle, white 0%, ${beamColor} 50%, transparent 70%)`,
-            boxShadow: `0 0 60px ${beamColor}`,
-          }}
-        /> */}
-
-        {/* Bottom beam particles - shorter distance */}
-        {[...Array(16)].map((_, i) => (
-          <div
-            key={i}
-            className="beam-particle-short"
-            style={{
-              width: 3 + Math.random() * 6,
-              height: 3 + Math.random() * 6,
-              bottom: "40%",
-              left: `${35 + Math.random() * 30}%`,
-              background: `radial-gradient(circle, white, ${beamColor})`,
-              animationDelay: `${i * 0.15}s`,
-              animationDuration: `${1 + Math.random() * 1}s`,
-            }}
-          />
-        ))}
-      </div>
-
-      {/* LIGHT BEAM TOP - Above carousel (flipped) */}
-      <div
-        className="absolute flex justify-center left-1/2 z-10 pointer-events-none"
-        style={{
-          top: "-20%",
-          width: depth * 2.5,
-          height: depth * 3,
-          transform: "translateX(-50%) scaleY(-1)",
-          transformStyle: "flat",
-        }}
-      >
-        <img
-          src="/images/light-base.webp"
-          alt=""
-          className="w-3/4 h-3/4 object-contain mt-auto"
-        />
-
-        {/* <div
-          className="absolute left-1/2 -translate-x-1/2"
-          style={{
-            bottom: "25%",
-            width: 40,
-            height: 40,
-            borderRadius: "50%",
-            background: `radial-gradient(circle, white 0%, ${beamColor} 50%, transparent 70%)`,
-            boxShadow: `0 0 60px ${beamColor}`,
-          }}
-        /> */}
-
-        {[...Array(16)].map((_, i) => (
-          <div
-            key={`top-${i}`}
-            className="beam-particle"
-            style={{
-              width: 4 + Math.random() * 8,
-              height: 4 + Math.random() * 8,
-              bottom: "20%",
-              left: `${35 + Math.random() * 30}%`,
-              background: `radial-gradient(circle, white, ${beamColor})`,
-              animationDelay: `${i * 0.15}s`,
-            }}
-          />
-        ))}
       </div>
     </div>
   );

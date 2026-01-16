@@ -14,33 +14,18 @@ import {
 } from "lucide-react";
 import { getTierConfig, isHighTier } from "@/lib/tier-config";
 import { cn } from "@/lib/utils";
-import { SerializedOrder } from "@/lib/services/order.service";
+import { orderService, SerializedOrder } from "@/lib/services/order.service";
 import { RecentOrdersGrid } from "@/components/ui/user/recent-orders-grid";
 
 export default async function UserDashboardPage() {
   const session = await requireAuth();
 
-  const [user, recentOrders, stats] = await Promise.all([
+  const [user, recentOrdersResult, stats] = await Promise.all([
     prisma.user.findUnique({
       where: { id: session.user.id },
       select: { name: true, email: true, image: true, createdAt: true },
     }),
-    prisma.order.findMany({
-      where: { userId: session.user.id },
-      orderBy: { createdAt: "desc" },
-      take: 6,
-      include: {
-        product: {
-          select: {
-            id: true,
-            title: true,
-            imageUrl: true,
-            price: true,
-            tier: true,
-          },
-        },
-      },
-    }),
+    orderService.getRecentOrders(6), // ✅ serialized
     prisma.order.aggregate({
       where: { userId: session.user.id, status: "COMPLETED" },
       _count: true,
@@ -48,20 +33,40 @@ export default async function UserDashboardPage() {
     }),
   ]);
 
+  const recentOrders: SerializedOrder[] =
+    recentOrdersResult.success && recentOrdersResult.data
+      ? recentOrdersResult.data
+      : [];
+
   // Get best pull (highest tier)
   const bestPull = await prisma.order.findFirst({
     where: {
       userId: session.user.id,
       status: "COMPLETED",
       selectedTier: { in: ["GRAIL", "BANGER", "SECRET_RARE", "ULTRA_RARE"] },
+      items: {
+        some: {}, // ensure at least one revealed item
+      },
     },
     orderBy: { createdAt: "desc" },
     include: {
-      product: {
-        select: { title: true, imageUrl: true, tier: true, price: true },
+      items: {
+        include: {
+          product: {
+            select: {
+              title: true,
+              imageUrl: true,
+              tier: true,
+              price: true,
+            },
+          },
+        },
       },
     },
   });
+
+  const bestItem = bestPull?.items[0];
+  const bestProduct = bestItem?.product;
 
   const totalOrders = stats._count || 0;
   const totalSpent = (stats._sum.amount || 0) / 100;
@@ -101,7 +106,7 @@ export default async function UserDashboardPage() {
           </div>
         </div>
         <Link
-          href="/packs"
+          href="/"
           className="group/btn relative h-10 px-6 rounded-md bg-gradient-to-br from-violet-600 to-purple-600 font-medium text-white text-sm shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] disabled:opacity-50 disabled:cursor-not-allowed
           hover:opacity-85 transition flex items-center gap-2"
         >
@@ -151,7 +156,7 @@ export default async function UserDashboardPage() {
       </div>
 
       {/* Best Pull */}
-      {bestPull && bestPull.product && (
+      {bestProduct && (
         <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
           <div className="px-6 py-4 border-b border-zinc-800 flex items-center gap-2">
             <Trophy className="h-5 w-5 text-amber-400" />
@@ -161,11 +166,11 @@ export default async function UserDashboardPage() {
           </div>
           <div className="p-6">
             <div className="flex items-center gap-6">
-              {bestPull.product.imageUrl ? (
+              {bestProduct.imageUrl ? (
                 <div className="relative h-24 w-24 overflow-hidden rounded-lg bg-zinc-800 border border-zinc-700">
                   <img
-                    src={bestPull.product.imageUrl}
-                    alt={bestPull.product.title}
+                    src={bestProduct.imageUrl}
+                    alt={bestProduct.title}
                     className="h-full w-full object-cover"
                   />
                 </div>
@@ -178,18 +183,18 @@ export default async function UserDashboardPage() {
                 <span
                   className={cn(
                     "inline-flex items-center rounded-md px-2 py-1 text-xs font-medium border mb-2",
-                    getTierConfig(bestPull.product.tier).bgColor,
-                    getTierConfig(bestPull.product.tier).color,
-                    getTierConfig(bestPull.product.tier).borderColor
+                    getTierConfig(bestProduct.tier).bgColor,
+                    getTierConfig(bestProduct.tier).color,
+                    getTierConfig(bestProduct.tier).borderColor
                   )}
                 >
-                  {getTierConfig(bestPull.product.tier).label}
+                  {getTierConfig(bestProduct.tier).label}
                 </span>
                 <h3 className="text-xl font-bold text-zinc-100">
-                  {bestPull.product.title}
+                  {bestProduct.title}
                 </h3>
                 <p className="text-emerald-400 font-medium">
-                  ${Number(bestPull.product.price).toFixed(2)} value
+                  ${Number(bestProduct.price).toFixed(2)} value
                 </p>
               </div>
             </div>

@@ -1,5 +1,5 @@
 import { AdminSidebar } from "@/components/dashboard/admin-sidebar";
-import { requireAuth } from "@/lib/auth-utils";
+import { requireAdmin, requireAuth } from "@/lib/auth-utils";
 import { redirect } from "next/navigation";
 
 export default async function AdminLayout({
@@ -7,12 +7,7 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await requireAuth();
-
-  // Redirect non-admins to user dashboard
-  if (session.user.role !== "ADMIN") {
-    redirect("/dashboard");
-  }
+  const session = await requireAdmin();
 
   return (
     <div className="flex min-h-screen">

@@ -73,9 +73,11 @@ export default async function OrderDetailPage({
   }
 
   const order = result.data;
+  const item = order.items[0];
+  const product = item?.product ?? null;
   const status = statusConfig[order.status] || statusConfig.PENDING;
   const StatusIcon = status.icon;
-  const tier = getTierConfig(order.selectedTier);
+  const tier = order.selectedTier ? getTierConfig(order.selectedTier) : null;
 
   return (
     <div className="space-y-6">
@@ -122,11 +124,11 @@ export default async function OrderDetailPage({
             </div>
             <div className="p-6">
               <div className="flex gap-4">
-                {order.product?.imageUrl ? (
+                {product?.imageUrl ? (
                   <div className="relative h-32 w-32 overflow-hidden rounded-lg bg-zinc-800 border border-zinc-700 shrink-0">
                     <Image
-                      src={order.product.imageUrl}
-                      alt={order.product.title}
+                      src={product.imageUrl}
+                      alt={product.title}
                       fill
                       className="object-cover"
                     />
@@ -140,15 +142,15 @@ export default async function OrderDetailPage({
                   <div className="flex items-start justify-between">
                     <div>
                       <h3 className="font-semibold text-lg text-zinc-100">
-                        {order.product?.title || "Unknown Product"}
+                        {product?.title || "Unknown Product"}
                       </h3>
                       <p className="text-sm text-zinc-500">
                         From: {order.packName}
                       </p>
                     </div>
-                    {order.product && (
+                    {product && (
                       <Link
-                        href={`/dashboard/products/${order.product.id}`}
+                        href={`/dashboard/products/${product.id}`}
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-zinc-700 bg-zinc-800 text-sm text-zinc-300 hover:bg-zinc-700 hover:text-zinc-100 transition-colors"
                       >
                         <ExternalLink className="h-3 w-3" />
@@ -157,7 +159,7 @@ export default async function OrderDetailPage({
                     )}
                   </div>
                   <div className="flex items-center gap-4">
-                    {order.selectedTier && (
+                    {order.selectedTier && tier && (
                       <span
                         className={cn(
                           "inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium border",
@@ -167,8 +169,9 @@ export default async function OrderDetailPage({
                         {tier.label}
                       </span>
                     )}
+
                     <span className="text-2xl font-bold text-zinc-100">
-                      ${Number(order.product?.price || 0).toFixed(2)}
+                      ${Number(product?.price || 0).toFixed(2)}
                     </span>
                   </div>
                 </div>
@@ -389,14 +392,14 @@ export default async function OrderDetailPage({
               <div className="flex justify-between">
                 <span className="text-zinc-500">Pack ID</span>
                 <span className="font-mono text-sm text-zinc-400">
-                  {order.packId.slice(0, 8)}...
+                  {order.packId ? `${order.packId.slice(0, 8)}...` : "—"}
                 </span>
               </div>
               <div className="border-t border-zinc-800" />
               <div className="flex justify-between">
                 <span className="text-zinc-500">Product ID</span>
                 <span className="font-mono text-sm text-zinc-400">
-                  {order.productId?.slice(0, 8) || "—"}...
+                  {product?.id ? `${product.id.slice(0, 8)}...` : "—"}
                 </span>
               </div>
               <div className="border-t border-zinc-800" />

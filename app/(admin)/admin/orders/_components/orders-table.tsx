@@ -179,6 +179,7 @@ export function OrdersTable({ orders, pagination }: OrdersTableProps) {
             {orders.map((order) => {
               const status = statusConfig[order.status] || statusConfig.PENDING;
               const StatusIcon = status.icon;
+              const product = order.items[0]?.product ?? null;
 
               return (
                 <TableRow
@@ -212,11 +213,11 @@ export function OrdersTable({ orders, pagination }: OrdersTableProps) {
                   {/* Product */}
                   <TableCell>
                     <div className="flex items-center gap-3">
-                      {order.product?.imageUrl ? (
+                      {product?.imageUrl ? (
                         <div className="relative h-10 w-10 overflow-hidden rounded-lg bg-zinc-800 border border-zinc-700">
                           <Image
-                            src={order.product.imageUrl}
-                            alt={order.product.title}
+                            src={product.imageUrl}
+                            alt={product.title}
                             fill
                             className="object-cover"
                           />
@@ -227,7 +228,7 @@ export function OrdersTable({ orders, pagination }: OrdersTableProps) {
                         </div>
                       )}
                       <span className="font-medium text-zinc-100 truncate max-w-[150px]">
-                        {order.product?.title ?? (
+                        {product?.title ?? (
                           <span className="text-zinc-500">Not assigned</span>
                         )}
                       </span>
@@ -295,7 +296,7 @@ export function OrdersTable({ orders, pagination }: OrdersTableProps) {
                           asChild
                           className="cursor-pointer text-zinc-300 focus:text-zinc-100 focus:bg-zinc-800"
                         >
-                          <Link href={`/dashboard/orders/${order.id}`}>
+                          <Link href={`/admin/orders/${order.id}`}>
                             <Eye className="mr-2 h-4 w-4" />
                             View Details
                           </Link>

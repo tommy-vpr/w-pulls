@@ -3,7 +3,7 @@ import {
   orderRepository,
   OrderRepository,
   OrderFilters,
-  OrderWithProduct,
+  OrderWithItems,
   OrderStats,
 } from "@/lib/repositories/order.repository";
 import {
@@ -13,13 +13,28 @@ import {
 } from "@/types/product";
 import { auditService } from "./audit.service";
 
+export interface SerializedOrderItem {
+  id: string;
+  productId: string;
+  quantity: number;
+  unitPrice: string;
+  product: {
+    id: string;
+    title: string;
+    imageUrl: string | null;
+    description: string | null;
+    price: string;
+    tier: string;
+    category: string;
+  };
+}
+
 export interface SerializedOrder {
   id: string;
-  packId: string;
-  packName: string;
+  type: string;
+  packId: string | null;
+  packName: string | null;
   amount: number;
-  productId: string | null;
-  userId: string | null;
   selectedTier: string | null;
   status: string;
   stripeSessionId: string | null;
@@ -27,15 +42,10 @@ export interface SerializedOrder {
   customerName: string | null;
   createdAt: string;
   updatedAt: string;
-  product: {
-    id: string;
-    title: string;
-    description: string | null;
-    imageUrl: string | null;
-    price: string;
-    tier: string;
-    category: string;
-  } | null;
+
+  items: SerializedOrderItem[];
+  product: SerializedOrderItem["product"] | null;
+
   user: {
     id: string;
     name: string | null;
@@ -49,14 +59,29 @@ export class OrderService {
   /**
    * Serialize order for client
    */
-  serializeOrder(order: OrderWithProduct): SerializedOrder {
+  serializeOrder(order: OrderWithItems): SerializedOrder {
+    const items = order.items.map((item) => ({
+      id: item.id,
+      productId: item.productId,
+      quantity: item.quantity,
+      unitPrice: item.unitPrice.toString(),
+      product: {
+        id: item.product.id,
+        title: item.product.title,
+        imageUrl: item.product.imageUrl,
+        description: item.product.description,
+        price: item.product.price.toString(),
+        tier: item.product.tier,
+        category: item.product.category,
+      },
+    }));
+
     return {
       id: order.id,
+      type: order.type,
       packId: order.packId,
       packName: order.packName,
       amount: order.amount,
-      productId: order.productId,
-      userId: order.userId,
       selectedTier: order.selectedTier,
       status: order.status,
       stripeSessionId: order.stripeSessionId,
@@ -64,18 +89,15 @@ export class OrderService {
       customerName: order.customerName,
       createdAt: order.createdAt.toISOString(),
       updatedAt: order.updatedAt.toISOString(),
-      product: order.product
+      items,
+      product: items[0]?.product ?? null, // Add this
+      user: order.user
         ? {
-            id: order.product.id,
-            title: order.product.title,
-            description: order.product.description,
-            imageUrl: order.product.imageUrl,
-            price: order.product.price.toString(),
-            tier: order.product.tier,
-            category: order.product.category,
+            id: order.user.id,
+            name: order.user.name,
+            email: order.user.email,
           }
         : null,
-      user: order.user,
     };
   }
 

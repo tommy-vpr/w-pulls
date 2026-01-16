@@ -4,31 +4,53 @@ import prisma from "@/lib/prisma";
 import { Order, OrderStatus, ProductTier, Prisma } from "@prisma/client";
 import { PaginationParams, PaginatedResult } from "@/types/product";
 
+/* ----------------------------------------
+ * Filters
+ * --------------------------------------*/
+
 export interface OrderFilters {
   status?: OrderStatus;
   search?: string;
   userId?: string;
-  productId?: string;
+  productId?: string; // filter via OrderItem
   dateFrom?: Date;
   dateTo?: Date;
 }
 
-export interface OrderWithProduct extends Order {
-  product: {
-    id: string;
-    title: string;
-    description: string | null;
-    imageUrl: string | null;
-    price: Prisma.Decimal;
-    tier: ProductTier;
-    category: string;
-  } | null;
-  user: {
-    id: string;
-    name: string | null;
-    email: string;
-  } | null;
-}
+/* ----------------------------------------
+ * Typed payloads
+ * --------------------------------------*/
+
+export type OrderWithItems = Prisma.OrderGetPayload<{
+  include: {
+    items: {
+      include: {
+        product: {
+          select: {
+            id: true;
+            title: true;
+            description: true;
+            imageUrl: true;
+            price: true;
+            tier: true;
+            category: true;
+          };
+        };
+      };
+    };
+    user: {
+      select: {
+        id: true;
+        name: true;
+        email: true;
+      };
+    };
+  };
+}>;
+
+/* ----------------------------------------
+ * Stats
+ * --------------------------------------*/
 
 export interface OrderStats {
   totalOrders: number;
@@ -40,33 +62,30 @@ export interface OrderStats {
   todayRevenue: number;
 }
 
-// Standard product select to reuse
-const productSelect = {
-  id: true,
-  title: true,
-  description: true,
-  imageUrl: true,
-  price: true,
-  tier: true,
-  category: true,
-} as const;
-
-const userSelect = {
-  id: true,
-  name: true,
-  email: true,
-} as const;
+/* ----------------------------------------
+ * Repository
+ * --------------------------------------*/
 
 export class OrderRepository {
   /**
-   * Find order by ID with product details
+   * Find order by ID
    */
-  async findById(id: string): Promise<OrderWithProduct | null> {
+  async findById(id: string): Promise<OrderWithItems | null> {
     return prisma.order.findUnique({
       where: { id },
       include: {
-        product: { select: productSelect },
-        user: { select: userSelect },
+        items: {
+          include: {
+            product: true,
+          },
+        },
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
       },
     });
   }
@@ -91,7 +110,7 @@ export class OrderRepository {
   }
 
   /**
-   * Update order
+   * Generic update
    */
   async update(id: string, data: Prisma.OrderUpdateInput): Promise<Order> {
     return prisma.order.update({
@@ -101,38 +120,31 @@ export class OrderRepository {
   }
 
   /**
-   * Get paginated orders with filters
+   * Find many orders with filters
    */
   async findMany(
     filters: OrderFilters = {},
     pagination: PaginationParams = {}
-  ): Promise<PaginatedResult<OrderWithProduct>> {
+  ): Promise<PaginatedResult<OrderWithItems>> {
     const { status, search, userId, productId, dateFrom, dateTo } = filters;
     const { page = 1, limit = 10 } = pagination;
     const skip = (page - 1) * limit;
 
     const where: Prisma.OrderWhereInput = {};
 
-    if (status) {
-      where.status = status;
-    }
-
-    if (userId) {
-      where.userId = userId;
-    }
+    if (status) where.status = status;
+    if (userId) where.userId = userId;
 
     if (productId) {
-      where.productId = productId;
+      where.items = {
+        some: { productId },
+      };
     }
 
     if (dateFrom || dateTo) {
       where.createdAt = {};
-      if (dateFrom) {
-        where.createdAt.gte = dateFrom;
-      }
-      if (dateTo) {
-        where.createdAt.lte = dateTo;
-      }
+      if (dateFrom) where.createdAt.gte = dateFrom;
+      if (dateTo) where.createdAt.lte = dateTo;
     }
 
     if (search) {
@@ -141,7 +153,15 @@ export class OrderRepository {
         { packName: { contains: search, mode: "insensitive" } },
         { customerEmail: { contains: search, mode: "insensitive" } },
         { customerName: { contains: search, mode: "insensitive" } },
-        { product: { title: { contains: search, mode: "insensitive" } } },
+        {
+          items: {
+            some: {
+              product: {
+                title: { contains: search, mode: "insensitive" },
+              },
+            },
+          },
+        },
       ];
     }
 
@@ -152,8 +172,18 @@ export class OrderRepository {
         take: limit,
         orderBy: { createdAt: "desc" },
         include: {
-          product: { select: productSelect },
-          user: { select: userSelect },
+          items: {
+            include: {
+              product: true,
+            },
+          },
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
         },
       }),
       prisma.order.count({ where }),
@@ -169,7 +199,7 @@ export class OrderRepository {
   }
 
   /**
-   * Get order statistics
+   * Order statistics
    */
   async getStats(): Promise<OrderStats> {
     const today = new Date();
@@ -216,31 +246,41 @@ export class OrderRepository {
   }
 
   /**
-   * Get orders by user ID
+   * Orders by user
    */
   async findByUserId(
     userId: string,
     pagination: PaginationParams = {}
-  ): Promise<PaginatedResult<OrderWithProduct>> {
+  ): Promise<PaginatedResult<OrderWithItems>> {
     return this.findMany({ userId }, pagination);
   }
 
   /**
-   * Get recent orders
+   * Recent orders
    */
-  async getRecent(limit: number = 5): Promise<OrderWithProduct[]> {
+  async getRecent(limit: number = 5): Promise<OrderWithItems[]> {
     return prisma.order.findMany({
       take: limit,
       orderBy: { createdAt: "desc" },
       include: {
-        product: { select: productSelect },
-        user: { select: userSelect },
+        items: {
+          include: {
+            product: true,
+          },
+        },
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
       },
     });
   }
 
   /**
-   * Delete an order
+   * Delete order
    */
   async delete(id: string): Promise<Order> {
     return prisma.order.delete({

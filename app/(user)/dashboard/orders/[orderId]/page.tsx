@@ -78,8 +78,9 @@ export default async function UserOrderDetailPage({
 
   const order = result.data;
 
-  // Ensure user can only see their own orders
-  if (order.userId !== session?.user?.id) {
+  const item = order.items[0] ?? null;
+
+  if (!item) {
     notFound();
   }
 
@@ -153,15 +154,14 @@ export default async function UserOrderDetailPage({
               <div className="flex gap-6">
                 {/* Product Image */}
                 <div className="relative shrink-0">
-                  {order.product?.imageUrl ? (
+                  {item.product.imageUrl ? (
                     <div className="relative h-40 w-32 overflow-hidden rounded-lg bg-zinc-800 border border-zinc-700">
                       <Image
-                        src={order.product.imageUrl}
-                        alt={order.product.title}
+                        src={item.product.imageUrl}
+                        alt={item.product.title}
                         fill
                         className="object-cover"
                       />
-                      {/* Tier glow effect */}
                       <div
                         className="absolute inset-0 opacity-20"
                         style={{
@@ -180,7 +180,7 @@ export default async function UserOrderDetailPage({
                 <div className="flex-1 space-y-3">
                   <div>
                     <h3 className="text-xl font-semibold text-zinc-100">
-                      {order.product?.title || "Mystery Card"}
+                      {item.product.title}
                     </h3>
                     <p className="text-sm text-zinc-500 mt-1">
                       From:{" "}
@@ -207,17 +207,17 @@ export default async function UserOrderDetailPage({
                   <div className="pt-2">
                     <p className="text-sm text-zinc-500">Card Value</p>
                     <p className="text-2xl font-bold text-zinc-100">
-                      ${Number(order.product?.price || 0).toFixed(2)}
+                      ${Number(item.product.price).toFixed(2)}
                     </p>
                   </div>
                 </div>
               </div>
 
               {/* Product Description if available */}
-              {order.product?.description && (
+              {item.product.description && (
                 <div className="mt-4 pt-4 border-t border-zinc-800">
                   <p className="text-sm text-zinc-400">
-                    {order.product.description}
+                    {item.product.description}
                   </p>
                 </div>
               )}

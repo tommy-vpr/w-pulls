@@ -12,6 +12,7 @@ import {
   User,
   ShoppingBag,
   Sparkles,
+  Copy,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { signOutAction } from "@/lib/actions/auth.actions";
@@ -36,23 +37,17 @@ const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "My Orders", href: "/dashboard/orders", icon: ShoppingBag },
   { label: "Open Packs", href: "/packs", icon: Sparkles },
+  { label: "Collections", href: "/dashboard/collections", icon: Copy },
   { label: "Profile", href: "/dashboard/profile", icon: User },
   { label: "Settings", href: "/dashboard/settings", icon: Settings },
 ];
 
 // export function UserSidebar({ user }: UserSidebarProps) {
-export function UserSidebar() {
-  // ✅ ALL hooks at the top
+export function UserSidebar({ user }: UserSidebarProps) {
   const pathname = usePathname();
-  const { data: session } = useSession();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const user = session?.user;
-  const isAdmin = user?.role === "ADMIN";
-
-  if (!user) {
-    return null; // or skeleton
-  }
+  const isAdmin = user.role === "ADMIN";
 
   return (
     <aside className="fixed inset-y-0 left-0 z-50 hidden w-64 lg:flex lg:flex-col bg-[#0a0a0f] border-r border-purple-500/20">

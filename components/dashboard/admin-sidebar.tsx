@@ -22,18 +22,6 @@ import { getInitials } from "@/lib/utils/initials";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 
-interface SidebarUser {
-  id: string;
-  name?: string | null;
-  email?: string | null;
-  image?: string | null;
-  role?: string;
-}
-
-interface AdminSidebarProps {
-  user: SidebarUser;
-}
-
 const navItems = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { label: "Activity", href: "/admin/activity", icon: Activity },
@@ -45,17 +33,20 @@ const navItems = [
   { label: "Users", href: "/admin/users", icon: Users },
 ];
 
+interface AdminSidebarProps {
+  user: {
+    id?: string;
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+    role?: string;
+  };
+}
+
 // export function AdminSidebar({ user }: AdminSidebarProps) {
-export function AdminSidebar() {
-  const { data: session } = useSession();
-  const pathname = usePathname(); // ✅ always called
-  const [menuOpen, setMenuOpen] = useState(false); // ✅ always called
-
-  const user = session?.user;
-
-  if (!user) {
-    return null; // ✅ safe now
-  }
+export function AdminSidebar({ user }: AdminSidebarProps) {
+  const pathname = usePathname();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <aside className="fixed inset-y-0 left-0 z-50 hidden w-64 lg:flex lg:flex-col bg-[#0a0a0f] border-r border-purple-500/20">

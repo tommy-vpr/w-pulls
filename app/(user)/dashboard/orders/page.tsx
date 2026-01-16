@@ -8,6 +8,7 @@ import { OrdersGrid } from "./_components/orders-grid";
 // import { OrdersStats } from "./_components/orders-stats";
 import { OrdersFilter } from "./_components/orders-filter";
 import { Package } from "lucide-react";
+import { OrdersTable } from "./_components/orders-table";
 
 export const metadata: Metadata = {
   title: "My Orders | WPulls",
@@ -61,7 +62,7 @@ export default async function MyOrdersPage({
         <Suspense fallback={<GridLoading />}>
           {ordersResult.success && ordersResult.data ? (
             ordersResult.data.orders.length > 0 ? (
-              <OrdersGrid
+              <OrdersTable
                 orders={ordersResult.data.orders}
                 pagination={{
                   page: ordersResult.data.page,

@@ -95,7 +95,7 @@ export function ProductsTable({ products }: ProductsTableProps) {
           asChild
           className="mt-4 bg-white text-zinc-900 hover:bg-zinc-200"
         >
-          <Link href="/dashboard/products/new">Create Product</Link>
+          <Link href="/admin/products/new">Create Product</Link>
         </Button>
       </div>
     );
@@ -145,7 +145,7 @@ export function ProductsTable({ products }: ProductsTableProps) {
                 <TableCell>
                   <div>
                     <Link
-                      href={`/dashboard/products/${product.id}`}
+                      href={`/admin/products/${product.id}`}
                       className="font-medium text-zinc-100 hover:text-white hover:underline transition-colors"
                     >
                       {product.title}

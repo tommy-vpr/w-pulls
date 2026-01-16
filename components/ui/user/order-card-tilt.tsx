@@ -6,23 +6,10 @@ import { format } from "date-fns";
 import { Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getTierConfig } from "@/lib/tier-config";
+import { SerializedOrder } from "@/lib/services/order.service";
 
 interface OrderCardProps {
-  order: {
-    id: string;
-    packName: string;
-    amount: number;
-    selectedTier: string | null;
-    status: string;
-    createdAt: Date;
-    product: {
-      id: string;
-      title: string;
-      imageUrl: string | null;
-      price: any;
-      tier: string;
-    } | null;
-  };
+  order: SerializedOrder;
 }
 
 export function OrderCard({ order }: OrderCardProps) {

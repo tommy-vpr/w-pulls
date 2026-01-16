@@ -90,7 +90,7 @@ export default async function ProductsPage({
           className="group/btn relative h-10 px-6 rounded-md bg-gradient-to-br from-violet-600 to-purple-600 font-medium text-white text-sm shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] disabled:opacity-50 disabled:cursor-not-allowed
           hover:opacity-85 transition"
         >
-          <Link href="/dashboard/products/new">
+          <Link href="/admin/products/new">
             <Plus className="mr-2 h-4 w-4" />
             Add Product
           </Link>

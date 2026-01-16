@@ -19,20 +19,10 @@ import {
 import { formatDistanceToNow } from "date-fns";
 import { OrderModal } from "./order-modal";
 import { getTierConfig, getTierBadgeClass } from "@/lib/tier-config";
-
-interface Order {
-  id: string;
-  packId: string;
-  packName: string;
-  amount: number;
-  selectedTier: string | null;
-  status: string;
-  createdAt: string;
-  product: SerializedProduct | null;
-}
+import { SerializedUserOrder } from "@/lib/actions/user-orders.actions";
 
 interface OrdersGridProps {
-  orders: Order[];
+  orders: SerializedUserOrder[];
   pagination: {
     page: number;
     totalPages: number;
@@ -73,7 +63,9 @@ const statusConfig: Record<
 export function OrdersGrid({ orders, pagination }: OrdersGridProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [selectedOrder, setSelectedOrder] =
+    useState<SerializedUserOrder | null>(null);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handlePageChange = (newPage: number) => {
@@ -82,7 +74,7 @@ export function OrdersGrid({ orders, pagination }: OrdersGridProps) {
     router.push(`?${params.toString()}`);
   };
 
-  const handleQuickView = (order: Order) => {
+  const handleQuickView = (order: SerializedUserOrder) => {
     setSelectedOrder(order);
     setIsModalOpen(true);
   };
@@ -146,7 +138,7 @@ function OrderCard({
   order,
   onQuickView,
 }: {
-  order: Order;
+  order: SerializedUserOrder;
   onQuickView: () => void;
 }) {
   const tier = getTierConfig(order.selectedTier);
@@ -210,7 +202,7 @@ function OrderCard({
             className="cursor-pointer flex items-center gap-2 px-4 py-2 rounded-lg bg-zinc-800 text-zinc-100 text-sm font-medium border border-zinc-700 hover:bg-zinc-700 transition-colors"
           >
             <Expand className="h-4 w-4" />
-            Quick View
+            View Card
           </button>
         </div>
       </div>
@@ -265,7 +257,7 @@ function OrderCard({
               onClick={onQuickView}
               className="cursor-pointer text-xs text-zinc-500 hover:text-violet-400 transition-colors"
             >
-              Quick View
+              View Card
             </button>
           </div>
         </div>

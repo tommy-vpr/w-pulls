@@ -86,7 +86,7 @@ export function ProductForm({ product, mode }: ProductFormProps) {
       const result: ActionResponse<SerializedProduct> = await action(formData);
 
       if (result.success) {
-        router.push("/dashboard/products");
+        router.push("/admin/products");
         router.refresh();
       } else {
         if (result.errors) {

@@ -8,7 +8,9 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-// Add to your existing schema.prisma
+////////////////////
+// USERS & AUTH
+////////////////////
 
 model User {
   id            String    @id @default(cuid())
@@ -18,12 +20,14 @@ model User {
   password      String?
   image         String?
   role          UserRole  @default(USER)
+
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+
   accounts      Account[]
   sessions      Session[]
   passwordResetTokens PasswordResetToken[]
-  orders              Order[]
+  orders        Order[]
 }
 
 model Account {
@@ -32,6 +36,7 @@ model Account {
   type              String
   provider          String
   providerAccountId String
+
   refresh_token     String? @db.Text
   access_token      String? @db.Text
   expires_at        Int?
@@ -39,6 +44,7 @@ model Account {
   scope             String?
   id_token          String? @db.Text
   session_state     String?
+
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
@@ -49,6 +55,7 @@ model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
+
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
@@ -64,9 +71,10 @@ model PasswordResetToken {
   id        String   @id @default(cuid())
   token     String   @unique
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   expiresAt DateTime
   createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
@@ -76,6 +84,10 @@ enum UserRole {
   ADMIN
 }
 
+////////////////////
+// PRODUCTS
+////////////////////
+
 model Product {
   id          String          @id @default(cuid())
   title       String
@@ -83,14 +95,18 @@ model Product {
   description String?         @db.Text
   price       Decimal         @db.Decimal(10, 2)
   imageUrl    String?
+  sku         String?         @unique
+
   category    ProductCategory
   tier        ProductTier     @default(COMMON)
-  sku         String?         @unique
+
   inventory   Int             @default(0)
   isActive    Boolean         @default(true)
+
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
-  orders      Order[]
+
+  orderItems  OrderItem[]
   audits      ProductAudit[]
 
   @@index([slug])
@@ -123,23 +139,30 @@ enum ProductTier {
   GRAIL
 }
 
+////////////////////
+// ORDERS
+////////////////////
+
+enum OrderType {
+  PACK
+  PRODUCT
+}
+
 model Order {
   id              String       @id @default(cuid())
+  type            OrderType    @default(PACK)
 
-  packId          String
-  packName        String
+  // Pack metadata (only for PACK orders)
+  packId          String?
+  packName        String?
+
+  // Total paid (cents)
   amount          Int
 
-  // Nullable until payment completes
-  productId       String?
-  product         Product?     @relation(fields: [productId], references: [id])
-
-  // Nullable for guest checkout
   userId          String?
   user            User?        @relation(fields: [userId], references: [id])
 
   selectedTier    ProductTier?
-
   status          OrderStatus  @default(PENDING)
 
   stripeSessionId String?
@@ -149,10 +172,10 @@ model Order {
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
 
+  items           OrderItem[]
   audits          OrderAudit[]
 
   @@index([status])
-  @@index([productId])
   @@index([userId])
   @@index([createdAt])
   @@index([customerEmail])
@@ -165,25 +188,48 @@ enum OrderStatus {
   REFUNDED
 }
 
-// Product Audit Trail
+model OrderItem {
+  id        String   @id @default(cuid())
+  orderId   String
+  productId String
+
+  quantity  Int      @default(1)
+  unitPrice Decimal  @db.Decimal(10, 2)
+
+  createdAt DateTime @default(now())
+
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+////////////////////
+// AUDITS
+////////////////////
+
 model ProductAudit {
   id          String            @id @default(cuid())
   productId   String
-  product     Product           @relation(fields: [productId], references: [id], onDelete: Cascade)
   action      ProductAction
-  field       String?           // Which field changed (e.g., "price", "inventory")
-  oldValue    String?           // Previous value (JSON string for complex values)
-  newValue    String?           // New value
-  metadata    Json?             // Additional context
-  performedBy String?           // User/system that made the change
+
+  field       String?
+  oldValue    String?
+  newValue    String?
+
+  metadata    Json?
+  performedBy String?
   ipAddress   String?
   userAgent   String?
+
   createdAt   DateTime          @default(now())
+
+  product     Product           @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@index([productId])
   @@index([action])
   @@index([createdAt])
-  @@index([performedBy])
 }
 
 enum ProductAction {
@@ -197,19 +243,22 @@ enum ProductAction {
   TIER_CHANGED
 }
 
-// Order Audit Trail
 model OrderAudit {
   id          String       @id @default(cuid())
   orderId     String
-  order       Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
   action      OrderAction
+
   oldStatus   OrderStatus?
   newStatus   OrderStatus?
-  metadata    Json?        // Additional context (stripe events, error messages, etc.)
-  performedBy String?      // User/system that made the change
+
+  metadata    Json?
+  performedBy String?
   ipAddress   String?
   userAgent   String?
+
   createdAt   DateTime     @default(now())
+
+  order       Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   @@index([orderId])
   @@index([action])

@@ -27,6 +27,115 @@ const textSizeClasses = {
   xl: "text-lg",
 };
 
+export const ProductDetailLoading = () => {
+  return (
+    <div className="space-y-6 max-w-5xl mx-auto">
+      {/* Back Link */}
+      <Skeleton className="h-4 w-32 bg-zinc-800" />
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        {/* Product Image */}
+        <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
+          <Skeleton className="aspect-square w-full bg-zinc-800" />
+        </div>
+
+        {/* Product Info */}
+        <div className="space-y-6">
+          {/* Header */}
+          <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 space-y-4">
+            {/* Tier Badge */}
+            <Skeleton className="h-6 w-20 rounded-md bg-zinc-800" />
+
+            {/* Title */}
+            <Skeleton className="h-8 w-3/4 bg-zinc-800" />
+
+            {/* Category */}
+            <Skeleton className="h-4 w-32 bg-zinc-800" />
+
+            {/* Price */}
+            <Skeleton className="h-10 w-28 bg-zinc-800" />
+
+            {/* Status */}
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-5 w-16 rounded-md bg-zinc-800" />
+              <Skeleton className="h-4 w-24 bg-zinc-800" />
+            </div>
+          </div>
+
+          {/* Stats Grid */}
+          <div className="grid grid-cols-2 gap-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div
+                key={i}
+                className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4"
+              >
+                <Skeleton className="h-4 w-20 bg-zinc-800 mb-2" />
+                <Skeleton className="h-6 w-16 bg-zinc-800" />
+              </div>
+            ))}
+          </div>
+
+          {/* Actions */}
+          <div className="flex gap-3">
+            <Skeleton className="h-10 w-24 rounded-lg bg-zinc-800" />
+            <Skeleton className="h-10 w-24 rounded-lg bg-zinc-800" />
+          </div>
+        </div>
+      </div>
+
+      {/* Description */}
+      <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
+        <div className="px-6 py-4 border-b border-zinc-800">
+          <Skeleton className="h-5 w-28 bg-zinc-800" />
+        </div>
+        <div className="p-6 space-y-3">
+          <Skeleton className="h-4 w-full bg-zinc-800" />
+          <Skeleton className="h-4 w-full bg-zinc-800" />
+          <Skeleton className="h-4 w-3/4 bg-zinc-800" />
+        </div>
+      </div>
+
+      {/* Details Table */}
+      <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
+        <div className="px-6 py-4 border-b border-zinc-800">
+          <Skeleton className="h-5 w-32 bg-zinc-800" />
+        </div>
+        <div className="divide-y divide-zinc-800">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div
+              key={i}
+              className="px-6 py-4 flex items-center justify-between"
+            >
+              <Skeleton className="h-4 w-24 bg-zinc-800" />
+              <Skeleton className="h-4 w-32 bg-zinc-800" />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Audit History */}
+      <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
+        <div className="px-6 py-4 border-b border-zinc-800 flex items-center justify-between">
+          <Skeleton className="h-5 w-28 bg-zinc-800" />
+          <Skeleton className="h-4 w-16 bg-zinc-800" />
+        </div>
+        <div className="divide-y divide-zinc-800">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="px-6 py-4 flex items-center gap-4">
+              <Skeleton className="h-10 w-10 rounded-full bg-zinc-800" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-4 w-48 bg-zinc-800" />
+                <Skeleton className="h-3 w-32 bg-zinc-800" />
+              </div>
+              <Skeleton className="h-4 w-24 bg-zinc-800" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export const ProductsLoading = () => {
   return (
     <div className="space-y-6">
@@ -163,6 +272,58 @@ export const OrdersLoading = () => {
         {Array.from({ length: 5 }).map((_, i) => (
           <Skeleton key={i} className="h-9 w-9 rounded-lg bg-zinc-800" />
         ))}
+      </div>
+    </div>
+  );
+};
+
+export const OrderDetailLoading = () => {
+  return (
+    <div className="space-y-6 max-w-4xl mx-auto">
+      {/* Back link */}
+      <Skeleton className="h-4 w-32 bg-zinc-800" />
+
+      {/* Header */}
+      <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 space-y-3">
+        <Skeleton className="h-7 w-48 bg-zinc-800" />
+        <Skeleton className="h-4 w-64 bg-zinc-800" />
+        <Skeleton className="h-10 w-full bg-zinc-800" />
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Main */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Product */}
+          <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 flex gap-6">
+            <Skeleton className="h-36 w-28 rounded-lg bg-zinc-800" />
+            <div className="flex-1 space-y-3">
+              <Skeleton className="h-6 w-3/4 bg-zinc-800" />
+              <Skeleton className="h-4 w-40 bg-zinc-800" />
+              <Skeleton className="h-6 w-24 bg-zinc-800" />
+              <Skeleton className="h-8 w-32 bg-zinc-800" />
+            </div>
+          </div>
+
+          {/* Timeline */}
+          <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 space-y-4">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton key={i} className="h-4 w-full bg-zinc-800" />
+            ))}
+          </div>
+        </div>
+
+        {/* Sidebar */}
+        <div className="space-y-6">
+          <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 space-y-3">
+            <Skeleton className="h-5 w-24 bg-zinc-800" />
+            <Skeleton className="h-4 w-full bg-zinc-800" />
+            <Skeleton className="h-6 w-32 bg-zinc-800" />
+          </div>
+
+          <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
+            <Skeleton className="h-4 w-full bg-zinc-800" />
+          </div>
+        </div>
       </div>
     </div>
   );

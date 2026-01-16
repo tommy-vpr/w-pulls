@@ -2,7 +2,33 @@
 
 import prisma from "@/lib/prisma";
 import { auth } from "@/lib/auth";
-import { serializeProduct } from "@/types/product";
+import { OrderStatus, OrderType, ProductTier } from "@prisma/client";
+
+import { serializeProduct, SerializedProduct } from "@/types/product";
+
+export interface SerializedUserOrderItem {
+  id: string;
+  quantity: number;
+  unitPrice: string;
+  product: SerializedProduct | null;
+}
+
+export interface SerializedUserOrder {
+  id: string;
+  type: OrderType;
+  packId: string | null;
+  packName: string | null;
+  amount: number;
+  selectedTier: ProductTier | null;
+  status: OrderStatus;
+  createdAt: string;
+  updatedAt: string;
+
+  items: SerializedUserOrderItem[];
+
+  // transitional / backward compatibility
+  product: SerializedProduct | null;
+}
 
 export async function getUserOrders(params?: {
   status?: string;
@@ -16,8 +42,8 @@ export async function getUserOrders(params?: {
       return { success: false, error: "Unauthorized" };
     }
 
-    const page = params?.page || 1;
-    const limit = params?.limit || 10;
+    const page = params?.page ?? 1;
+    const limit = params?.limit ?? 10;
     const skip = (page - 1) * limit;
 
     const where: any = {
@@ -32,7 +58,11 @@ export async function getUserOrders(params?: {
       prisma.order.findMany({
         where,
         include: {
-          product: true,
+          items: {
+            include: {
+              product: true,
+            },
+          },
         },
         orderBy: { createdAt: "desc" },
         skip,
@@ -41,17 +71,33 @@ export async function getUserOrders(params?: {
       prisma.order.count({ where }),
     ]);
 
-    const serializedOrders = orders.map((order) => ({
-      id: order.id,
-      packId: order.packId,
-      packName: order.packName,
-      amount: order.amount,
-      selectedTier: order.selectedTier, // Can be null
-      status: order.status,
-      createdAt: order.createdAt.toISOString(),
-      updatedAt: order.updatedAt.toISOString(),
-      product: order.product ? serializeProduct(order.product) : null, // Handle nullable
-    }));
+    const serializedOrders: SerializedUserOrder[] = orders.map((order) => {
+      const firstItem = order.items[0] ?? null;
+
+      return {
+        id: order.id,
+        type: order.type,
+        packId: order.packId,
+        packName: order.packName,
+        amount: order.amount,
+        selectedTier: order.selectedTier,
+        status: order.status,
+        createdAt: order.createdAt.toISOString(),
+        updatedAt: order.updatedAt.toISOString(),
+
+        items: order.items.map((item) => ({
+          id: item.id,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice.toString(),
+          product: item.product ? serializeProduct(item.product) : null,
+        })),
+
+        // Backwards compatibility (if UI expects a single product)
+        product: firstItem?.product
+          ? serializeProduct(firstItem.product)
+          : null,
+      };
+    });
 
     return {
       success: true,
@@ -67,6 +113,10 @@ export async function getUserOrders(params?: {
     return { success: false, error: "Failed to fetch orders" };
   }
 }
+
+/* -------------------------------------------------- */
+/* USER ORDER STATS                                   */
+/* -------------------------------------------------- */
 
 export async function getUserOrderStats() {
   try {
@@ -96,7 +146,7 @@ export async function getUserOrderStats() {
           where: {
             userId: session.user.id,
             status: "COMPLETED",
-            selectedTier: { not: null }, // Filter out null tiers
+            selectedTier: { not: null },
           },
           _count: true,
         }),
@@ -115,7 +165,7 @@ export async function getUserOrderStats() {
         total,
         completed,
         pending,
-        totalSpent: (totalSpent._sum.amount || 0) / 100, // Convert cents to dollars
+        totalSpent: (totalSpent._sum.amount || 0) / 100,
         tierStats,
       },
     };

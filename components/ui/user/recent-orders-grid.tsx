@@ -1,5 +1,6 @@
 "use client";
 
+import { SerializedOrder } from "@/lib/services/order.service";
 import { OrderCard } from "./order-card-tilt";
 
 interface Order {
@@ -19,10 +20,11 @@ interface Order {
 }
 
 interface RecentOrdersGridProps {
-  orders: Order[];
+  orders: SerializedOrder[];
 }
 
 export function RecentOrdersGrid({ orders }: RecentOrdersGridProps) {
+  console.log(orders);
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {orders.map((order) => (
