@@ -1,9 +1,11 @@
 "use client";
 
 import React, { useState, useRef, useCallback, useEffect } from "react";
-import { Sparkles } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ChevronRight, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { CardBack } from "./(components)/Cardback";
+import { SerializedProduct } from "@/types/product";
+import { getTierConfig } from "@/lib/tier-config";
 
 type AnimationStage = "idle" | "tearing" | "revealing" | "done";
 
@@ -27,21 +29,16 @@ const adjust = (
 };
 
 // ============================================
-// Mock Data
+// Props
 // ============================================
-const MOCK_PRODUCT = {
-  title: "Charizard VMAX",
-  price: "250.00",
-  imageUrl: "/images/charizard.png",
-};
-
-const MOCK_TIER = {
-  label: "Ultra Rare",
-  hexColor: "#a855f7",
-  bgColor: "bg-purple-900/30",
-  color: "text-purple-400",
-  borderColor: "border-purple-700/50",
-};
+interface PackRevealAnimationProps {
+  product: SerializedProduct;
+  tier: string;
+  packName: string;
+  orderId: string;
+  packTopImage?: string;
+  packBottomImage?: string;
+}
 
 // ============================================
 // HoloCardFace Component
@@ -188,11 +185,13 @@ function HoloCardFace({
       onTouchMove={handleInteract}
       onTouchEnd={handleInteractEnd}
     >
-      {/* Image wrapper with overflow hidden for rounded corners */}
-      {/* Clipped surface */}
       <div className="absolute inset-0 rounded-xl overflow-hidden">
-        <img src={imageUrl} alt={alt} className="w-full h-full object-cover" />
-
+        <img
+          src={imageUrl}
+          alt={alt}
+          className="w-full h-full object-cover select-none"
+          draggable={false}
+        />
         <div className="holo-face__foil" />
         <div className="holo-face__extra" />
         <div className="holo-face__shine" />
@@ -201,11 +200,334 @@ function HoloCardFace({
     </div>
   );
 }
+
 // ============================================
-// Main Page Component
+// CardBack Component
 // ============================================
-export default function PackRevealTest() {
+interface CardBackProps {
+  tier: {
+    label: string;
+    hexColor: string;
+  };
+}
+
+function CardBack({ tier }: CardBackProps) {
+  return (
+    <div
+      className="w-full h-full rounded-xl flex items-center justify-center overflow-hidden"
+      style={{
+        background: `linear-gradient(135deg, ${tier.hexColor}90 0%, ${tier.hexColor}40 50%, ${tier.hexColor}90 100%)`,
+      }}
+    >
+      <div className="relative">
+        <div className="absolute inset-0 opacity-10">
+          {[...Array(6)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute rounded-full border border-white"
+              style={{
+                width: `${80 + i * 30}px`,
+                height: `${80 + i * 30}px`,
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+              }}
+            />
+          ))}
+        </div>
+        <Sparkles className="h-16 w-16 text-white/50" />
+      </div>
+    </div>
+  );
+}
+
+// ============================================
+// SlashEffect Component
+// ============================================
+function SlashEffect() {
+  return (
+    <>
+      <style>{`
+        @keyframes slashCut {
+          0% { left: -10%; }
+          100% { left: 110%; }
+        }
+      `}</style>
+      <div
+        className="absolute h-[2px] w-28"
+        style={{
+          background: "linear-gradient(90deg, transparent, white, transparent)",
+          animation: "slashCut 0.25s linear forwards",
+        }}
+      />
+    </>
+  );
+}
+
+// ============================================
+// Particles Component
+// ============================================
+function Particles({ color = "#fff" }: { color?: string }) {
+  const particles = Array.from({ length: 12 }, (_, i) => ({
+    id: i,
+    left: `${Math.random() * 100}%`,
+    delay: Math.random() * 0.2,
+  }));
+
+  return (
+    <>
+      <style>{`
+        @keyframes particleFly {
+          0% { transform: translateY(0) scale(1); opacity: 1; }
+          100% { transform: translateY(-100px) scale(0); opacity: 0; }
+        }
+      `}</style>
+      <div className="absolute top-0 left-0 right-0 h-24 z-[35] pointer-events-none">
+        {particles.map((particle) => (
+          <div
+            key={particle.id}
+            className="absolute w-1 h-1 rounded-full"
+            style={{
+              left: particle.left,
+              animationName: "particleFly",
+              animationDuration: "0.8s",
+              animationTimingFunction: "ease-out",
+              animationFillMode: "forwards",
+              animationDelay: `${particle.delay}s`,
+              backgroundColor: color,
+            }}
+          />
+        ))}
+      </div>
+    </>
+  );
+}
+
+// ============================================
+// SwipeToOpenButton Component
+// ============================================
+interface SwipeToOpenButtonProps {
+  onComplete: () => void;
+  disabled?: boolean;
+  accentColor?: string;
+}
+
+function SwipeToOpenButton({
+  onComplete,
+  disabled = false,
+  accentColor = "#8b5cf6",
+}: SwipeToOpenButtonProps) {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [isComplete, setIsComplete] = useState(false);
+  const startX = useRef<number>(0);
+  const thumbWidth = 56;
+
+  const getClientX = (
+    e: MouseEvent | TouchEvent | React.MouseEvent | React.TouchEvent
+  ): number => {
+    if ("touches" in e && e.touches.length > 0) {
+      return e.touches[0].clientX;
+    }
+    if ("changedTouches" in e && e.changedTouches.length > 0) {
+      return e.changedTouches[0].clientX;
+    }
+    if ("clientX" in e) {
+      return e.clientX;
+    }
+    return 0;
+  };
+
+  const handleStart = useCallback(
+    (e: React.MouseEvent | React.TouchEvent) => {
+      if (disabled || isComplete) return;
+      e.preventDefault();
+      e.stopPropagation();
+      setIsDragging(true);
+      startX.current = getClientX(e);
+    },
+    [disabled, isComplete]
+  );
+
+  const handleMove = useCallback(
+    (e: MouseEvent | TouchEvent) => {
+      if (!isDragging || !trackRef.current || isComplete) return;
+
+      const currentX = getClientX(e);
+      const trackWidth = trackRef.current.offsetWidth - thumbWidth;
+      const deltaX = currentX - startX.current;
+      const newProgress = Math.max(0, Math.min(1, deltaX / trackWidth));
+
+      setProgress(newProgress);
+    },
+    [isDragging, isComplete]
+  );
+
+  const handleEnd = useCallback(() => {
+    if (!isDragging) return;
+
+    if (progress >= 0.9) {
+      setProgress(1);
+      setIsComplete(true);
+      setTimeout(() => {
+        onComplete();
+      }, 200);
+    } else {
+      setProgress(0);
+    }
+
+    setIsDragging(false);
+  }, [isDragging, progress, onComplete]);
+
+  useEffect(() => {
+    if (isDragging) {
+      window.addEventListener("mousemove", handleMove);
+      window.addEventListener("mouseup", handleEnd);
+      window.addEventListener("touchmove", handleMove, { passive: false });
+      window.addEventListener("touchend", handleEnd);
+    }
+
+    return () => {
+      window.removeEventListener("mousemove", handleMove);
+      window.removeEventListener("mouseup", handleEnd);
+      window.removeEventListener("touchmove", handleMove);
+      window.removeEventListener("touchend", handleEnd);
+    };
+  }, [isDragging, handleMove, handleEnd]);
+
+  const trackWidth = trackRef.current?.offsetWidth || 280;
+  const thumbPosition = progress * (trackWidth - thumbWidth);
+
+  return (
+    <div
+      ref={trackRef}
+      className={cn(
+        "relative w-[280px] h-14 rounded-full overflow-hidden select-none",
+        "bg-zinc-800/80 backdrop-blur-sm border border-zinc-700/50",
+        disabled && "opacity-50 cursor-not-allowed"
+      )}
+      style={{
+        boxShadow: `0 0 20px ${accentColor}20`,
+        touchAction: "none",
+      }}
+      onMouseDown={(e) => e.preventDefault()}
+      onTouchStart={(e) => e.preventDefault()}
+    >
+      {/* Progress fill */}
+      <div
+        className="absolute inset-y-0 left-0 rounded-full transition-all duration-75"
+        style={{
+          width: `${thumbPosition + thumbWidth}px`,
+          background: `linear-gradient(90deg, ${accentColor}40 0%, ${accentColor}60 100%)`,
+        }}
+      />
+
+      {/* Text label */}
+      <div
+        className="absolute inset-0 flex items-center justify-center pointer-events-none"
+        style={{
+          opacity: 1 - progress,
+        }}
+      >
+        <span className="text-zinc-400 text-sm font-medium tracking-wide flex items-center gap-2">
+          Swipe to Open
+          <ChevronRight className="w-4 h-4 animate-pulse" />
+        </span>
+      </div>
+
+      {/* Success text */}
+      {isComplete && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <span className="text-white text-sm font-medium">Opening!</span>
+        </div>
+      )}
+
+      {/* Draggable thumb */}
+      <div
+        className={cn(
+          "absolute top-1 bottom-1 w-12 rounded-full cursor-grab active:cursor-grabbing",
+          "flex items-center justify-center select-none",
+          "transition-transform duration-75",
+          isComplete && "scale-110"
+        )}
+        style={{
+          left: `${4 + thumbPosition}px`,
+          background: isComplete
+            ? `linear-gradient(135deg, ${accentColor} 0%, ${accentColor}cc 100%)`
+            : `linear-gradient(135deg, ${accentColor} 0%, ${accentColor}aa 100%)`,
+          boxShadow: `0 4px 15px ${accentColor}50`,
+          touchAction: "none",
+        }}
+        onMouseDown={handleStart}
+        onTouchStart={handleStart}
+        draggable={false}
+        tabIndex={-1}
+      >
+        {isComplete ? (
+          <Sparkles className="w-5 h-5 text-white" />
+        ) : (
+          <ChevronRight className="w-5 h-5 text-white" />
+        )}
+      </div>
+
+      {/* Shimmer effect */}
+      {!isDragging && !isComplete && (
+        <div
+          className="absolute inset-0 pointer-events-none overflow-hidden rounded-full"
+          style={{
+            background: `linear-gradient(90deg, transparent 0%, ${accentColor}15 50%, transparent 100%)`,
+            animation: "shimmer 2s ease-in-out infinite",
+          }}
+        />
+      )}
+
+      <style>{`
+        @keyframes shimmer {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+// ============================================
+// Main Component
+// ============================================
+export function PackSlashAnimation({
+  product,
+  tier,
+  packName,
+  orderId,
+  packTopImage = "/images/pack-top.png",
+  packBottomImage = "/images/pack-bottom.png",
+}: PackRevealAnimationProps) {
+  const router = useRouter();
   const [stage, setStage] = useState<AnimationStage>("idle");
+  const tierConfig = getTierConfig(tier);
+
+  const startAnimation = useCallback(() => {
+    if (stage !== "idle") return;
+
+    setStage("tearing");
+
+    setTimeout(() => {
+      setStage("revealing");
+    }, 500);
+
+    setTimeout(() => {
+      setStage("done");
+    }, 2000);
+  }, [stage]);
+
+  const handleViewOrder = () => {
+    router.push(`/dashboard/orders/${orderId}`);
+  };
+
+  const handleOpenAnother = () => {
+    router.push("/packs");
+  };
 
   const getCardContainerStyles = (): React.CSSProperties => {
     const baseStyles: React.CSSProperties = {
@@ -215,7 +537,7 @@ export default function PackRevealTest() {
       height: "380px",
       zIndex: 15,
       perspective: "1000px",
-      filter: `drop-shadow(0 25px 50px ${MOCK_TIER.hexColor}40)`,
+      filter: `drop-shadow(0 25px 50px ${tierConfig.hexColor}40)`,
     };
 
     if (stage === "idle" || stage === "tearing") {
@@ -255,8 +577,6 @@ export default function PackRevealTest() {
     width: "100%",
     height: "100%",
     backfaceVisibility: "hidden",
-    // borderRadius: "12px",
-    // overflow: "hidden",
   };
 
   const getPackTopStyles = (): React.CSSProperties => {
@@ -321,7 +641,7 @@ export default function PackRevealTest() {
       transform: "translate(-50%, -50%)",
       width: "200px",
       height: "300px",
-      background: `radial-gradient(ellipse, ${MOCK_TIER.hexColor}66 0%, transparent 70%)`,
+      background: `radial-gradient(ellipse, ${tierConfig.hexColor}66 0%, transparent 70%)`,
       zIndex: 5,
       filter: "blur(30px)",
       transition: "opacity 0.5s",
@@ -329,10 +649,8 @@ export default function PackRevealTest() {
     };
   };
 
-  const stages: AnimationStage[] = ["idle", "tearing", "revealing", "done"];
-
   return (
-    <div className="relative min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 flex flex-col items-center justify-center overflow-hidden">
+    <div className="relative min-h-screen w-full bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 flex flex-col items-center justify-center overflow-hidden">
       <style>{`
         @keyframes cardReveal {
           0% { transform: translateX(-50%) translateY(-50%); }
@@ -483,31 +801,10 @@ export default function PackRevealTest() {
         }
       `}</style>
 
-      {/* Stage Selector */}
-      <div className="absolute top-6 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-3">
-        <p className="text-zinc-500 text-sm">Select Stage</p>
-        <div className="flex gap-2">
-          {stages.map((s) => (
-            <button
-              key={s}
-              onClick={() => setStage(s)}
-              className={cn(
-                "px-4 py-2 rounded-lg text-sm font-medium transition-all",
-                stage === s
-                  ? "bg-violet-600 text-white"
-                  : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-zinc-200"
-              )}
-            >
-              {s}
-            </button>
-          ))}
-        </div>
-      </div>
-
       {/* Pack Name Header */}
-      <div className="absolute top-28 left-1/2 -translate-x-1/2 text-center z-50">
+      <div className="absolute top-8 left-1/2 -translate-x-1/2 text-center z-50">
         <p className="text-zinc-500 text-sm">Opening</p>
-        <h1 className="text-2xl font-bold text-zinc-100">Elite Pack</h1>
+        <h1 className="text-2xl font-bold text-zinc-100">{packName}</h1>
       </div>
 
       <div className="relative w-[300px] h-[450px]">
@@ -519,7 +816,7 @@ export default function PackRevealTest() {
             {/* Back Face */}
             <div style={cardFaceStyles}>
               <div className="absolute inset-0 rounded-xl overflow-hidden">
-                <CardBack tier={MOCK_TIER} />
+                <CardBack tier={tierConfig} />
               </div>
             </div>
 
@@ -531,157 +828,118 @@ export default function PackRevealTest() {
               }}
             >
               <HoloCardFace
-                imageUrl={MOCK_PRODUCT.imageUrl}
-                alt={MOCK_PRODUCT.title}
-                rarity={MOCK_TIER.label}
+                imageUrl={product.imageUrl || "/images/placeholder-card.png"}
+                alt={product.title}
+                rarity={tier}
                 isActive={stage === "done"}
               />
             </div>
           </div>
         </div>
 
-        {/* Slash Effect - outside pack-bottom */}
+        {/* Slash Effect */}
         {stage === "tearing" && (
           <div
             className="absolute left-0 right-0 z-[25] pointer-events-none"
             style={{ top: -1 }}
           >
-            <SlashEffect color={MOCK_TIER.hexColor} />
+            <SlashEffect />
           </div>
         )}
 
         {/* Pack Bottom */}
         <div style={getPackBottomStyles()}>
-          {/* Slash effect at the top */}
-          {stage === "tearing" && <SlashEffect color={MOCK_TIER.hexColor} />}
-
           <img
-            src="/images/pack-bottom.png"
+            src={packBottomImage}
             alt="Pack"
-            className="w-full h-auto"
+            className="w-full h-auto select-none"
+            draggable={false}
           />
         </div>
 
         {/* Pack Top */}
         <div style={getPackTopStyles()}>
           <img
-            src="/images/pack-top.png"
+            src={packTopImage}
             alt="Pack Top"
-            className="w-full h-auto"
+            className="w-full h-auto select-none"
+            draggable={false}
           />
         </div>
 
-        {stage === "tearing" && <Particles color={"#fff"} />}
-
-        {stage === "idle" && (
-          <div className="absolute inset-0 z-40 flex items-center justify-center">
-            <span className="text-white text-lg font-semibold drop-shadow-lg animate-pulse">
-              Click to Open
-            </span>
-          </div>
-        )}
+        {stage === "tearing" && <Particles color="#fff" />}
       </div>
+
+      {/* Swipe to Open Button */}
+      {stage === "idle" && (
+        <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-50">
+          <SwipeToOpenButton
+            onComplete={startAnimation}
+            accentColor={tierConfig.hexColor}
+          />
+        </div>
+      )}
 
       {/* Result Panel */}
       {stage === "done" && (
-        <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4">
+        <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-4">
           <span
             className={cn(
               "inline-flex items-center rounded-md px-3 py-1.5 text-sm font-medium border",
-              MOCK_TIER.bgColor,
-              MOCK_TIER.color,
-              MOCK_TIER.borderColor
+              tierConfig.bgColor,
+              tierConfig.color,
+              tierConfig.borderColor
             )}
           >
             <Sparkles className="mr-1.5 h-3.5 w-3.5" />
-            {MOCK_TIER.label}
+            {tierConfig.label}
           </span>
 
           <div className="text-center">
-            <h2 className="text-xl font-bold text-zinc-100">
-              {MOCK_PRODUCT.title}
-            </h2>
+            <h2 className="text-xl font-bold text-zinc-100">{product.title}</h2>
             <p className="text-emerald-400 font-medium">
-              ${MOCK_PRODUCT.price} value
+              ${Number(product.price).toFixed(2)} value
             </p>
           </div>
 
           <div className="flex gap-3 mt-2">
-            <button className="px-5 py-2.5 bg-zinc-800 text-zinc-100 font-medium rounded-full border border-zinc-700 hover:bg-zinc-700 transition-colors">
+            <button
+              onClick={handleViewOrder}
+              className="
+                cursor-pointer relative px-6 py-3
+                font-semibold text-violet-400
+                bg-zinc-950
+                border border-violet-500/40
+                rounded-md
+                shadow-[0_0_25px_-10px_rgba(168,85,247,0.9)]
+                hover:bg-violet-500
+                hover:shadow-[0_0_40px_-8px_rgba(168,85,247,1)]
+                hover:text-white
+                transition-all duration-300
+            "
+            >
               View Order
             </button>
-            <button className="px-5 py-2.5 bg-gradient-to-r from-violet-600 to-purple-600 text-white font-medium rounded-full shadow-lg hover:opacity-90 transition-all">
+            <button
+              onClick={handleOpenAnother}
+              className="
+                cursor-pointer relative px-6 py-3
+                font-semibold text-teal-400
+                bg-zinc-950
+                border border-teal-500/40
+                rounded-md
+                shadow-[0_0_25px_-10px_rgba(20,184,166,0.9)]
+                hover:bg-teal-500
+                hover:shadow-[0_0_40px_-8px_rgba(20,184,166,1)]
+                hover:text-white
+                transition-all duration-300
+            "
+            >
               Open Another Pack
             </button>
           </div>
         </div>
       )}
-
-      <div className="absolute bottom-4 left-4 text-zinc-500 text-sm font-mono">
-        Stage: {stage}
-      </div>
     </div>
-  );
-}
-
-function SlashEffect({ color = "#ffffff" }: { color?: string }) {
-  return (
-    <>
-      <style>{`
-        @keyframes slashCut {
-          0% {
-            left: -10%;
-          }
-          100% {
-            left: 110%;
-          }
-        }
-      `}</style>
-
-      <div
-        className="absolute h-[2px] w-28"
-        style={{
-          background: `linear-gradient(90deg, transparent, white, transparent)`,
-
-          animation: "slashCut 0.25s linear forwards",
-        }}
-      />
-    </>
-  );
-}
-
-function Particles({ color = "#fff" }: { color?: string }) {
-  const particles = Array.from({ length: 12 }, (_, i) => ({
-    id: i,
-    left: `${Math.random() * 100}%`,
-    delay: Math.random() * 0.2,
-  }));
-
-  return (
-    <>
-      <style>{`
-        @keyframes particleFly {
-          0% { transform: translateY(0) scale(1); opacity: 1; }
-          100% { transform: translateY(-100px) scale(0); opacity: 0; }
-        }
-      `}</style>
-      <div className="absolute top-0 left-0 right-0 h-24 z-[35] pointer-events-none">
-        {particles.map((particle) => (
-          <div
-            key={particle.id}
-            className="absolute w-1 h-1 rounded-full"
-            style={{
-              left: particle.left,
-              animationName: "particleFly",
-              animationDuration: "0.8s",
-              animationTimingFunction: "ease-out",
-              animationFillMode: "forwards",
-              animationDelay: `${particle.delay}s`,
-              backgroundColor: color,
-            }}
-          />
-        ))}
-      </div>
-    </>
   );
 }
