@@ -17,7 +17,6 @@ interface MetalTierBadgeProps {
   tier?: string;
 }
 
-// Auto-map tiers to metal styles
 const tierToMetal: Record<string, MetalStyle> = {
   COMMON: "chrome",
   UNCOMMON: "bronze",
@@ -28,6 +27,7 @@ const tierToMetal: Record<string, MetalStyle> = {
   GRAIL: "gold",
 };
 
+// Base styles (no background for animated ones)
 const metalStyles: Record<MetalStyle, string> = {
   chrome: cn(
     "bg-gradient-to-b from-zinc-200 via-zinc-400 to-zinc-300",
@@ -36,7 +36,6 @@ const metalStyles: Record<MetalStyle, string> = {
     "shadow-[inset_0_1px_0_rgba(255,255,255,0.5),inset_0_-1px_0_rgba(0,0,0,0.1)]"
   ),
   gold: cn(
-    "bg-gradient-to-b from-yellow-300 via-yellow-500 to-yellow-600",
     "text-yellow-950",
     "border-yellow-400/60",
     "shadow-[inset_0_1px_0_rgba(255,255,255,0.4),inset_0_-1px_0_rgba(0,0,0,0.2)]"
@@ -60,21 +59,28 @@ const metalStyles: Record<MetalStyle, string> = {
     "shadow-[inset_0_1px_0_rgba(255,255,255,0.15),inset_0_-1px_0_rgba(0,0,0,0.3)]"
   ),
   "rose-gold": cn(
-    "bg-gradient-to-b from-rose-300 via-rose-400 to-rose-500",
     "text-rose-950",
     "border-rose-300/60",
     "shadow-[inset_0_1px_0_rgba(255,255,255,0.5),inset_0_-1px_0_rgba(0,0,0,0.15)]"
   ),
   holo: cn(
-    "text-white",
-    "border-white/30",
+    "text-zinc-700",
+    "border-white/60",
     "shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]"
   ),
 };
 
+// Animated gradients (applied via inline style)
+const holoGradients: Partial<Record<MetalStyle, string>> = {
+  holo: "linear-gradient(135deg, #c0c0c0 0%, #f0e68c 15%, #98fb98 30%, #87ceeb 45%, #dda0dd 60%, #f0e68c 75%, #c0c0c0 100%)",
+  gold: "linear-gradient(135deg, #fdf4ff 0%, #fbcfe8 10%, #f0abfc 22%, #d946ef 34%, #a855f7 46%, #f472b6 58%, #fde047 70%, #fbcfe8 82%, #fdf4ff 100%)",
+  "rose-gold":
+    "linear-gradient(135deg, #e5e7eb 0%, #fef3c7 12%, #a7f3d0 26%, #93c5fd 40%, #d8b4fe 55%, #fde68a 70%, #e5e7eb 100%)",
+};
+
 export function MetalTierBadge({ label, style, tier }: MetalTierBadgeProps) {
   const metalStyle = style || (tier ? tierToMetal[tier] : "chrome") || "chrome";
-  const isHolo = metalStyle === "holo";
+  const isHolo = metalStyle in holoGradients;
 
   return (
     <>
@@ -94,10 +100,8 @@ export function MetalTierBadge({ label, style, tier }: MetalTierBadgeProps) {
         style={
           isHolo
             ? {
-                background:
-                  "linear-gradient(135deg, #c0c0c0 0%, #f0e68c 25%, #c0c0c0 50%, #87ceeb 75%, #c0c0c0 100%)",
+                background: holoGradients[metalStyle],
                 backgroundSize: "200% 200%",
-                animation: "holoShift 3s ease infinite",
               }
             : undefined
         }

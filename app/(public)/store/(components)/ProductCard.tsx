@@ -60,14 +60,21 @@ export function ProductCard({ product }: ProductCardProps) {
         <div className="mb-1">
           <MetalTierBadge label={tierConfig.label} tier={product.tier} />
         </div>
-        <h3 className="text-zinc-300 line-clamp-2 text-xs sm:text-base drop-shadow-lg">
+        <h3 className="font-['Oxanium',monospace] text-zinc-300 line-clamp-2 text-xs sm:text-base drop-shadow-lg">
           {product.title}
         </h3>
 
-        <div className="flex items-center justify-between">
-          <span className="font-light text-emerald-400">
+        <div className="font-mono flex items-center justify-between">
+          {/* <span className="font-light text-emerald-400">
             ${Number(product.price).toFixed(2)}
-          </span>
+          </span> */}
+
+          <p
+            className="text-base font-mono text-[#78ff7c]"
+            style={{ textShadow: "0 0 6px rgba(120,255,124,.4)" }}
+          >
+            ${product.price.toString()}
+          </p>
 
           {!product.isActive && (
             <span className="text-xs text-zinc-400 bg-zinc-800/80 backdrop-blur-sm px-2 py-1 rounded">
