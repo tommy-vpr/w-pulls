@@ -1,4 +1,4 @@
-import { Product } from "@prisma/client";
+import { Product, ProductCategory, ProductTier } from "@prisma/client";
 
 export type ProductWithoutDates = Omit<Product, "createdAt" | "updatedAt">;
 
@@ -15,7 +15,8 @@ export interface ProductListItem {
 }
 
 export interface ProductFilters {
-  category?: string;
+  category?: ProductCategory | string;
+  tier?: ProductTier | string;
   isActive?: boolean;
   search?: string;
 }
@@ -69,4 +70,11 @@ export function serializeProduct(product: Product): SerializedProduct {
 
 export function serializeProducts(products: Product[]): SerializedProduct[] {
   return products.map(serializeProduct);
+}
+
+export interface ProductFilters {
+  category?: string;
+  tier?: string; // Add this
+  isActive?: boolean;
+  search?: string;
 }

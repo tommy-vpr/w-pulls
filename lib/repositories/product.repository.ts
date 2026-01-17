@@ -1,6 +1,10 @@
-import prisma from '@/lib/prisma';
-import { Product, Prisma } from '@prisma/client';
-import { ProductFilters, PaginationParams, PaginatedResult } from '@/types/product';
+import prisma from "@/lib/prisma";
+import { Product, Prisma, ProductCategory, ProductTier } from "@prisma/client";
+import {
+  ProductFilters,
+  PaginationParams,
+  PaginatedResult,
+} from "@/types/product";
 
 export class ProductRepository {
   /**
@@ -84,25 +88,29 @@ export class ProductRepository {
     filters: ProductFilters = {},
     pagination: PaginationParams = {}
   ): Promise<PaginatedResult<Product>> {
-    const { category, isActive, search } = filters;
+    const { category, tier, isActive, search } = filters;
     const { page = 1, limit = 10 } = pagination;
     const skip = (page - 1) * limit;
 
     const where: Prisma.ProductWhereInput = {};
 
     if (category) {
-      where.category = category;
+      where.category = category as ProductCategory;
     }
 
-    if (typeof isActive === 'boolean') {
+    if (tier) {
+      where.tier = tier as ProductTier;
+    }
+
+    if (typeof isActive === "boolean") {
       where.isActive = isActive;
     }
 
     if (search) {
       where.OR = [
-        { title: { contains: search, mode: 'insensitive' } },
-        { description: { contains: search, mode: 'insensitive' } },
-        { sku: { contains: search, mode: 'insensitive' } },
+        { title: { contains: search, mode: "insensitive" } },
+        { description: { contains: search, mode: "insensitive" } },
+        { sku: { contains: search, mode: "insensitive" } },
       ];
     }
 
@@ -111,7 +119,7 @@ export class ProductRepository {
         where,
         skip,
         take: limit,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { createdAt: "desc" },
       }),
       prisma.product.count({ where }),
     ]);
@@ -129,12 +137,13 @@ export class ProductRepository {
    * Get all categories
    */
   async getCategories(): Promise<string[]> {
-    const categories = await prisma.product.findMany({
-      where: { category: { not: null } },
-      select: { category: true },
-      distinct: ['category'],
+    const categories = await prisma.product.groupBy({
+      by: ["category"],
+      where: {
+        isActive: true,
+      },
     });
-    return categories.map((c) => c.category!).filter(Boolean);
+    return categories.map((c) => c.category);
   }
 
   /**

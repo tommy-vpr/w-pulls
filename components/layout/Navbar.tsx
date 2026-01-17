@@ -17,7 +17,7 @@ type NavItem = {
 const NAV: NavItem[] = [
   { label: "Home", href: "/" },
   { label: "Packs", href: "/packs" },
-  { label: "Products", href: "/products" },
+  { label: "Shop", href: "/store" },
   { label: "Changelog", href: "/changelog" },
 ];
 
@@ -72,7 +72,7 @@ export function Navbar() {
   }, []);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50">
+    <header className="fixed top-0 left-0 right-0 z-50 font-mono">
       <div
         className={`
           relative mx-3 mt-3 rounded-xl transition-all duration-500
@@ -144,7 +144,7 @@ export function Navbar() {
 
                 <Link
                   href={item.href}
-                  className="relative z-10 block rounded-lg px-4 py-2 text-xs font-medium uppercase tracking-wider text-cyan-100/70 transition-all duration-300 hover:text-cyan-300"
+                  className="relative z-10 block rounded-lg px-4 py-2 text-sm font-medium uppercase tracking-wider text-cyan-100/70 transition-all duration-300 hover:text-cyan-300"
                 >
                   {item.label}
                 </Link>
