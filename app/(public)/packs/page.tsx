@@ -5,7 +5,6 @@ import { Carousel3D } from "@/components/layout/Carousel3D";
 import { PackCard } from "@/components/packs/pack-card";
 import { PACK_CONFIGS } from "@/lib/packs/config";
 import { HudFrame } from "@/components/ui/HudFrame";
-import { NewsletterSignup } from "@/components/ui/NewsletterSignup";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // HOLOGRAPHIC HUB UI - Futuristic Trading Card Interface
@@ -331,7 +330,7 @@ function StatsTicker() {
 }
 
 // Main Hub Component
-export default function HolographicHub() {
+export default function PacksSelection() {
   const [mounted, setMounted] = useState(false);
   const [systemTime, setSystemTime] = useState("");
 
@@ -354,7 +353,7 @@ export default function HolographicHub() {
   }, []);
 
   return (
-    <div className="relative min-h-screen bg-[#030812] overflow-hidden">
+    <div className="relative min-h-[70vh] bg-[#030812] overflow-hidden">
       {/* Custom CSS animations */}
       <style jsx global>{`
         @keyframes float-up {
@@ -586,115 +585,19 @@ export default function HolographicHub() {
 
       {/* Main content */}
       <div className="relative z-10">
-        {/* Hero section with carousel */}
         <section className="relative pt-24">
-          {/* Carousel container */}
-          <div className="relative h-[70vh] min-h-[500px] w-full max-w-[1800px] mx-auto">
-            {/* HudFrame wrapper */}
-            <div className="absolute inset-8">
-              <HudFrame
-                title="Card Selection"
-                accentColor="#00ffff"
-                className="h-full"
-              >
-                {mounted && (
-                  <Carousel3D
-                    images={images}
-                    width={160}
-                    height={240}
-                    depth={400}
-                    duration={30}
-                    className="h-full justify-center"
-                  />
-                )}
-              </HudFrame>
-            </div>
-
-            {/* Side panels */}
-            {/* <div className="absolute left-4 top-1/2 -translate-y-1/2 hidden lg:block">
-              <HoloPanel className="w-48 p-4">
-                <div className="space-y-4">
-                  <h3 className="font-orbitron text-xs text-cyan-400 uppercase tracking-wider">
-                    System Status
-                  </h3>
-                  <StatusIndicator
-                    label="Network"
-                    value="CONNECTED"
-                    color="green"
-                  />
-                  <StatusIndicator
-                    label="RNG Engine"
-                    value="ACTIVE"
-                    color="cyan"
-                  />
-                  <StatusIndicator
-                    label="Drop Rate"
-                    value="ENHANCED"
-                    color="magenta"
-                  />
-                  <StatusIndicator
-                    label="Jackpot"
-                    value="AVAILABLE"
-                    color="yellow"
-                  />
-                </div>
-              </HoloPanel>
-            </div> */}
-
-            {/* Right side panel */}
-            {/* <div className="absolute right-4 top-1/2 -translate-y-1/2 hidden lg:block">
-              <HoloPanel className="w-48 p-4">
-                <div className="space-y-4">
-                  <h3 className="font-orbitron text-xs text-cyan-400 uppercase tracking-wider">
-                    Recent Drops
-                  </h3>
-                  {["Charizard ★", "Gardevoir", "Lucario EX", "Xerneas"].map(
-                    (card, i) => (
-                      <div key={i} className="flex items-center gap-2 text-sm">
-                        <div
-                          className="w-1.5 h-1.5 rounded-full"
-                          style={{
-                            background:
-                              i === 0
-                                ? "#ffd700"
-                                : i === 1
-                                ? "#c0c0c0"
-                                : "#cd7f32",
-                            boxShadow: `0 0 8px ${
-                              i === 0
-                                ? "#ffd700"
-                                : i === 1
-                                ? "#c0c0c0"
-                                : "#cd7f32"
-                            }`,
-                          }}
-                        />
-                        <span className="text-white/80 font-rajdhani">
-                          {card}
-                        </span>
-                      </div>
-                    )
-                  )}
-                </div>
-              </HoloPanel>
-            </div> */}
-          </div>
-
           {/* Title section */}
           <div className="text-center px-6 -mt-8 relative z-10 mt-8">
-            {/* <h1 className="font-orbitron text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
-              <span className="holo-text">SELECT YOUR PACK</span>
-            </h1> */}
             <h1 className="font-orbitron text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
               <span
                 className="text-cyan-400"
                 style={{
                   textShadow: `
-        0 0 10px rgba(0, 255, 255, 0.7),
-        0 0 20px rgba(0, 255, 255, 0.5),
-        0 0 40px rgba(0, 255, 255, 0.3),
-        0 0 80px rgba(0, 255, 255, 0.2)
-      `,
+                    0 0 10px rgba(0, 255, 255, 0.7),
+                    0 0 20px rgba(0, 255, 255, 0.5),
+                    0 0 40px rgba(0, 255, 255, 0.3),
+                    0 0 80px rgba(0, 255, 255, 0.2)
+                `,
                 }}
               >
                 SELECT YOUR PACK
@@ -764,22 +667,6 @@ export default function HolographicHub() {
                 </p>
               </div>
             </HoloPanel>
-
-            <div className="flex items-center gap-4 mb-8 mt-16">
-              <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent" />
-              <h2 className="font-orbitron text-sm uppercase tracking-[0.3em] text-cyan-400">
-                Stay Updated!
-              </h2>
-              <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent" />
-            </div>
-
-            <div className="mx-auto w-full max-w-xl flex justify-center">
-              <NewsletterSignup
-                source="homepage"
-                variant="card"
-                accentColor="cyan"
-              />
-            </div>
           </div>
         </footer>
       </div>

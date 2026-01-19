@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           error: "Unauthorized",
-          redirect: "/auth?callbackUrl=/packs", // Add redirect hint
+          redirect: "/auth?callbackUrl=/packs",
         },
         { status: 401 }
       );
@@ -51,7 +51,16 @@ export async function POST(request: NextRequest) {
     const checkoutSession = await stripe.checkout.sessions.create({
       mode: "payment",
       payment_method_types: ["card"],
-      customer_email: session.user.email ?? undefined,
+      // customer_email: session.user.email ?? undefined,
+
+      // Enable automatic tax calculation
+      automatic_tax: { enabled: true },
+
+      // Collect shipping address (required for tax calculation on physical goods)
+      shipping_address_collection: {
+        allowed_countries: ["US"],
+      },
+
       line_items: [
         {
           quantity: 1,

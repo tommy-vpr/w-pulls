@@ -8,6 +8,7 @@ import { User, Settings, LogOut, ChevronDown, Zap } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { signOutAction } from "@/lib/actions/auth.actions";
 import { getInitials } from "@/lib/utils/initials";
+import { CartIcon } from "./CartIcon";
 
 type NavItem = {
   label: string;
@@ -154,6 +155,8 @@ export function Navbar() {
 
           {/* Right - User Menu / Auth */}
           <div className="flex items-center gap-3">
+            <CartIcon />
+
             {status === "loading" ? (
               <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-cyan-400/10 to-fuchsia-500/10 border border-cyan-400/20 animate-pulse" />
             ) : session?.user ? (

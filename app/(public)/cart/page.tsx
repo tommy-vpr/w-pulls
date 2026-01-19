@@ -73,16 +73,22 @@ export default function CartPage() {
   if (items.length === 0) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center px-4">
-        <div className="w-20 h-20 rounded-full bg-zinc-800/50 flex items-center justify-center mb-6">
+        {/* <div className="w-20 h-20 rounded-full bg-zinc-800/50 flex items-center justify-center mb-6">
           <ShoppingBag className="w-10 h-10 text-zinc-600" />
-        </div>
-        <h1 className="text-2xl font-bold mb-2">Your cart is empty</h1>
-        <p className="text-zinc-400 mb-8">
-          Looks like you haven't added anything yet.
-        </p>
+        </div> */}
+        <Image
+          src={"/images/empty-cart.png"}
+          width="300"
+          height="400"
+          alt="continue shopping"
+        />
+        <h1 className="text-2xl font-bold mb-2 text-gray-300">
+          Your cart is empty
+        </h1>
+
         <Link
           href="/store"
-          className="px-6 py-3 bg-[#78ff7c] text-black font-semibold rounded-lg hover:bg-[#5ce860] transition-colors"
+          className="text-sm px-6 py-3 bg-[#78ff7c] text-black font-semibold rounded hover:bg-[#5ce860] transition-colors"
         >
           Continue Shopping
         </Link>
@@ -90,10 +96,16 @@ export default function CartPage() {
     );
   }
 
-  const merged = products.map((p) => {
-    const item = items.find((i) => i.productId === p.id)!;
-    return { ...p, quantity: item.quantity };
-  });
+  const merged = products.reduce<(CartProduct & { quantity: number })[]>(
+    (acc, p) => {
+      const item = items.find((i) => i.productId === p.id);
+      if (item) {
+        acc.push({ ...p, quantity: item.quantity });
+      }
+      return acc;
+    },
+    []
+  );
 
   const subtotal = merged.reduce(
     (sum, p) => sum + Number(p.price) * p.quantity,
@@ -103,10 +115,10 @@ export default function CartPage() {
   const itemCount = merged.reduce((sum, p) => sum + p.quantity, 0);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 font-mono">
+    <div className="min-h-[70vh] max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-24 font-mono">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold">Shopping Cart</h1>
+        <h1 className="text-2xl font-bold text-zinc-200">Shopping Cart</h1>
         <p className="text-zinc-400 mt-1">
           {itemCount} {itemCount === 1 ? "item" : "items"}
         </p>
@@ -119,21 +131,23 @@ export default function CartPage() {
             {merged.map((p) => (
               <div
                 key={p.id}
-                className="group bg-zinc-900/50 border border-zinc-800 rounded-xl p-4 sm:p-6 transition-colors hover:border-zinc-700"
+                className="group bg-slate-900/50 border border-slate-800 rounded-xl p-4 sm:p-6 transition-colors hover:border-slate-700"
               >
                 <div className="flex gap-4 sm:gap-6">
                   {/* Product Image */}
-                  <div className="relative w-24 h-24 sm:w-32 sm:h-32 flex-shrink-0 rounded-lg overflow-hidden bg-zinc-800">
+                  <div className="relative w-28 aspect-square flex-shrink-0 rounded-lg bg-slate-800">
                     {p.imageUrl ? (
-                      <Image
-                        src={p.imageUrl}
-                        alt={p.title}
-                        fill
-                        className="object-contain p-2"
-                        sizes="(max-width: 640px) 96px, 128px"
-                      />
+                      <div className="absolute inset-2">
+                        <Image
+                          src={p.imageUrl}
+                          alt={p.title}
+                          fill
+                          className="object-contain"
+                          sizes="(max-width: 640px) 96px, 128px"
+                        />
+                      </div>
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-zinc-600 text-xs">
+                      <div className="absolute inset-0 flex items-center justify-center text-zinc-600 text-xs">
                         No image
                       </div>
                     )}
@@ -146,7 +160,7 @@ export default function CartPage() {
                         {p.title}
                       </h3>
                       <p
-                        className="text-lg font-mono text-[#78ff7c]"
+                        className="text-sm font-mono"
                         style={{ textShadow: "0 0 6px rgba(120,255,124,.4)" }}
                       >
                         ${p.price}
@@ -180,10 +194,11 @@ export default function CartPage() {
                       {/* Remove Button */}
                       <button
                         onClick={() => removeItem(p.id)}
-                        className="flex items-center gap-2 text-zinc-400 hover:text-red-400 transition-colors text-sm"
+                        className="cursor-pointer flex items-center gap-2 text-red-400  transition-colors text-sm
+                            rounded-sm px-3 py-2 bg-red-800/20 hover:text-red-800 hover:bg-red-400"
                       >
                         <Trash2 className="w-4 h-4" />
-                        <span className="hidden sm:inline">Remove</span>
+                        {/* <span className="hidden sm:inline">Remove</span> */}
                       </button>
                     </div>
                   </div>
@@ -204,7 +219,7 @@ export default function CartPage() {
 
         {/* Order Summary */}
         <div className="lg:col-span-5 xl:col-span-4 mt-8 lg:mt-0 text-gray-200">
-          <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 lg:sticky lg:top-24">
+          <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-6 lg:sticky lg:top-24">
             <h2 className="text-lg font-semibold mb-4">Order Summary</h2>
 
             <div className="space-y-3 text-sm">

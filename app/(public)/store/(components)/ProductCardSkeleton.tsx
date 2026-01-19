@@ -2,30 +2,26 @@
 
 export function ProductCardSkeleton() {
   return (
-    <div className="relative flex flex-col overflow-hidden rounded-xl bg-zinc-900 border border-zinc-800">
-      {/* Image Skeleton */}
-      <div className="relative aspect-square overflow-hidden bg-zinc-800">
-        <div className="absolute inset-0 skeleton-shimmer" />
-
-        {/* Tier Badge Skeleton */}
-        <div className="absolute top-2 left-2">
-          <div className="h-6 w-16 rounded-md bg-zinc-700 skeleton-shimmer" />
+    <div>
+      {/* Image Wrapper */}
+      <div className="relative aspect-[3/4] overflow-hidden rounded-xl bg-zinc-900 border border-zinc-800 p-2">
+        <div className="relative h-full w-full rounded-lg bg-zinc-800">
+          <div className="absolute inset-0 skeleton-shimmer" />
         </div>
       </div>
 
-      {/* Content Skeleton */}
-      <div className="flex flex-1 flex-col p-4 gap-2">
-        {/* Title */}
-        <div className="h-5 w-3/4 rounded bg-zinc-800 skeleton-shimmer" />
+      {/* Content - Outside Image */}
+      <div className="relative mt-2">
+        {/* Tier Badge Skeleton */}
+        <div className="mb-1">
+          <div className="h-5 w-20 rounded-lg bg-zinc-800 skeleton-shimmer" />
+        </div>
 
-        {/* Description */}
-        <div className="h-4 w-full rounded bg-zinc-800/60 skeleton-shimmer" />
-        <div className="h-4 w-2/3 rounded bg-zinc-800/60 skeleton-shimmer" />
+        {/* Title */}
+        <div className="h-4 w-3/4 rounded bg-zinc-800 skeleton-shimmer mb-2" />
 
         {/* Price */}
-        <div className="mt-auto pt-3">
-          <div className="h-6 w-20 rounded bg-zinc-800 skeleton-shimmer" />
-        </div>
+        <div className="h-5 w-16 rounded bg-zinc-800 skeleton-shimmer" />
       </div>
 
       <style jsx>{`

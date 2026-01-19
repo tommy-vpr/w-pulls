@@ -1,3 +1,4 @@
+// api/checkout/product
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { stripe } from "@/lib/stripe";
@@ -55,7 +56,14 @@ export async function POST(request: NextRequest) {
 
     const checkoutSession = await stripe.checkout.sessions.create({
       mode: "payment",
-      customer_email: session.user.email ?? undefined,
+      //   customer_email: session.user.email ?? undefined,
+
+      // Add these two lines
+      automatic_tax: { enabled: true },
+      shipping_address_collection: {
+        allowed_countries: ["US"],
+      },
+
       line_items: products.map((product) => {
         const item = items.find((i) => i.productId === product.id)!;
         return {
