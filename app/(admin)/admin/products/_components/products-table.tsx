@@ -169,7 +169,7 @@ export function ProductsTable({ products }: ProductsTableProps) {
                 <TableCell>
                   <span
                     className={`rounded-md px-2.5 py-1 text-xs font-medium border ${getTierBadgeClass(
-                      product.tier
+                      product.tier,
                     )}`}
                   >
                     {tier.label}
@@ -184,8 +184,8 @@ export function ProductsTable({ products }: ProductsTableProps) {
                       product.inventory <= 0
                         ? "text-red-400"
                         : product.inventory <= 10
-                        ? "text-amber-400"
-                        : "text-zinc-300"
+                          ? "text-amber-400"
+                          : "text-zinc-300"
                     }`}
                   >
                     {product.inventory}
@@ -214,7 +214,7 @@ export function ProductsTable({ products }: ProductsTableProps) {
                       disabled={isLoading}
                       className="h-8 w-8 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
                     >
-                      <Link href={`/dashboard/products/${product.id}/edit`}>
+                      <Link href={`/admin/products/${product.id}/edit`}>
                         <Pencil className="h-4 w-4" />
                       </Link>
                     </Button>

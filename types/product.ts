@@ -19,11 +19,14 @@ export interface ProductFilters {
   tier?: ProductTier | string;
   isActive?: boolean;
   search?: string;
+  stock?: "instock" | "outofstock" | "low";
 }
 
 export interface PaginationParams {
   page?: number;
   limit?: number;
+  sortBy?: string; // Optional: add sorting
+  sortOrder?: "asc" | "desc";
 }
 
 export interface PaginatedResult<T> {

@@ -9,13 +9,13 @@ const prisma = new PrismaClient();
 const CATEGORY = "POKEMON" as const;
 
 const TIER_COUNTS: Record<ProductTier, number> = {
-  COMMON: 30,
-  UNCOMMON: 25,
-  RARE: 20,
-  ULTRA_RARE: 15,
-  SECRET_RARE: 10,
-  BANGER: 5,
-  GRAIL: 3,
+  COMMON: 120,
+  UNCOMMON: 125,
+  RARE: 60,
+  ULTRA_RARE: 80,
+  SECRET_RARE: 30,
+  BANGER: 25,
+  GRAIL: 20,
 };
 
 const PRICE_RANGES: Record<ProductTier, [number, number]> = {
@@ -39,13 +39,16 @@ const INVENTORY_RANGES: Record<ProductTier, [number, number]> = {
 };
 
 const TIER_IMAGE_MAP: Record<ProductTier, string> = {
-  COMMON: "/images/common.png",
-  UNCOMMON: "/images/uncommon.png",
-  RARE: "/images/rare.png",
-  ULTRA_RARE: "/images/ultra_rare.png",
-  SECRET_RARE: "/images/secret_rare.png",
-  BANGER: "/images/banger.png",
-  GRAIL: "/images/grail.png",
+  COMMON: "https://storage.googleapis.com/wms-order-images/products/common.png",
+  UNCOMMON:
+    "https://storage.googleapis.com/wms-order-images/products/uncommon.png",
+  RARE: "https://storage.googleapis.com/wms-order-images/products/rare.png",
+  ULTRA_RARE:
+    "https://storage.googleapis.com/wms-order-images/products/ultra_rare.png",
+  SECRET_RARE:
+    "https://storage.googleapis.com/wms-order-images/products/secret_rare.png",
+  BANGER: "https://storage.googleapis.com/wms-order-images/products/banger.png",
+  GRAIL: "https://storage.googleapis.com/wms-order-images/products/grail.png",
 };
 
 /* ------------------------------------------------------------------ */

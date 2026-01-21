@@ -151,6 +151,7 @@ enum OrderType {
 model Order {
   id              String       @id @default(cuid())
   type            OrderType    @default(PACK)
+  orderNumber     Int          @unique @default(autoincrement())
 
   // Pack metadata (only for PACK orders)
   packId          String?

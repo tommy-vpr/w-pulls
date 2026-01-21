@@ -27,7 +27,7 @@ export function ProductForm({ product, mode }: ProductFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [imageUrl, setImageUrl] = useState<string | null>(
-    product?.imageUrl || null
+    product?.imageUrl || null,
   );
   const [isActive, setIsActive] = useState(product?.isActive ?? true);
   const [errors, setErrors] = useState<Record<string, string[]>>({});
@@ -105,7 +105,7 @@ export function ProductForm({ product, mode }: ProductFormProps) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Link
-            href="/dashboard/products"
+            href="/admin/products"
             className="inline-flex items-center justify-center h-10 w-10 rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 transition-colors"
           >
             <ArrowLeft className="h-5 w-5" />

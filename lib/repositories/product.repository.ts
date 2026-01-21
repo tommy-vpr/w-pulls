@@ -86,10 +86,15 @@ export class ProductRepository {
    */
   async findMany(
     filters: ProductFilters = {},
-    pagination: PaginationParams = {}
+    pagination: PaginationParams = {},
   ): Promise<PaginatedResult<Product>> {
-    const { category, tier, isActive, search } = filters;
-    const { page = 1, limit = 10 } = pagination;
+    const { category, tier, isActive, search, stock } = filters;
+    const {
+      page = 1,
+      limit = 10,
+      sortBy = "createdAt",
+      sortOrder = "desc",
+    } = pagination;
     const skip = (page - 1) * limit;
 
     const where: Prisma.ProductWhereInput = {};
@@ -106,6 +111,15 @@ export class ProductRepository {
       where.isActive = isActive;
     }
 
+    // 👇 Add stock filter
+    if (stock === "instock") {
+      where.inventory = { gt: 0 };
+    } else if (stock === "outofstock") {
+      where.inventory = 0;
+    } else if (stock === "low") {
+      where.inventory = { gt: 0, lt: 10 };
+    }
+
     if (search) {
       where.OR = [
         { title: { contains: search, mode: "insensitive" } },
@@ -113,6 +127,11 @@ export class ProductRepository {
         { sku: { contains: search, mode: "insensitive" } },
       ];
     }
+
+    // 👇 Dynamic sorting
+    const orderBy: Prisma.ProductOrderByWithRelationInput = {
+      [sortBy]: sortOrder,
+    };
 
     const [data, total] = await Promise.all([
       prisma.product.findMany({

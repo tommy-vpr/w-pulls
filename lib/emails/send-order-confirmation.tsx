@@ -29,7 +29,7 @@ interface SendOrderConfirmationParams {
 }
 
 function generateOrderConfirmationHTML(
-  params: Omit<SendOrderConfirmationParams, "to">,
+  params: SendOrderConfirmationParams,
 ): string {
   const {
     customerName,
@@ -52,8 +52,34 @@ function generateOrderConfirmationHTML(
         <td style="padding: 12px 0; vertical-align: top; width: 70px;">
           ${
             item.image
-              ? `<img src="${item.image}" width="60" height="60" alt="${item.name}" style="border-radius: 8px; border: 1px solid rgba(0,255,255,0.2);" />`
-              : `<div style="width: 60px; height: 60px; border-radius: 8px; background: rgba(0,255,255,0.1); border: 1px solid rgba(0,255,255,0.2);"></div>`
+              ? `
+                <img
+                  src="${item.image}"
+                  alt="${item.name}"
+                  width="60"
+                  height="60"
+                  style="
+                    width: 60px;
+                    height: 60px;
+                    object-fit: contain;
+                    border-radius: 8px;
+                    border: 1px solid rgba(0,255,255,0.2);
+                    display: block;
+                    background: #00000010;
+                  "
+                />
+              `
+              : `
+                <div
+                  style="
+                    width: 60px;
+                    height: 60px;
+                    border-radius: 8px;
+                    background: rgba(0,255,255,0.1);
+                    border: 1px solid rgba(0,255,255,0.2);
+                  "
+                ></div>
+              `
           }
         </td>
         <td style="padding: 12px 0; vertical-align: middle; padding-left: 15px;">
@@ -186,14 +212,12 @@ function generateOrderConfirmationHTML(
 export async function sendOrderConfirmationEmail(
   params: SendOrderConfirmationParams,
 ) {
-  const { to, ...emailProps } = params;
-
   try {
     const { error } = await resend.emails.send({
       from: "W-Pull <orders@emails.teevong.com>",
-      to,
+      to: params.to,
       subject: `Order Confirmed - W-Pull #${params.orderNumber}`,
-      html: generateOrderConfirmationHTML(emailProps),
+      html: generateOrderConfirmationHTML(params),
     });
 
     if (error) {
@@ -207,59 +231,3 @@ export async function sendOrderConfirmationEmail(
     return { success: false, error };
   }
 }
-
-// // lib/emails/send-order-confirmation.ts
-// import { resend } from "@/lib/resend";
-// import OrderConfirmationEmail from "./order-confirmation";
-
-// interface OrderItem {
-//   name: string;
-//   quantity: number;
-//   price: number;
-//   image?: string;
-// }
-
-// interface SendOrderConfirmationParams {
-//   to: string;
-//   customerName: string;
-//   orderNumber: string;
-//   orderDate: string;
-//   items: OrderItem[];
-//   subtotal: number;
-//   tax: number;
-//   shipping: number;
-//   total: number;
-//   shippingAddress?: {
-//     line1: string;
-//     line2?: string;
-//     city: string;
-//     state: string;
-//     postalCode: string;
-//     country: string;
-//   };
-// }
-
-// export async function sendOrderConfirmationEmail(
-//   params: SendOrderConfirmationParams,
-// ) {
-//   const { to, ...emailProps } = params;
-
-//   try {
-//     const { error } = await resend.emails.send({
-//       from: "W-Pull <orders@emails.teevong.com>",
-//       to,
-//       subject: `Order Confirmed - W-Pull #${params.orderNumber}`,
-//       react: <OrderConfirmationEmail {...emailProps} />,
-//     });
-
-//     if (error) {
-//       console.error("Failed to send order confirmation email:", error);
-//       return { success: false, error };
-//     }
-
-//     return { success: true };
-//   } catch (error) {
-//     console.error("Order confirmation email error:", error);
-//     return { success: false, error };
-//   }
-// }

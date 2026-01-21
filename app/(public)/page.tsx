@@ -31,7 +31,7 @@ function DataParticles() {
         duration: 8 + Math.random() * 12,
         size: 2 + Math.random() * 4,
       })),
-    [] // Empty deps = only create once
+    [], // Empty deps = only create once
   );
 
   return (
@@ -345,7 +345,7 @@ export default function HolographicHub() {
           hour: "2-digit",
           minute: "2-digit",
           second: "2-digit",
-        })
+        }),
       );
     };
     updateTime();
@@ -472,11 +472,13 @@ export default function HolographicHub() {
         @keyframes pulse-glow {
           0%,
           100% {
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3),
+            box-shadow:
+              0 0 20px rgba(0, 255, 255, 0.3),
               inset 0 0 20px rgba(0, 255, 255, 0.1);
           }
           50% {
-            box-shadow: 0 0 40px rgba(0, 255, 255, 0.5),
+            box-shadow:
+              0 0 40px rgba(0, 255, 255, 0.5),
               inset 0 0 30px rgba(0, 255, 255, 0.2);
           }
         }
@@ -592,11 +594,7 @@ export default function HolographicHub() {
           <div className="relative h-[70vh] min-h-[500px] w-full max-w-[1800px] mx-auto">
             {/* HudFrame wrapper */}
             <div className="absolute inset-8">
-              <HudFrame
-                title="Card Selection"
-                accentColor="#00ffff"
-                className="h-full"
-              >
+              <HudFrame title="W-Pull" accentColor="#00ffff" className="h-full">
                 {mounted && (
                   <Carousel3D
                     images={images}

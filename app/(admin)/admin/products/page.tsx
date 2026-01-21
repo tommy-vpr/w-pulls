@@ -9,9 +9,14 @@ export const dynamic = "force-dynamic";
 
 interface ProductsPageProps {
   searchParams: Promise<{
-    page?: string;
     search?: string;
     category?: string;
+    tier?: string;
+    status?: string;
+    stock?: string;
+    page?: string;
+    sortBy?: string;
+    sortOrder?: string;
   }>;
 }
 
@@ -20,56 +25,66 @@ export default async function ProductsPage({
 }: ProductsPageProps) {
   const params = await searchParams;
   const page = Number(params.page) || 1;
-  const result = await getProductsAction(
-    {
-      search: params.search,
-      category: params.category,
-    },
-    { page, limit: 20 }
-  );
+
+  // Map URL params to service filters
+  const filters = {
+    search: params.search,
+    category: params.category,
+    tier: params.tier,
+    isActive:
+      params.status === "active"
+        ? true
+        : params.status === "inactive"
+          ? false
+          : undefined,
+    stock: params.stock as "instock" | "outofstock" | "low" | undefined,
+  };
+
+  const pagination = {
+    page,
+    limit: 20,
+    sortBy: params.sortBy,
+    sortOrder: params.sortOrder as "asc" | "desc" | undefined,
+  };
+
+  // 👇 Pass ALL filters to the action
+  const result = await getProductsAction(filters, pagination);
 
   const products = result.success ? result.data?.data || [] : [];
-  const pagination = result.success ? result.data : null;
+  const paginationData = result.success ? result.data : null;
 
   // Generate page numbers with ellipsis
   const getPageNumbers = (current: number, total: number) => {
     const pages: (number | "...")[] = [];
 
     if (total <= 7) {
-      // Show all pages if 7 or fewer
       for (let i = 1; i <= total; i++) pages.push(i);
     } else {
-      // Always show first page
       pages.push(1);
+      if (current > 3) pages.push("...");
 
-      if (current > 3) {
-        pages.push("...");
-      }
-
-      // Show pages around current
       const start = Math.max(2, current - 1);
       const end = Math.min(total - 1, current + 1);
+      for (let i = start; i <= end; i++) pages.push(i);
 
-      for (let i = start; i <= end; i++) {
-        pages.push(i);
-      }
-
-      if (current < total - 2) {
-        pages.push("...");
-      }
-
-      // Always show last page
+      if (current < total - 2) pages.push("...");
       pages.push(total);
     }
 
     return pages;
   };
 
+  // 👇 Preserve ALL filter params in pagination URLs
   const buildUrl = (pageNum: number) => {
     const queryParams = new URLSearchParams();
     queryParams.set("page", pageNum.toString());
     if (params.search) queryParams.set("search", params.search);
     if (params.category) queryParams.set("category", params.category);
+    if (params.tier) queryParams.set("tier", params.tier);
+    if (params.status) queryParams.set("status", params.status);
+    if (params.stock) queryParams.set("stock", params.stock);
+    if (params.sortBy) queryParams.set("sortBy", params.sortBy);
+    if (params.sortOrder) queryParams.set("sortOrder", params.sortOrder);
     return `/admin/products?${queryParams.toString()}`;
   };
 
@@ -87,8 +102,7 @@ export default async function ProductsPage({
         </div>
         <Button
           asChild
-          className="group/btn relative h-10 px-6 rounded-md bg-gradient-to-br from-violet-600 to-purple-600 font-medium text-white text-sm shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] disabled:opacity-50 disabled:cursor-not-allowed
-          hover:opacity-85 transition"
+          className="group/btn relative h-10 px-6 rounded-md bg-gradient-to-br from-violet-600 to-purple-600 font-medium text-white text-sm shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-85 transition"
         >
           <Link href="/admin/products/new">
             <Plus className="mr-2 h-4 w-4" />
@@ -104,7 +118,7 @@ export default async function ProductsPage({
       <ProductsTable products={products} />
 
       {/* Pagination */}
-      {pagination && pagination.totalPages > 1 && (
+      {paginationData && paginationData.totalPages > 1 && (
         <div className="flex items-center justify-center gap-1">
           {/* Previous Button */}
           {page > 1 ? (
@@ -121,34 +135,35 @@ export default async function ProductsPage({
           )}
 
           {/* Page Numbers */}
-          {getPageNumbers(page, pagination.totalPages).map((pageNum, idx) =>
-            pageNum === "..." ? (
-              <span
-                key={`ellipsis-${idx}`}
-                className="px-3 py-2 text-sm text-zinc-600"
-              >
-                ...
-              </span>
-            ) : page === pageNum ? (
-              <span
-                key={pageNum}
-                className="inline-flex items-center justify-center h-9 w-9 rounded-lg bg-white text-zinc-900 font-medium"
-              >
-                {pageNum}
-              </span>
-            ) : (
-              <Link
-                key={pageNum}
-                href={buildUrl(pageNum)}
-                className="inline-flex items-center justify-center h-9 w-9 rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 transition-colors"
-              >
-                {pageNum}
-              </Link>
-            )
+          {getPageNumbers(page, paginationData.totalPages).map(
+            (pageNum, idx) =>
+              pageNum === "..." ? (
+                <span
+                  key={`ellipsis-${idx}`}
+                  className="px-3 py-2 text-sm text-zinc-600"
+                >
+                  ...
+                </span>
+              ) : page === pageNum ? (
+                <span
+                  key={pageNum}
+                  className="inline-flex items-center justify-center h-9 w-9 rounded-lg bg-white text-zinc-900 font-medium"
+                >
+                  {pageNum}
+                </span>
+              ) : (
+                <Link
+                  key={pageNum}
+                  href={buildUrl(pageNum)}
+                  className="inline-flex items-center justify-center h-9 w-9 rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 transition-colors"
+                >
+                  {pageNum}
+                </Link>
+              ),
           )}
 
           {/* Next Button */}
-          {page < pagination.totalPages ? (
+          {page < paginationData.totalPages ? (
             <Link
               href={buildUrl(page + 1)}
               className="inline-flex items-center justify-center h-9 w-9 rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 transition-colors"
@@ -163,7 +178,7 @@ export default async function ProductsPage({
 
           {/* Page Info */}
           <span className="ml-4 text-sm text-zinc-500">
-            Page {page} of {pagination.totalPages}
+            Page {page} of {paginationData.totalPages}
           </span>
         </div>
       )}

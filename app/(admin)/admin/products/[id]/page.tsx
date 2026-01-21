@@ -86,7 +86,7 @@ export default async function ProductDetailPage({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Link
-            href="/dashboard/products"
+            href="/admin/products"
             className="inline-flex items-center justify-center h-10 w-10 rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 transition-colors"
           >
             <ArrowLeft className="h-5 w-5" />
@@ -115,7 +115,7 @@ export default async function ProductDetailPage({
           </div>
         </div>
         <Link
-          href={`/dashboard/products/${product.id}/edit`}
+          href={`/admin/products/${product.id}/edit`}
           className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white text-zinc-900 font-medium hover:bg-zinc-200 transition-colors"
         >
           <Pencil className="h-4 w-4" />
@@ -208,8 +208,8 @@ export default async function ProductDetailPage({
                     product.inventory <= 0
                       ? "text-red-400"
                       : product.inventory <= 10
-                      ? "text-amber-400"
-                      : "text-zinc-100"
+                        ? "text-amber-400"
+                        : "text-zinc-100"
                   }
                 >
                   {product.inventory}

@@ -4,6 +4,13 @@ import prisma from "@/lib/prisma";
 import { Order, OrderStatus, ProductTier, Prisma } from "@prisma/client";
 import { PaginationParams, PaginatedResult } from "@/types/product";
 
+const hideAbandonedProductCheckouts: Prisma.OrderWhereInput = {
+  NOT: {
+    type: "PRODUCT",
+    status: "PENDING",
+  },
+};
+
 /* ----------------------------------------
  * Filters
  * --------------------------------------*/
@@ -124,13 +131,15 @@ export class OrderRepository {
    */
   async findMany(
     filters: OrderFilters = {},
-    pagination: PaginationParams = {}
+    pagination: PaginationParams = {},
   ): Promise<PaginatedResult<OrderWithItems>> {
     const { status, search, userId, productId, dateFrom, dateTo } = filters;
     const { page = 1, limit = 10 } = pagination;
     const skip = (page - 1) * limit;
 
-    const where: Prisma.OrderWhereInput = {};
+    const where: Prisma.OrderWhereInput = {
+      ...hideAbandonedProductCheckouts, // ✅ KEY LINE
+    };
 
     if (status) where.status = status;
     if (userId) where.userId = userId;
@@ -172,18 +181,8 @@ export class OrderRepository {
         take: limit,
         orderBy: { createdAt: "desc" },
         include: {
-          items: {
-            include: {
-              product: true,
-            },
-          },
-          user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-            },
-          },
+          items: { include: { product: true } },
+          user: { select: { id: true, name: true, email: true } },
         },
       }),
       prisma.order.count({ where }),
@@ -250,7 +249,7 @@ export class OrderRepository {
    */
   async findByUserId(
     userId: string,
-    pagination: PaginationParams = {}
+    pagination: PaginationParams = {},
   ): Promise<PaginatedResult<OrderWithItems>> {
     return this.findMany({ userId }, pagination);
   }
@@ -260,20 +259,15 @@ export class OrderRepository {
    */
   async getRecent(limit: number = 5): Promise<OrderWithItems[]> {
     return prisma.order.findMany({
+      where: {
+        ...hideAbandonedProductCheckouts, // ✅ REQUIRED
+      },
       take: limit,
       orderBy: { createdAt: "desc" },
       include: {
-        items: {
-          include: {
-            product: true,
-          },
-        },
+        items: { include: { product: true } },
         user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
+          select: { id: true, name: true, email: true },
         },
       },
     });

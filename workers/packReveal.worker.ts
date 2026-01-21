@@ -6,6 +6,7 @@ import { connection } from "@/lib/queue/redis";
 import { getPackById } from "@/lib/packs/config";
 import { rollTier, pickProductWithBump } from "@/lib/packs/ev";
 import { sendOrderConfirmationEmail } from "@/lib/emails/send-order-confirmation";
+import { getProductImageUrl } from "@/lib/utils/productImage";
 
 console.log("🟢 Pack reveal worker booting…");
 
@@ -14,7 +15,7 @@ const worker = new Worker(
   async (job) => {
     console.log("▶️ Processing job", job.id);
 
-    const { orderId, packId, stripeSessionId } = job.data;
+    const { orderId, packId } = job.data;
 
     const order = await prisma.order.findUnique({
       where: { id: orderId },
@@ -66,8 +67,11 @@ const worker = new Worker(
       return;
     }
 
+    let revealedProduct = null;
+
     try {
-      await prisma.$transaction(async (tx) => {
+      // Transaction for DB operations only
+      revealedProduct = await prisma.$transaction(async (tx) => {
         const product = await tx.product.findFirst({
           where: {
             id: selectedProduct.id,
@@ -94,46 +98,39 @@ const worker = new Worker(
           },
         });
 
-        // await tx.order.update({
-        //   where: { id: orderId },
-        //   data: {
-        //     status: "COMPLETED",
-        //     selectedTier: rolledTier,
-        //     stripeSessionId,
-        //   },
-        // });
-
         await tx.order.update({
           where: { id: orderId },
           data: {
             status: "COMPLETED",
             selectedTier: rolledTier,
-            revealedAt: new Date(),
           },
         });
 
-        // ✅ Send confirmation email AFTER reveal
+        return product;
+      });
+
+      // ✅ Send confirmation email AFTER transaction completes
+      if (revealedProduct) {
         await sendOrderConfirmationEmail({
           to: order.customerEmail!,
           customerName: order.customerName!,
-          orderNumber: order.id.slice(-8).toUpperCase(),
+          orderNumber: order.orderNumber.toString(),
           orderDate: new Date().toLocaleDateString("en-US"),
           items: [
             {
-              name: product.title,
+              name: revealedProduct.title,
               quantity: 1,
-              price: Number(product.price),
-              image: product.imageUrl ?? undefined,
+              price: Number(revealedProduct.price) * 100, // Convert to cents
+              image: getProductImageUrl(revealedProduct.imageUrl),
             },
           ],
-          subtotal: order.subtotal!,
-          tax: order.tax!,
-          shipping: order.shipping!,
+          subtotal: order.subtotal ?? 0,
+          tax: order.tax ?? 0,
+          shipping: order.shipping ?? 0,
           total: order.amount,
         });
-      });
+      }
     } catch (err) {
-      // 👇 THIS is the entire improvement
       await prisma.order.update({
         where: { id: orderId },
         data: { status: "FAILED" },

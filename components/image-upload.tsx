@@ -44,7 +44,7 @@ export function ImageUpload({ value, onChange, disabled }: ImageUploadProps) {
         setUploading(false);
       }
     },
-    [onChange]
+    [onChange],
   );
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -82,7 +82,7 @@ export function ImageUpload({ value, onChange, disabled }: ImageUploadProps) {
   return (
     <div className="space-y-4">
       {value ? (
-        <div className="relative group">
+        <div className="relative group flex justify-center items-center">
           <div className="relative w-full max-w-sm overflow-hidden">
             <img
               src={value}
@@ -110,7 +110,7 @@ export function ImageUpload({ value, onChange, disabled }: ImageUploadProps) {
             dragActive
               ? "border-primary bg-primary/5"
               : "border-muted-foreground/25 hover:border-muted-foreground/50",
-            disabled && "cursor-not-allowed opacity-50"
+            disabled && "cursor-not-allowed opacity-50",
           )}
           onDragEnter={handleDrag}
           onDragLeave={handleDrag}

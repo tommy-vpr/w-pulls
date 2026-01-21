@@ -2,8 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { auth } from "@/lib/auth";
-import { OrderStatus, OrderType, ProductTier } from "@prisma/client";
-
+import { OrderStatus, OrderType, ProductTier, Prisma } from "@prisma/client";
 import { serializeProduct, SerializedProduct } from "@/types/product";
 
 export interface SerializedUserOrderItem {
@@ -25,9 +24,7 @@ export interface SerializedUserOrder {
   updatedAt: string;
 
   items: SerializedUserOrderItem[];
-
-  // transitional / backward compatibility
-  product: SerializedProduct | null;
+  product: SerializedProduct | null; // backward compat
 }
 
 export async function getUserOrders(params?: {
@@ -37,7 +34,6 @@ export async function getUserOrders(params?: {
 }) {
   try {
     const session = await auth();
-
     if (!session?.user?.id) {
       return { success: false, error: "Unauthorized" };
     }
@@ -46,12 +42,19 @@ export async function getUserOrders(params?: {
     const limit = params?.limit ?? 10;
     const skip = (page - 1) * limit;
 
-    const where: any = {
+    const where: Prisma.OrderWhereInput = {
       userId: session.user.id,
     };
 
     if (params?.status && params.status !== "all") {
-      where.status = params.status;
+      // Explicit filter from UI
+      where.status = params.status as OrderStatus;
+    } else {
+      // ✅ Hide abandoned PRODUCT checkouts ONLY
+      where.NOT = {
+        type: "PRODUCT",
+        status: "PENDING",
+      };
     }
 
     const [orders, total] = await Promise.all([
@@ -92,7 +95,6 @@ export async function getUserOrders(params?: {
           product: item.product ? serializeProduct(item.product) : null,
         })),
 
-        // Backwards compatibility (if UI expects a single product)
         product: firstItem?.product
           ? serializeProduct(firstItem.product)
           : null,
@@ -126,21 +128,28 @@ export async function getUserOrderStats() {
       return { success: false, error: "Unauthorized" };
     }
 
-    const [total, completed, pending, totalSpent, tierCounts] =
+    const [total, completed, processing, totalSpent, tierCounts] =
       await Promise.all([
+        // Total orders (excluding PENDING/abandoned)
         prisma.order.count({
-          where: { userId: session.user.id },
+          where: {
+            userId: session.user.id,
+            status: { not: "PENDING" },
+          },
         }),
         prisma.order.count({
           where: { userId: session.user.id, status: "COMPLETED" },
         }),
+        // Processing orders (paid, awaiting fulfillment)
         prisma.order.count({
-          where: { userId: session.user.id, status: "PENDING" },
+          where: { userId: session.user.id, status: "PROCESSING" },
         }),
+        // Total spent (only completed orders)
         prisma.order.aggregate({
           where: { userId: session.user.id, status: "COMPLETED" },
           _sum: { amount: true },
         }),
+        // Tier breakdown
         prisma.order.groupBy({
           by: ["selectedTier"],
           where: {
@@ -152,19 +161,22 @@ export async function getUserOrderStats() {
         }),
       ]);
 
-    const tierStats = tierCounts.reduce((acc, curr) => {
-      if (curr.selectedTier) {
-        acc[curr.selectedTier] = curr._count;
-      }
-      return acc;
-    }, {} as Record<string, number>);
+    const tierStats = tierCounts.reduce(
+      (acc, curr) => {
+        if (curr.selectedTier) {
+          acc[curr.selectedTier] = curr._count;
+        }
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
 
     return {
       success: true,
       data: {
         total,
         completed,
-        pending,
+        processing,
         totalSpent: (totalSpent._sum.amount || 0) / 100,
         tierStats,
       },

@@ -11,7 +11,7 @@ export default async function UserLayout({
   return (
     <div className="flex min-h-screen">
       <UserSidebar user={session.user} />
-      <main className="flex-1 lg:pl-64 w-full mx-auto">
+      <main className="flex-1 lg:pl-64 w-full max-w-[85%] mx-auto">
         <div className="p-6">{children}</div>
       </main>
     </div>

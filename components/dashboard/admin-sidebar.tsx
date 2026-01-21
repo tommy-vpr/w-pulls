@@ -20,7 +20,6 @@ import { signOutAction } from "@/lib/actions/auth.actions";
 import { useState } from "react";
 import { getInitials } from "@/lib/utils/initials";
 import Image from "next/image";
-import { useSession } from "next-auth/react";
 
 const navItems = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
@@ -28,8 +27,8 @@ const navItems = [
   { label: "Products", href: "/admin/products", icon: Package },
   { label: "Orders", href: "/admin/orders", icon: DollarSign },
   { label: "Analytics", href: "/admin/analytics", icon: BarChart3 },
-  { label: "profile", href: "/admin/profile", icon: User },
-  { label: "settings", href: "/admin/settings", icon: Settings },
+  { label: "Profile", href: "/admin/profile", icon: User },
+  { label: "Settings", href: "/admin/settings", icon: Settings },
   { label: "Users", href: "/admin/users", icon: Users },
 ];
 
@@ -43,7 +42,6 @@ interface AdminSidebarProps {
   };
 }
 
-// export function AdminSidebar({ user }: AdminSidebarProps) {
 export function AdminSidebar({ user }: AdminSidebarProps) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -91,7 +89,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
               href={item.href}
               className={cn(
                 "group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-300",
-                isActive ? "text-white" : "text-gray-400 hover:text-white"
+                isActive ? "text-white" : "text-gray-400 hover:text-white",
               )}
             >
               {isActive && (
@@ -106,7 +104,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
                 className={cn(
                   "absolute inset-0 rounded-lg bg-gradient-to-r from-purple-600/0 to-cyan-600/0 transition-all duration-300",
                   !isActive &&
-                    "group-hover:from-purple-600/10 group-hover:to-cyan-600/10"
+                    "group-hover:from-purple-600/10 group-hover:to-cyan-600/10",
                 )}
               />
 
@@ -116,7 +114,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
                     "h-4 w-4 transition-all duration-300",
                     isActive
                       ? "text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]"
-                      : "text-gray-500 group-hover:text-purple-400"
+                      : "text-gray-500 group-hover:text-purple-400",
                   )}
                 />
               </div>
@@ -129,19 +127,6 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
             </Link>
           );
         })}
-
-        {/* Divider */}
-        <div className="my-4 border-t border-purple-500/20" />
-
-        {/* Switch to User View */}
-        <Link
-          href="/dashboard"
-          className="group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-400 hover:text-white transition-all duration-300"
-        >
-          <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-purple-600/0 to-cyan-600/0 group-hover:from-purple-600/10 group-hover:to-cyan-600/10 transition-all" />
-          <User className="h-4 w-4 relative z-10 text-gray-500 group-hover:text-purple-400" />
-          <span className="relative z-10">Switch to User View</span>
-        </Link>
       </nav>
 
       {/* User Menu */}
@@ -162,8 +147,6 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
                 {getInitials(user)}
               </div>
             )}
-            {/* <div className="absolute -inset-0.5 rounded-full bg-gradient-to-r from-purple-500 to-cyan-500 opacity-50 blur-sm group-hover:opacity-75 transition-opacity" />
-            <div className="absolute -inset-0.5 rounded-full bg-gradient-to-r from-purple-500 to-cyan-500 opacity-20" /> */}
             <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-[#0a0a0f] bg-emerald-500 shadow-lg shadow-emerald-500/50" />
           </div>
 
@@ -177,7 +160,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
           <ChevronUp
             className={cn(
               "h-4 w-4 text-gray-500 transition-transform duration-300",
-              menuOpen ? "rotate-180" : ""
+              menuOpen ? "rotate-180" : "",
             )}
           />
         </button>
@@ -185,25 +168,6 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
         {menuOpen && (
           <div className="absolute bottom-full left-4 right-4 mb-2 rounded-lg border border-purple-500/30 bg-[#0a0a0f]/95 backdrop-blur-xl shadow-2xl shadow-purple-500/10 overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 to-cyan-900/20 pointer-events-none" />
-
-            <Link
-              href="/dashboard/profile"
-              className="group relative flex items-center gap-3 px-4 py-3 text-sm text-gray-300 hover:text-white transition-colors"
-              onClick={() => setMenuOpen(false)}
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-600/0 to-cyan-600/0 group-hover:from-purple-600/10 group-hover:to-cyan-600/10 transition-all" />
-              <User className="h-4 w-4 relative z-10" />
-              <span className="relative z-10">Profile</span>
-            </Link>
-            <Link
-              href="/dashboard/settings"
-              className="group relative flex items-center gap-3 px-4 py-3 text-sm text-gray-300 hover:text-white transition-colors"
-              onClick={() => setMenuOpen(false)}
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-600/0 to-cyan-600/0 group-hover:from-purple-600/10 group-hover:to-cyan-600/10 transition-all" />
-              <Settings className="h-4 w-4 relative z-10" />
-              <span className="relative z-10">Settings</span>
-            </Link>
 
             <div className="border-t border-purple-500/20" />
 
