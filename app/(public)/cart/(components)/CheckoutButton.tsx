@@ -39,9 +39,9 @@ export function CheckoutButton() {
     <button
       onClick={checkout}
       disabled={isLoading || items.length === 0}
-      className="font-mono uppercase w-full border border-violet-300/30 bg-violet-600/30 rounded text-violet-400 
-        hover:text-white hover:bg-violet-500 transition duration-300 py-3 cursor-pointer
-        disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-violet-600/30 disabled:hover:text-violet-400
+      className="font-mono uppercase w-full border border-green-300/30 bg-green-600/30 rounded text-green-400 
+        hover:text-white hover:bg-green-500 transition duration-300 py-3 cursor-pointer
+        disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-green-600/30 disabled:hover:text-green-400
         flex items-center justify-center gap-2"
     >
       {isLoading ? (

@@ -51,9 +51,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
   });
 
   return (
-    <div className="min-h-screen bg-[#020603] relative pt-12">
+    <div className="min-h-screen relative pt-12 bg-slate-950">
       {/* Scanline Overlay */}
-      <div
+      {/* <div
         className="fixed inset-0 pointer-events-none z-[1]"
         style={{
           background: `repeating-linear-gradient(
@@ -65,7 +65,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           )`,
           mixBlendMode: "screen",
         }}
-      />
+      /> */}
 
       {/* Starfield Background */}
       <div
@@ -77,7 +77,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
             radial-gradient(1.2px 1.2px at 40% 80%, rgba(255,255,255,.4), transparent 60%),
             radial-gradient(1.2px 1.2px at 85% 65%, rgba(255,255,255,.35), transparent 60%)
           `,
-          backgroundColor: "#000",
         }}
       />
 
@@ -105,7 +104,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
               <ChevronRight className="w-4 h-4" />
             </>
           )}
-          <span className="text-[#eafbe0] truncate max-w-[200px]">
+          <span className="text-gray-300 truncate max-w-[200px]">
             {product.title}
           </span>
         </nav>
@@ -151,19 +150,13 @@ export default async function ProductPage({ params }: ProductPageProps) {
             </div>
 
             {/* Title */}
-            <h1
-              className="font-['Oxanium',monospace] font-bold text-2xl sm:text-3xl lg:text-4xl text-[#eafbe0] mb-4"
-              style={{ textShadow: "0 0 0.5px rgba(120,255,124,.35)" }}
-            >
+            <h1 className="font-['Oxanium',monospace] font-bold text-2xl sm:text-3xl lg:text-4xl text-gray-200 mb-4">
               {product.title}
             </h1>
 
             {/* Price */}
             <div className="flex items-baseline gap-3 mb-6">
-              <span
-                className="text-3xl sm:text-4xl font-bold font-mono text-[#78ff7c]"
-                style={{ textShadow: "0 0 8px rgba(120,255,124,.5)" }}
-              >
+              <span className="text-2xl sm:text-3xl font-mono text-gray-300">
                 ${product.price.toString()}
               </span>
               {product.inventory > 0 && product.inventory <= 5 && (
@@ -186,7 +179,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                   Description
                 </h2>
                 <p
-                  className="font-mono text-[#eafbe0] leading-relaxed"
+                  className="font-mono text-gray-300 leading-relaxed"
                   style={{ textShadow: "0 0 0.5px rgba(120,255,124,.35)" }}
                 >
                   {product.description}
@@ -199,16 +192,15 @@ export default async function ProductPage({ params }: ProductPageProps) {
               <div
                 className="relative p-4 overflow-hidden"
                 style={{
-                  // BL + TR notch (matches your ask)
                   clipPath:
                     "polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 18px 100%, 0 calc(100% - 18px))",
                   background:
-                    "linear-gradient(180deg, rgba(7,20,9,.85), rgba(3,10,5,.85))",
-                  boxShadow: "inset 0 0 30px rgba(120,255,124,.08)",
-                  border: "1px solid rgba(120,255,124,.25)",
+                    "linear-gradient(180deg, rgba(7,15,20,.85), rgba(3,10,15,.85))",
+                  boxShadow: "inset 0 0 30px rgba(0,255,255,.08)",
+                  border: "1px solid rgba(0,255,255,.25)",
                 }}
               >
-                {/* TR notch bar (little 45deg detail like your CSS) */}
+                {/* TR notch bar */}
                 <div
                   className="pointer-events-none absolute"
                   style={{
@@ -216,9 +208,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
                     right: -8,
                     width: 26,
                     height: 3,
-                    background: "rgba(120,255,124,.6)",
+                    background: "rgba(0,255,255,.6)",
                     transform: "rotate(45deg)",
-                    boxShadow: "0 0 6px rgba(120,255,124,.35)",
+                    boxShadow: "0 0 6px rgba(0,255,255,.35)",
                   }}
                 />
 
@@ -230,15 +222,15 @@ export default async function ProductPage({ params }: ProductPageProps) {
                     left: -8,
                     width: 26,
                     height: 3,
-                    background: "rgba(120,255,124,.35)",
+                    background: "rgba(0,255,255,.35)",
                     transform: "rotate(45deg)",
                   }}
                 />
 
                 {/* content */}
                 <h2
-                  className="text-sm font-mono font-bold text-[#78ff7c] uppercase tracking-wider mb-3"
-                  style={{ textShadow: "0 0 4px rgba(120,255,124,.3)" }}
+                  className="text-sm font-mono font-bold text-cyan-400 uppercase tracking-wider mb-3"
+                  style={{ textShadow: "0 0 4px rgba(0,255,255,.3)" }}
                 >
                   Details
                 </h2>
@@ -246,40 +238,40 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 <dl className="space-y-2 font-mono text-sm">
                   {product.sku && (
                     <div className="flex justify-between">
-                      <dt className="text-[#3de14d]">SKU</dt>
-                      <dd className="text-[#eafbe0]">{product.sku}</dd>
+                      <dt className="text-cyan-500">SKU</dt>
+                      <dd className="text-cyan-100">{product.sku}</dd>
                     </div>
                   )}
                   <div className="flex justify-between">
-                    <dt className="text-[#3de14d]">CATEGORY</dt>
-                    <dd className="text-[#eafbe0]">
+                    <dt className="text-cyan-500">CATEGORY</dt>
+                    <dd className="text-cyan-100">
                       {product.category?.replace(/_/g, " ") || "UNCATEGORIZED"}
                     </dd>
                   </div>
                   <div className="flex justify-between">
-                    <dt className="text-[#3de14d]">TIER</dt>
+                    <dt className="text-cyan-500">TIER</dt>
                     <dd
                       style={{
-                        color: tierColor,
-                        textShadow: `0 0 4px ${tierColor}50`,
+                        color: "#78ff7c",
+                        textShadow: `0 0 4px ${"#78ff7c"}50`,
                       }}
                     >
                       {tierConfig.label}
                     </dd>
                   </div>
                   <div className="flex justify-between">
-                    <dt className="text-[#3de14d]">AVAILABILITY</dt>
+                    <dt className="text-cyan-500">AVAILABILITY</dt>
                     <dd
                       className={cn(
                         "font-bold",
                         product.inventory > 0
-                          ? "text-[#78ff7c]"
-                          : "text-[#ff5b5b]"
+                          ? "text-cyan-400"
+                          : "text-rose-400"
                       )}
                       style={{
                         textShadow:
                           product.inventory > 0
-                            ? "0 0 4px rgba(120,255,124,.4)"
+                            ? "0 0 4px rgba(0,255,255,.4)"
                             : "0 0 4px rgba(255,91,91,.4)",
                       }}
                     >
@@ -299,7 +291,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
             </div>
 
             {/* Trust Badges */}
-            <div className="grid grid-cols-3 gap-4 pt-6 border-t border-[rgba(120,255,124,.25)]">
+            <div className="grid grid-cols-3 gap-4 pt-6 border-t border-cyan-400/25">
               {[
                 { icon: Shield, label: "AUTHENTIC" },
                 { icon: Truck, label: "FAST SHIP" },
@@ -310,23 +302,23 @@ export default async function ProductPage({ params }: ProductPageProps) {
                   className="flex flex-col items-center text-center gap-2"
                 >
                   <div
-                    className="p-2 rounded-full border border-[rgba(120,255,124,.35)]"
+                    className="p-2 rounded-full border border-cyan-400/35"
                     style={{
                       background:
-                        "linear-gradient(180deg, rgba(12,28,15,.95), rgba(6,16,9,.95))",
-                      boxShadow: "inset 0 0 10px rgba(120,255,124,.1)",
+                        "linear-gradient(180deg, rgba(12,20,28,.95), rgba(6,12,18,.95))",
+                      boxShadow: "inset 0 0 10px rgba(0,255,255,.1)",
                     }}
                   >
                     <Icon
-                      className="w-5 h-5 text-[#3de14d]"
+                      className="w-5 h-5 text-cyan-400"
                       style={{
-                        filter: "drop-shadow(0 0 2px rgba(120,255,124,.4))",
+                        filter: "drop-shadow(0 0 2px rgba(0,255,255,.4))",
                       }}
                     />
                   </div>
                   <span
-                    className="text-xs font-mono text-[#3de14d] uppercase tracking-wider"
-                    style={{ textShadow: "0 0 0.5px rgba(120,255,124,.35)" }}
+                    className="text-xs font-mono text-cyan-400 uppercase tracking-wider"
+                    style={{ textShadow: "0 0 0.5px rgba(0,255,255,.35)" }}
                   >
                     {label}
                   </span>
@@ -338,13 +330,21 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
         {/* Related Products */}
         {relatedProducts.length > 0 && (
-          <section className="mt-16 pt-12 border-t border-[rgba(120,255,124,.25)]">
-            <h2
+          <section className="mt-24">
+            {/* <h2
               className="font-['Oxanium',monospace] font-bold text-xl text-[#78ff7c] mb-6 uppercase tracking-wider"
               style={{ textShadow: "0 0 6px rgba(120,255,124,.4)" }}
             >
               You May Also Like
-            </h2>
+            </h2> */}
+            <div className="flex items-center gap-4 mb-16">
+              <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent" />
+              <h2 className="font-mono text-lg uppercase tracking-[0.3em] text-cyan-400">
+                You May Also Like
+              </h2>
+              <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent" />
+            </div>
+
             <RelatedProducts products={relatedProducts} />
           </section>
         )}

@@ -1,4 +1,4 @@
-// checkout/product
+// checkout/product ************NOT USED
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { stripe } from "@/lib/stripe";

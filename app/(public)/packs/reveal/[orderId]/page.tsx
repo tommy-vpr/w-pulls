@@ -31,6 +31,13 @@ export default async function RevealPage({ params }: RevealPageProps) {
     notFound();
   }
 
+  // Block swiping again if revealed at
+  if (order.revealedAt) {
+    redirect(`/dashboard/orders/${order.id}`);
+    // or: redirect("/packs");
+    // or: redirect(`/packs/reveal/${order.id}/complete`);
+  }
+
   // 2️⃣ Failure guard
   if (order.status === "FAILED") {
     redirect("/packs?error=payment_failed");
@@ -72,22 +79,9 @@ export default async function RevealPage({ params }: RevealPageProps) {
 
   // 8️⃣ Render reveal
   return (
-    <div className="h-screen w-screen bg-accent-foreground flex items-center justify-center">
-      {/* <RevealAnimation
-        product={serializeProduct(item.product)}
-        tier={order.selectedTier}
-        packName={order.packName!}
-      /> */}
-      {/* <PackRevealAnimation
-        product={serializeProduct(item.product)}
-        tier={order.selectedTier}
-        packName={order.packName!}
-        orderId={order.id}
-        packTopImage={`/images/pack-top.png`}
-        packBottomImage={`/images/pack-bottom.png`}
-      /> */}
+    <div className="min-h-screen w-full overflow-x-hidden bg-accent-foreground flex items-center justify-center">
       <PackSlashAnimation
-        product={serializeProduct(item.product)}
+        // product={serializeProduct(item.product)}
         tier={order.selectedTier}
         packName={order.packName!}
         orderId={order.id}

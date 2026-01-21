@@ -111,7 +111,7 @@ export default async function UserOrderDetailPage({
                 <span
                   className={cn(
                     "inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium border",
-                    status.className
+                    status.className,
                   )}
                 >
                   <StatusIcon className="mr-1 h-3 w-3" />
@@ -194,7 +194,7 @@ export default async function UserOrderDetailPage({
                       <span
                         className={cn(
                           "inline-flex items-center rounded-md px-3 py-1.5 text-sm font-medium border",
-                          getTierBadgeClass(order.selectedTier)
+                          getTierBadgeClass(order.selectedTier),
                         )}
                       >
                         <Sparkles className="mr-1.5 h-3.5 w-3.5" />
@@ -246,7 +246,7 @@ export default async function UserOrderDetailPage({
                     <p className="text-sm text-zinc-500 mt-0.5">
                       {format(
                         new Date(order.createdAt),
-                        "MMMM d, yyyy 'at' h:mm a"
+                        "MMMM d, yyyy 'at' h:mm a",
                       )}
                     </p>
                     <p className="text-sm text-zinc-400 mt-2">
@@ -271,7 +271,7 @@ export default async function UserOrderDetailPage({
                       <p className="text-sm text-zinc-500 mt-0.5">
                         {format(
                           new Date(order.updatedAt),
-                          "MMMM d, yyyy 'at' h:mm a"
+                          "MMMM d, yyyy 'at' h:mm a",
                         )}
                       </p>
                       <p className="text-sm text-zinc-400 mt-2">
@@ -296,7 +296,7 @@ export default async function UserOrderDetailPage({
                       <p className="text-sm text-zinc-500 mt-0.5">
                         {format(
                           new Date(order.updatedAt),
-                          "MMMM d, yyyy 'at' h:mm a"
+                          "MMMM d, yyyy 'at' h:mm a",
                         )}
                       </p>
                       <p className="text-sm text-red-400 mt-2">
@@ -320,7 +320,7 @@ export default async function UserOrderDetailPage({
                       <p className="text-sm text-zinc-500 mt-0.5">
                         {format(
                           new Date(order.updatedAt),
-                          "MMMM d, yyyy 'at' h:mm a"
+                          "MMMM d, yyyy 'at' h:mm a",
                         )}
                       </p>
                       <p className="text-sm text-zinc-400 mt-2">
@@ -378,22 +378,36 @@ export default async function UserOrderDetailPage({
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Payment Summary */}
-          <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
+          <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden text-zinc-300">
             <div className="px-6 py-4 border-b border-zinc-800 flex items-center gap-2">
               <CreditCard className="h-5 w-5 text-zinc-400" />
               <h2 className="text-lg font-semibold text-zinc-100">Payment</h2>
             </div>
             <div className="p-6 space-y-4">
               <div className="flex justify-between">
-                <span className="text-zinc-500">Pack Price</span>
-                <span className="text-zinc-100 font-medium">
-                  ${(order.amount / 100).toFixed(2)}
+                <span className="text-zinc-500">Subtotal</span>
+                <span>${(order.subtotal / 100).toFixed(2)}</span>
+              </div>
+
+              <div className="flex justify-between">
+                <span className="text-zinc-500">Tax</span>
+                <span>${(order.tax / 100).toFixed(2)}</span>
+              </div>
+
+              <div className="flex justify-between">
+                <span className="text-zinc-500">Shipping</span>
+                <span>
+                  {order.shipping === 0
+                    ? "FREE"
+                    : `$${(order.shipping / 100).toFixed(2)}`}
                 </span>
               </div>
+
               <div className="border-t border-zinc-800" />
+
               <div className="flex justify-between">
                 <span className="text-zinc-100 font-medium">Total Paid</span>
-                <span className="text-xl font-bold text-zinc-100">
+                <span className="text-xl font-bold">
                   ${(order.amount / 100).toFixed(2)}
                 </span>
               </div>

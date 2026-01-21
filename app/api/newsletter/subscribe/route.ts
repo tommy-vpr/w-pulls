@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     if (!result.success) {
       return NextResponse.json(
         { success: false, error: result.error.errors[0].message },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
       if (error.message?.includes("already exists")) {
         return NextResponse.json(
           { success: false, error: "You're already subscribed!" },
-          { status: 400 }
+          { status: 400 },
         );
       }
       throw error;
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
 
     // Send welcome email
     await resend.emails.send({
-      from: "W-Pull <noreply@yourdomain.com>",
+      from: "W-Pull <noreply@emails.teevong.com>",
       to: email,
       subject: "Welcome to W-Pull Newsletter! 🎴",
       html: `
@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
     console.error("Newsletter subscribe error:", error);
     return NextResponse.json(
       { success: false, error: "Failed to subscribe" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -50,29 +50,29 @@ export function AddToCartButton({
       style={{
         background:
           state === "success"
-            ? "linear-gradient(180deg, rgba(60,200,80,.2), rgba(30,150,50,.15))"
+            ? "linear-gradient(180deg, rgba(0,180,200,.2), rgba(0,120,150,.15))"
             : disabled
             ? "linear-gradient(180deg, rgba(40,40,40,.95), rgba(20,20,20,.95))"
-            : "linear-gradient(180deg, rgba(12,28,15,.95), rgba(6,16,9,.95))",
+            : "linear-gradient(180deg, rgba(12,20,28,.95), rgba(6,12,18,.95))",
         borderColor:
           state === "success"
-            ? "rgba(120,255,124,.7)"
+            ? "rgba(0,255,255,.7)"
             : disabled
             ? "rgba(100,100,100,.4)"
-            : "rgba(120,255,124,.45)",
-        color: state === "success" ? "#78ff7c" : disabled ? "#666" : "#78ff7c",
+            : "rgba(0,255,255,.45)",
+        color: state === "success" ? "#00ffff" : disabled ? "#666" : "#00ffff",
         boxShadow:
           state === "success"
-            ? "inset 0 0 20px rgba(120,255,124,.25), 0 0 20px rgba(120,255,124,.3)"
+            ? "inset 0 0 20px rgba(0,255,255,.25), 0 0 20px rgba(0,255,255,.3)"
             : disabled
             ? "none"
-            : "inset 0 0 12px rgba(120,255,124,.18), 0 6px 16px rgba(0,0,0,.35)",
+            : "inset 0 0 12px rgba(0,255,255,.18), 0 6px 16px rgba(0,0,0,.35)",
         textShadow:
           state === "success"
-            ? "0 0 8px rgba(120,255,124,.6)"
+            ? "0 0 8px rgba(0,255,255,.6)"
             : disabled
             ? "none"
-            : "0 0 6px rgba(120,255,124,.4)",
+            : "0 0 6px rgba(0,255,255,.4)",
       }}
     >
       {/* Hover Neon Glow */}
@@ -84,7 +84,7 @@ export function AddToCartButton({
         )}
         style={{
           background:
-            "radial-gradient(circle at 50% 50%, rgba(120,255,124,.75), transparent 60%)",
+            "radial-gradient(circle at 50% 50%, rgba(0,255,255,.75), transparent 60%)",
           filter: "blur(18px)",
           zIndex: 0,
         }}
@@ -96,7 +96,7 @@ export function AddToCartButton({
           className="absolute inset-0 -translate-x-full animate-crt-shimmer"
           style={{
             background:
-              "linear-gradient(90deg, transparent 0%, rgba(120,255,124,.08) 50%, transparent 100%)",
+              "linear-gradient(90deg, transparent 0%, rgba(0,255,255,.08) 50%, transparent 100%)",
           }}
         />
       )}
@@ -107,7 +107,7 @@ export function AddToCartButton({
           <>
             <Loader2
               className="w-5 h-5 animate-spin"
-              style={{ filter: "drop-shadow(0 0 4px rgba(120,255,124,.5))" }}
+              style={{ filter: "drop-shadow(0 0 4px rgba(0,255,255,.5))" }}
             />
             <span>PROCESSING...</span>
           </>
@@ -115,7 +115,7 @@ export function AddToCartButton({
           <>
             <Check
               className="w-5 h-5"
-              style={{ filter: "drop-shadow(0 0 4px rgba(120,255,124,.5))" }}
+              style={{ filter: "drop-shadow(0 0 4px rgba(0,255,255,.5))" }}
             />
             <span>ADDED TO CART!</span>
           </>
@@ -125,7 +125,7 @@ export function AddToCartButton({
           <>
             <ShoppingCart
               className="w-5 h-5"
-              style={{ filter: "drop-shadow(0 0 4px rgba(120,255,124,.5))" }}
+              style={{ filter: "drop-shadow(0 0 4px rgba(0,255,255,.5))" }}
             />
             <span>ADD TO CART</span>
           </>

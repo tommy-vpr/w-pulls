@@ -1,6 +1,13 @@
 import { Queue } from "bullmq";
 import { connection } from "./redis";
 
+const q = new Queue("pack-reveal", { connection, prefix: "bull" });
+console.log("WORKER COUNTS", await q.getJobCounts());
+console.log(
+  "WORKER WAITING IDS",
+  (await q.getJobs(["waiting"], 0, 10)).map((j) => j.id),
+);
+
 export type PackRevealJob = {
   orderId: string;
   packId: string;

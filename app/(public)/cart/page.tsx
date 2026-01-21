@@ -2,7 +2,14 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
+import {
+  Minus,
+  Plus,
+  Trash2,
+  ShoppingBag,
+  Loader,
+  ShoppingCart,
+} from "lucide-react";
 import { useCartStore } from "@/lib/cart/cart.store";
 import { useEffect, useState } from "react";
 import { CheckoutButton } from "./(components)/CheckoutButton";
@@ -65,31 +72,61 @@ export default function CartPage() {
   if (!hydrated || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-zinc-400">Loading cart…</div>
+        <div className="text-zinc-400 flex items-center gap-2">
+          <Loader className="h-6 w-6 animate-spin" />
+          Loading cart…
+        </div>
       </div>
     );
   }
 
   if (items.length === 0) {
     return (
-      <div className="min-h-[60vh] flex flex-col items-center justify-center px-4">
-        {/* <div className="w-20 h-20 rounded-full bg-zinc-800/50 flex items-center justify-center mb-6">
-          <ShoppingBag className="w-10 h-10 text-zinc-600" />
-        </div> */}
-        <Image
-          src={"/images/empty-cart.png"}
-          width="300"
-          height="400"
+      <div className="min-h-[80vh] flex flex-col items-center justify-center px-4">
+        <div className="rounded-full bg-slate-600/20 p-8 flex items-center justify-center mb-6">
+          <ShoppingCart
+            className="w-16 h-16 text-cyan-400"
+            style={{ filter: "drop-shadow(0 0 8px rgba(0,255,255,.5))" }}
+          />
+        </div>
+        {/* <Image
+          src={"/images/empty-bag.webp"}
+          width="240"
+          height="280"
           alt="continue shopping"
-        />
-        <h1 className="text-2xl font-bold mb-2 text-gray-300">
+          className="opacity-70"
+        /> */}
+        <h1 className="text-xl md:text-2xl font-semibold mb-2 text-gray-300">
           Your cart is empty
         </h1>
+        <p className="text-center text-gray-600">
+          Looks like you haven't added <br />
+          anything to your cart yet{" "}
+        </p>
 
         <Link
           href="/store"
-          className="text-sm px-6 py-3 bg-[#78ff7c] text-black font-semibold rounded hover:bg-[#5ce860] transition-colors"
+          className="group relative text-sm px-6 py-3 font-mono font-semibold uppercase mt-12
+          tracking-wider rounded overflow-hidden transition-all duration-300 hover:-translate-y-0.5"
+          style={{
+            background:
+              "linear-gradient(180deg, rgba(12,20,28,.95), rgba(6,12,18,.95))",
+            border: "1px solid rgba(0,255,255,.45)",
+            color: "#00ffff",
+            boxShadow:
+              "inset 0 0 12px rgba(0,255,255,.15), 0 4px 12px rgba(0,0,0,.3)",
+            textShadow: "0 0 6px rgba(0,255,255,.4)",
+          }}
         >
+          {/* Hover glow */}
+          <span
+            className="pointer-events-none absolute inset-[-4px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"
+            style={{
+              background:
+                "radial-gradient(circle at 50% 50%, rgba(0,255,255,.5), transparent 60%)",
+              filter: "blur(12px)",
+            }}
+          />
           Continue Shopping
         </Link>
       </div>

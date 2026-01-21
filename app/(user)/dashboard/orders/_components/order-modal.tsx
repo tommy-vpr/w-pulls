@@ -7,20 +7,10 @@ import { SerializedProduct } from "@/types/product";
 import { cn } from "@/lib/utils";
 import { getTierConfig, getTierBadgeClass } from "@/lib/tier-config";
 import "./order-modal.css";
-
-interface Order {
-  id: string;
-  packId: string;
-  packName: string;
-  amount: number;
-  selectedTier: string | null;
-  status: string;
-  createdAt: string;
-  product: SerializedProduct | null;
-}
+import type { SerializedUserOrder } from "@/lib/actions/user-orders.actions";
 
 interface OrderModalProps {
-  order: Order | null;
+  order: SerializedUserOrder | null;
   isOpen: boolean;
   onClose: () => void;
 }

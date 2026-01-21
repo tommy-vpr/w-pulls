@@ -32,14 +32,22 @@ export interface SerializedOrderItem {
 export interface SerializedOrder {
   id: string;
   type: string;
+
   packId: string | null;
   packName: string | null;
-  amount: number;
+
+  // 💰 Stripe money (ALL IN CENTS)
+  subtotal: number;
+  tax: number;
+  shipping: number;
+  amount: number; // total paid
+
   selectedTier: string | null;
   status: string;
   stripeSessionId: string | null;
   customerEmail: string | null;
   customerName: string | null;
+
   createdAt: string;
   updatedAt: string;
 
@@ -79,18 +87,27 @@ export class OrderService {
     return {
       id: order.id,
       type: order.type,
+
       packId: order.packId,
       packName: order.packName,
+
+      subtotal: order.subtotal ?? 0,
+      tax: order.tax ?? 0,
+      shipping: order.shipping ?? 0,
       amount: order.amount,
+
       selectedTier: order.selectedTier,
       status: order.status,
       stripeSessionId: order.stripeSessionId,
       customerEmail: order.customerEmail,
       customerName: order.customerName,
+
       createdAt: order.createdAt.toISOString(),
       updatedAt: order.updatedAt.toISOString(),
+
       items,
-      product: items[0]?.product ?? null, // Add this
+      product: items[0]?.product ?? null,
+
       user: order.user
         ? {
             id: order.user.id,
@@ -122,7 +139,7 @@ export class OrderService {
    */
   async getOrders(
     filters: OrderFilters = {},
-    pagination: PaginationParams = {}
+    pagination: PaginationParams = {},
   ): Promise<ActionResponse<PaginatedResult<SerializedOrder>>> {
     try {
       const result = await this.repository.findMany(filters, pagination);
@@ -144,7 +161,7 @@ export class OrderService {
    */
   async updateOrderStatus(
     id: string,
-    status: OrderStatus
+    status: OrderStatus,
   ): Promise<ActionResponse<Order>> {
     try {
       const existingOrder = await this.repository.findById(id);
@@ -182,7 +199,7 @@ export class OrderService {
    * Get recent orders
    */
   async getRecentOrders(
-    limit: number = 5
+    limit: number = 5,
   ): Promise<ActionResponse<SerializedOrder[]>> {
     try {
       const orders = await this.repository.getRecent(limit);
@@ -201,7 +218,7 @@ export class OrderService {
    */
   async getOrdersByUser(
     userId: string,
-    pagination: PaginationParams = {}
+    pagination: PaginationParams = {},
   ): Promise<ActionResponse<PaginatedResult<SerializedOrder>>> {
     try {
       const result = await this.repository.findByUserId(userId, pagination);

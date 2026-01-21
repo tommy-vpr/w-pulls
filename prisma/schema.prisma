@@ -156,8 +156,11 @@ model Order {
   packId          String?
   packName        String?
 
-  // Total paid (cents)
-  amount          Int
+  // Pricing (all in cents)
+  subtotal        Int?
+  tax             Int?
+  shipping        Int?
+  amount          Int          // Total paid
 
   userId          String?
   user            User?        @relation(fields: [userId], references: [id])
@@ -169,8 +172,17 @@ model Order {
   customerEmail   String?
   customerName    String?
 
+  // Shipping address (stored for record)
+  shippingLine1   String?
+  shippingLine2   String?
+  shippingCity    String?
+  shippingState   String?
+  shippingPostal  String?
+  shippingCountry String?
+
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
+  revealedAt      DateTime?
 
   items           OrderItem[]
   audits          OrderAudit[]
@@ -184,6 +196,7 @@ model Order {
 enum OrderStatus {
   PENDING
   COMPLETED
+  PROCESSING
   FAILED
   REFUNDED
 }

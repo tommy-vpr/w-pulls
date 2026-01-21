@@ -21,10 +21,10 @@ const adjust = (
   fromMin: number,
   fromMax: number,
   toMin: number,
-  toMax: number
+  toMax: number,
 ) => {
   return round(
-    toMin + ((toMax - toMin) * (value - fromMin)) / (fromMax - fromMin)
+    toMin + ((toMax - toMin) * (value - fromMin)) / (fromMax - fromMin),
   );
 };
 
@@ -32,7 +32,7 @@ const adjust = (
 // Props
 // ============================================
 interface PackRevealAnimationProps {
-  product: SerializedProduct;
+  // product: SerializedProduct;
   tier: string;
   packName: string;
   orderId: string;
@@ -67,21 +67,21 @@ function HoloCardFace({
       bgX: number,
       bgY: number,
       rotX: number,
-      rotY: number
+      rotY: number,
     ) => {
       if (!cardRef.current) return;
 
       const pointerFromCenter = clamp(
         Math.sqrt((y - 50) * (y - 50) + (x - 50) * (x - 50)) / 50,
         0,
-        1
+        1,
       );
 
       cardRef.current.style.setProperty("--pointer-x", `${x}%`);
       cardRef.current.style.setProperty("--pointer-y", `${y}%`);
       cardRef.current.style.setProperty(
         "--pointer-from-center",
-        `${pointerFromCenter}`
+        `${pointerFromCenter}`,
       );
       cardRef.current.style.setProperty("--card-opacity", `${o}`);
       cardRef.current.style.setProperty("--background-x", `${bgX}%`);
@@ -89,7 +89,7 @@ function HoloCardFace({
       cardRef.current.style.setProperty("--rotate-x", `${rotX}deg`);
       cardRef.current.style.setProperty("--rotate-y", `${rotY}deg`);
     },
-    []
+    [],
   );
 
   const handleInteract = useCallback(
@@ -136,7 +136,7 @@ function HoloCardFace({
         updateStyles(percent.x, percent.y, 1, bgX, bgY, rotX, rotY);
       });
     },
-    [isActive, updateStyles]
+    [isActive, updateStyles],
   );
 
   const handleInteractEnd = useCallback(() => {
@@ -325,7 +325,7 @@ function SwipeToOpenButton({
   const thumbWidth = 56;
 
   const getClientX = (
-    e: MouseEvent | TouchEvent | React.MouseEvent | React.TouchEvent
+    e: MouseEvent | TouchEvent | React.MouseEvent | React.TouchEvent,
   ): number => {
     if ("touches" in e && e.touches.length > 0) {
       return e.touches[0].clientX;
@@ -347,7 +347,7 @@ function SwipeToOpenButton({
       setIsDragging(true);
       startX.current = getClientX(e);
     },
-    [disabled, isComplete]
+    [disabled, isComplete],
   );
 
   const handleMove = useCallback(
@@ -361,7 +361,7 @@ function SwipeToOpenButton({
 
       setProgress(newProgress);
     },
-    [isDragging, isComplete]
+    [isDragging, isComplete],
   );
 
   const handleEnd = useCallback(() => {
@@ -405,7 +405,7 @@ function SwipeToOpenButton({
       className={cn(
         "relative w-[280px] h-14 rounded-full overflow-hidden select-none",
         "bg-zinc-800/80 backdrop-blur-sm border border-zinc-700/50",
-        disabled && "opacity-50 cursor-not-allowed"
+        disabled && "opacity-50 cursor-not-allowed",
       )}
       style={{
         boxShadow: `0 0 20px ${accentColor}20`,
@@ -449,7 +449,7 @@ function SwipeToOpenButton({
           "absolute top-1 bottom-1 w-12 rounded-full cursor-grab active:cursor-grabbing",
           "flex items-center justify-center select-none",
           "transition-transform duration-75",
-          isComplete && "scale-110"
+          isComplete && "scale-110",
         )}
         style={{
           left: `${4 + thumbPosition}px`,
@@ -496,7 +496,7 @@ function SwipeToOpenButton({
 // Main Component
 // ============================================
 export function PackSlashAnimation({
-  product,
+  // product,
   tier,
   packName,
   orderId,
@@ -507,19 +507,73 @@ export function PackSlashAnimation({
   const [stage, setStage] = useState<AnimationStage>("idle");
   const tierConfig = getTierConfig(tier);
 
-  const startAnimation = useCallback(() => {
-    if (stage !== "idle") return;
+  // Sound Effect Tearing
+  const tearSoundRef = useRef<HTMLAudioElement | null>(null);
 
+  const [revealedProduct, setRevealedProduct] =
+    useState<SerializedProduct | null>(null);
+
+  const [isRevealing, setIsRevealing] = useState(false);
+
+  // Preload audio on mount
+  useEffect(() => {
+    tearSoundRef.current = new Audio("/audio/tearing-effect.mp3");
+    tearSoundRef.current.preload = "auto";
+  }, []);
+
+  // Play when stage becomes "tearing"
+  useEffect(() => {
+    if (stage === "tearing" && tearSoundRef.current) {
+      tearSoundRef.current.currentTime = 0;
+      tearSoundRef.current.play().catch((err) => {
+        console.warn("Audio play failed:", err);
+      });
+    }
+  }, [stage]);
+
+  const startAnimation = useCallback(async () => {
+    if (stage !== "idle" || isRevealing) return;
+
+    setIsRevealing(true);
+
+    const res = await fetch("/api/packs/reveal", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orderId }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      console.error("Reveal failed:", data);
+      setIsRevealing(false);
+      return;
+    }
+
+    if (data.revealed || data.alreadyRevealed) {
+      setRevealedProduct(data.product);
+    } else {
+      console.error("Invalid reveal response", data);
+      setIsRevealing(false);
+      return;
+    }
+
+    if (data.alreadyRevealed) {
+      setRevealedProduct(data.product);
+      setStage("done");
+      setIsRevealing(false);
+      return;
+    }
+
+    // ✅ Only animate AFTER server confirms reveal
     setStage("tearing");
 
-    setTimeout(() => {
-      setStage("revealing");
-    }, 500);
-
+    setTimeout(() => setStage("revealing"), 500);
     setTimeout(() => {
       setStage("done");
+      setIsRevealing(false);
     }, 2000);
-  }, [stage]);
+  }, [stage, isRevealing, orderId]);
 
   const handleViewOrder = () => {
     router.push(`/dashboard/orders/${orderId}`);
@@ -828,8 +882,10 @@ export function PackSlashAnimation({
               }}
             >
               <HoloCardFace
-                imageUrl={product.imageUrl || "/images/placeholder-card.png"}
-                alt={product.title}
+                imageUrl={
+                  revealedProduct?.imageUrl || "/images/placeholder-card.png"
+                }
+                alt={revealedProduct?.title ?? ""}
                 rarity={tier}
                 isActive={stage === "done"}
               />
@@ -881,14 +937,14 @@ export function PackSlashAnimation({
       )}
 
       {/* Result Panel */}
-      {stage === "done" && (
+      {stage === "done" && revealedProduct && (
         <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-4">
           <span
             className={cn(
               "inline-flex items-center rounded-md px-3 py-1.5 text-sm font-medium border",
               tierConfig.bgColor,
               tierConfig.color,
-              tierConfig.borderColor
+              tierConfig.borderColor,
             )}
           >
             <Sparkles className="mr-1.5 h-3.5 w-3.5" />
@@ -896,9 +952,13 @@ export function PackSlashAnimation({
           </span>
 
           <div className="text-center">
-            <h2 className="text-xl font-bold text-zinc-100">{product.title}</h2>
+            {/* <h2 className="text-xl font-bold text-zinc-100">{product.title}</h2> */}
+            <h2 className="text-xl font-bold text-zinc-100">
+              {revealedProduct.title}+{" "}
+            </h2>
             <p className="text-emerald-400 font-medium">
-              ${Number(product.price).toFixed(2)} value
+              {/* ${Number(product.price).toFixed(2)} value */}$
+              {Number(revealedProduct.price).toFixed(2)} value
             </p>
           </div>
 

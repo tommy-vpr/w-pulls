@@ -1,8 +1,11 @@
+import "dotenv/config";
+
 import { Worker } from "bullmq";
 import prisma from "@/lib/prisma";
 import { connection } from "@/lib/queue/redis";
 import { getPackById } from "@/lib/packs/config";
 import { rollTier, pickProductWithBump } from "@/lib/packs/ev";
+import { sendOrderConfirmationEmail } from "@/lib/emails/send-order-confirmation";
 
 console.log("🟢 Pack reveal worker booting…");
 
@@ -20,8 +23,7 @@ const worker = new Worker(
 
     // Idempotency
     if (!order) return;
-    if (order.status === "COMPLETED") return;
-    if (order.status === "FAILED") return;
+    if (order.status !== "PROCESSING") return;
     if (order.items.length > 0) return;
 
     const pack = getPackById(packId);
@@ -92,13 +94,42 @@ const worker = new Worker(
           },
         });
 
+        // await tx.order.update({
+        //   where: { id: orderId },
+        //   data: {
+        //     status: "COMPLETED",
+        //     selectedTier: rolledTier,
+        //     stripeSessionId,
+        //   },
+        // });
+
         await tx.order.update({
           where: { id: orderId },
           data: {
             status: "COMPLETED",
             selectedTier: rolledTier,
-            stripeSessionId,
+            revealedAt: new Date(),
           },
+        });
+
+        // ✅ Send confirmation email AFTER reveal
+        await sendOrderConfirmationEmail({
+          to: order.customerEmail!,
+          customerName: order.customerName!,
+          orderNumber: order.id.slice(-8).toUpperCase(),
+          orderDate: new Date().toLocaleDateString("en-US"),
+          items: [
+            {
+              name: product.title,
+              quantity: 1,
+              price: Number(product.price),
+              image: product.imageUrl ?? undefined,
+            },
+          ],
+          subtotal: order.subtotal!,
+          tax: order.tax!,
+          shipping: order.shipping!,
+          total: order.amount,
         });
       });
     } catch (err) {
@@ -111,7 +142,7 @@ const worker = new Worker(
       throw err; // keep BullMQ retry + observability
     }
   },
-  { connection }
+  { connection },
 );
 
 console.log("🟢 Pack reveal worker ready (waiting for jobs)");
@@ -122,4 +153,8 @@ worker.on("completed", (job) => {
 
 worker.on("failed", (job, err) => {
   console.error("❌ Job failed", job?.id, err.message);
+});
+
+worker.on("error", (err) => {
+  console.error("❌ Worker error", err);
 });

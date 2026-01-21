@@ -34,7 +34,7 @@ export function OrderCard({ order }: OrderCardProps) {
     const rotateY = ((x - centerX) / centerX) * 12;
 
     setTransform(
-      `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`
+      `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`,
     );
 
     const glareX = (x / rect.width) * 100;
@@ -71,7 +71,7 @@ export function OrderCard({ order }: OrderCardProps) {
             className={cn(
               "absolute inset-0 transition-opacity",
               tier.bgColor,
-              isHovering ? "opacity-60" : "opacity-40"
+              isHovering ? "opacity-60" : "opacity-40",
             )}
           />
 
@@ -88,7 +88,7 @@ export function OrderCard({ order }: OrderCardProps) {
                 className={cn(
                   "h-10 w-10 transition-all duration-300",
                   tier.color,
-                  isHovering ? "opacity-60 scale-110" : "opacity-40"
+                  isHovering ? "opacity-60 scale-110" : "opacity-40",
                 )}
               />
             </div>
@@ -102,7 +102,7 @@ export function OrderCard({ order }: OrderCardProps) {
                 tier.bgColor,
                 tier.color,
                 "border-current/20",
-                isHovering && "shadow-lg"
+                isHovering && "shadow-lg",
               )}
             >
               {tier.label}
@@ -115,7 +115,7 @@ export function OrderCard({ order }: OrderCardProps) {
               "absolute top-2 right-2 inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium backdrop-blur-sm",
               order.status === "COMPLETED"
                 ? "bg-emerald-900/40 text-emerald-400"
-                : "bg-amber-900/40 text-amber-400"
+                : "bg-amber-900/40 text-amber-400",
             )}
           >
             {order.status === "COMPLETED" ? "Revealed" : "Pending"}

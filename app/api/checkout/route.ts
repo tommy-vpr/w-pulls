@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
           error: "Unauthorized",
           redirect: "/auth?callbackUrl=/packs",
         },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -27,13 +27,14 @@ export async function POST(request: NextRequest) {
     if (!pack) {
       return NextResponse.json(
         { success: false, error: "Invalid pack" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // Create PENDING order with user info from session
     const order = await prisma.order.create({
       data: {
+        type: "PACK", // Add this!
         userId: session.user.id,
         packId: pack.id,
         packName: pack.name,
@@ -67,6 +68,7 @@ export async function POST(request: NextRequest) {
           price_data: {
             currency: "usd",
             unit_amount: pack.price,
+            tax_behavior: "exclusive",
             product_data: {
               name: pack.name,
               description: pack.description,
@@ -88,7 +90,7 @@ export async function POST(request: NextRequest) {
     console.error("Checkout error:", err);
     return NextResponse.json(
       { success: false, error: "Checkout failed" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

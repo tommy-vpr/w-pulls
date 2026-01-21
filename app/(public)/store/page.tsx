@@ -34,7 +34,7 @@ export default async function StorePage({ searchParams }: StorePageProps) {
 
   if (!success || !data) {
     return (
-      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <p className="text-zinc-400">Failed to load products</p>
         </div>
@@ -45,7 +45,7 @@ export default async function StorePage({ searchParams }: StorePageProps) {
   const { data: products, totalPages, total } = data;
 
   return (
-    <div className="min-h-screen bg-zinc-950">
+    <div className="min-h-screen mt-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-20">
         {/* Header */}
         <div className="mb-8">
