@@ -954,7 +954,7 @@ export function PackSlashAnimation({
           <div className="text-center">
             {/* <h2 className="text-xl font-bold text-zinc-100">{product.title}</h2> */}
             <h2 className="text-xl font-bold text-zinc-100">
-              {revealedProduct.title}+{" "}
+              {revealedProduct.title}
             </h2>
             <p className="text-emerald-400 font-medium">
               {/* ${Number(product.price).toFixed(2)} value */}$

@@ -55,17 +55,24 @@ export async function POST(request: NextRequest) {
   }
 
   // ✅ Persist Stripe FINAL amounts
-  const nextStatus = order.type === "PRODUCT" ? "COMPLETED" : "PROCESSING";
+  // const nextStatus = order.type === "PRODUCT" ? "COMPLETED" : "PROCESSING";
+  const nextStatus = "PROCESSING";
 
   await prisma.order.update({
     where: { id: orderId },
     data: {
       status: nextStatus,
       stripeSessionId: fullSession.id,
+
+      // 💰 money
       subtotal: fullSession.amount_subtotal ?? 0,
       tax: fullSession.total_details?.amount_tax ?? 0,
       shipping: fullSession.shipping_cost?.amount_total ?? 0,
       amount: fullSession.amount_total,
+
+      // 📧 SOURCE OF TRUTH
+      customerEmail: fullSession.customer_details?.email ?? order.customerEmail,
+      customerName: fullSession.customer_details?.name ?? order.customerName,
     },
   });
 
@@ -78,32 +85,6 @@ export async function POST(request: NextRequest) {
       { orderId },
       { jobId: orderId },
     );
-
-    // Get items for email
-    const orderItems = await prisma.orderItem.findMany({
-      where: { orderId },
-      include: { product: true },
-    });
-
-    const items = orderItems.map((i) => ({
-      name: i.product.title,
-      quantity: i.quantity,
-      price: Number(i.unitPrice) * 100, // Convert to cents for email
-      image: getProductImageUrl(i.product.imageUrl),
-    }));
-
-    // ✅ Send confirmation email
-    await sendOrderConfirmationEmail({
-      to: order.customerEmail!,
-      customerName: order.customerName!,
-      orderNumber,
-      orderDate: new Date().toLocaleDateString("en-US"),
-      items,
-      subtotal: fullSession.amount_subtotal ?? 0,
-      tax: fullSession.total_details?.amount_tax ?? 0,
-      shipping: fullSession.shipping_cost?.amount_total ?? 0,
-      total: fullSession.amount_total,
-    });
   }
 
   if (order.type === "PACK") {

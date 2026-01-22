@@ -93,19 +93,20 @@ export default async function OrderDetailPage({
           <div>
             <div className="flex items-center gap-3">
               <h1 className="text-2xl font-bold text-zinc-100">
-                Order Details
+                <span className="font-normal text-gray-500">Order:</span> #
+                {order.orderNumber.toString()}
               </h1>
               <span
                 className={cn(
                   "inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium border",
-                  status.className
+                  status.className,
                 )}
               >
                 <StatusIcon className="mr-1 h-3 w-3" />
                 {status.label}
               </span>
             </div>
-            <p className="text-zinc-500 font-mono text-sm">{order.id}</p>
+            <p className="text-zinc-500 font-mono text-sm">ID: {order.id}</p>
           </div>
         </div>
         <OrderActions order={order} />
@@ -163,7 +164,7 @@ export default async function OrderDetailPage({
                       <span
                         className={cn(
                           "inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium border",
-                          getTierBadgeClass(order.selectedTier)
+                          getTierBadgeClass(order.selectedTier),
                         )}
                       >
                         {tier.label}
@@ -245,7 +246,7 @@ export default async function OrderDetailPage({
                   <span
                     className={cn(
                       "inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium border mt-1",
-                      status.className
+                      status.className,
                     )}
                   >
                     <StatusIcon className="mr-1 h-3 w-3" />
@@ -291,7 +292,7 @@ export default async function OrderDetailPage({
                     <p className="text-sm text-zinc-500">
                       {format(
                         new Date(order.createdAt),
-                        "MMM d, yyyy 'at' h:mm a"
+                        "MMM d, yyyy 'at' h:mm a",
                       )}
                     </p>
                   </div>
@@ -311,7 +312,7 @@ export default async function OrderDetailPage({
                       <p className="text-sm text-zinc-500">
                         {format(
                           new Date(order.updatedAt),
-                          "MMM d, yyyy 'at' h:mm a"
+                          "MMM d, yyyy 'at' h:mm a",
                         )}
                       </p>
                     </div>
@@ -332,7 +333,7 @@ export default async function OrderDetailPage({
                       <p className="text-sm text-zinc-500">
                         {format(
                           new Date(order.updatedAt),
-                          "MMM d, yyyy 'at' h:mm a"
+                          "MMM d, yyyy 'at' h:mm a",
                         )}
                       </p>
                     </div>
@@ -353,7 +354,7 @@ export default async function OrderDetailPage({
                       <p className="text-sm text-zinc-500">
                         {format(
                           new Date(order.updatedAt),
-                          "MMM d, yyyy 'at' h:mm a"
+                          "MMM d, yyyy 'at' h:mm a",
                         )}
                       </p>
                     </div>

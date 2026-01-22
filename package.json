@@ -12,7 +12,7 @@
     "db:studio": "prisma studio",
     "db:migrate": "prisma migrate dev",
     "seed": "tsx prisma/seed.ts",
-    "worker:pack": "tsx --watch workers/packReveal.worker.ts"
+    "worker": "tsx --watch workers/index.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",

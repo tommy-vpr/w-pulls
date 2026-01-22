@@ -134,7 +134,8 @@ export async function getUserOrderStats() {
         prisma.order.count({
           where: {
             userId: session.user.id,
-            status: { not: "PENDING" },
+            // status: { not: "PENDING" },
+            status: { notIn: ["PENDING", "ABANDONED"] },
           },
         }),
         prisma.order.count({

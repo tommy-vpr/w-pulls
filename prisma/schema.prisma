@@ -200,6 +200,7 @@ enum OrderStatus {
   PROCESSING
   FAILED
   REFUNDED
+  ABANDONED 
 }
 
 model OrderItem {

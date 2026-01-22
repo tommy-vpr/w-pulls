@@ -82,7 +82,7 @@ export function RecentOrderCard({ order }: RecentOrderProps) {
       </div>
 
       {/* Card Content */}
-      <div className="p-3 bg-zinc-950">
+      <div className="p-3 bg-zinc-950/40">
         <p className="text-xs text-zinc-500">
           {isPack ? order.packName : "Product Order"}
         </p>

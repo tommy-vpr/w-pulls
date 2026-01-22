@@ -5,6 +5,8 @@ import { Carousel3D } from "@/components/layout/Carousel3D";
 import { PackCard } from "@/components/packs/pack-card";
 import { PACK_CONFIGS } from "@/lib/packs/config";
 import { HudFrame } from "@/components/ui/HudFrame";
+import { TierBreakdownChart } from "./(components)/Tierbreakdownchart";
+import { PackOddsBreakdown } from "./(components)/Packoddsbreakdown";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // HOLOGRAPHIC HUB UI - Futuristic Trading Card Interface
@@ -30,7 +32,7 @@ function DataParticles() {
         duration: 8 + Math.random() * 12,
         size: 2 + Math.random() * 4,
       })),
-    [] // Empty deps = only create once
+    [], // Empty deps = only create once
   );
 
   return (
@@ -344,7 +346,7 @@ export default function PacksSelection() {
           hour: "2-digit",
           minute: "2-digit",
           second: "2-digit",
-        })
+        }),
       );
     };
     updateTime();
@@ -471,11 +473,13 @@ export default function PacksSelection() {
         @keyframes pulse-glow {
           0%,
           100% {
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3),
+            box-shadow:
+              0 0 20px rgba(0, 255, 255, 0.3),
               inset 0 0 20px rgba(0, 255, 255, 0.1);
           }
           50% {
-            box-shadow: 0 0 40px rgba(0, 255, 255, 0.5),
+            box-shadow:
+              0 0 40px rgba(0, 255, 255, 0.5),
               inset 0 0 30px rgba(0, 255, 255, 0.2);
           }
         }
@@ -648,6 +652,11 @@ export default function PacksSelection() {
               ))}
             </div>
           </div>
+        </section>
+
+        <section className="w-full max-w-6xl mx-auto">
+          {/* <TierBreakdownChart odds={PACK_CONFIGS[0].odds} /> */}
+          <PackOddsBreakdown />
         </section>
 
         {/* Bottom info bar */}

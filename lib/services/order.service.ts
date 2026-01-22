@@ -32,6 +32,7 @@ export interface SerializedOrderItem {
 export interface SerializedOrder {
   id: string;
   type: string;
+  orderNumber: number;
 
   packId: string | null;
   packName: string | null;
@@ -87,6 +88,7 @@ export class OrderService {
     return {
       id: order.id,
       type: order.type,
+      orderNumber: order.orderNumber,
 
       packId: order.packId,
       packName: order.packName,
