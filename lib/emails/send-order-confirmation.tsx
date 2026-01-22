@@ -13,6 +13,8 @@ interface SendOrderConfirmationParams {
   customerName: string;
   orderNumber: string;
   orderDate: string;
+  orderType: "PRODUCT" | "PACK";
+  packPrice?: number;
   items: OrderItem[];
   subtotal: number;
   tax: number;
@@ -42,6 +44,8 @@ function generateOrderConfirmationHTML(
     total,
     shippingAddress,
   } = params;
+
+  const isPack = params.orderType === "PACK";
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://wpull.com";
 
@@ -130,7 +134,8 @@ function generateOrderConfirmationHTML(
     <div style="background: linear-gradient(135deg, rgba(0,255,255,0.1), rgba(255,0,255,0.05)); border: 1px solid rgba(0,255,255,0.3); border-radius: 12px; padding: 30px; text-align: center; margin-bottom: 30px;">
       <p style="font-size: 48px; color: #00ffff; margin: 0 0 10px 0;">✓</p>
       <h1 style="font-size: 24px; color: #ffffff; margin: 0 0 10px 0;">Order Confirmed!</h1>
-      <p style="font-size: 16px; color: rgba(255,255,255,0.7); margin: 0;">Thanks for your purchase, ${customerName}!</p>
+      <p style="font-size: 16px; color: rgba(255,255,255,0.7); margin: 0;">
+      ${isPack ? "Your pack has been opened!" : "Thanks for your purchase!"}, ${customerName}!</p>
     </div>
 
     <!-- Order Details -->

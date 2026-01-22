@@ -49,6 +49,14 @@ export interface SerializedOrder {
   customerEmail: string | null;
   customerName: string | null;
 
+  // 📦 Shipping address (persisted on Order)
+  shippingLine1: string | null;
+  shippingLine2: string | null;
+  shippingCity: string | null;
+  shippingState: string | null;
+  shippingPostal: string | null;
+  shippingCountry: string | null;
+
   createdAt: string;
   updatedAt: string;
 
@@ -103,6 +111,13 @@ export class OrderService {
       stripeSessionId: order.stripeSessionId,
       customerEmail: order.customerEmail,
       customerName: order.customerName,
+
+      shippingLine1: order.shippingLine1,
+      shippingLine2: order.shippingLine2,
+      shippingCity: order.shippingCity,
+      shippingState: order.shippingState,
+      shippingPostal: order.shippingPostal,
+      shippingCountry: order.shippingCountry,
 
       createdAt: order.createdAt.toISOString(),
       updatedAt: order.updatedAt.toISOString(),

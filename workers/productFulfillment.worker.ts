@@ -101,6 +101,17 @@ new Worker(
       );
     }
 
+    const shippingAddress = order.shippingLine1
+      ? {
+          line1: order.shippingLine1,
+          line2: order.shippingLine2 ?? undefined,
+          city: order.shippingCity ?? "",
+          state: order.shippingState ?? "",
+          postalCode: order.shippingPostal ?? "",
+          country: order.shippingCountry ?? "",
+        }
+      : undefined;
+
     /**
      * 5️⃣ Confirmation email
      */
@@ -109,6 +120,9 @@ new Worker(
       customerName: order.customerName!,
       orderNumber: order.orderNumber.toString(),
       orderDate: new Date().toLocaleDateString("en-US"),
+      // ✅ REQUIRED
+      orderType: "PRODUCT",
+
       items: order.items.map((i) => ({
         name: i.product.title,
         quantity: i.quantity,
@@ -119,6 +133,7 @@ new Worker(
       tax: order.tax ?? 0,
       shipping: order.shipping ?? 0,
       total: order.amount,
+      shippingAddress,
     });
   },
   { connection },

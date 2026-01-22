@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { serializeProduct } from "@/types/product";
 
 export async function POST(req: Request) {
   const session = await auth();
@@ -22,9 +23,12 @@ export async function POST(req: Request) {
 
       // 🔒 ONE-TIME GUARD
       if (order.revealedAt) {
+        const item = order.items[0];
         return {
           alreadyRevealed: true,
-          product: order.items[0]?.product,
+          product: item?.product ? serializeProduct(item.product) : null,
+          orderItemId: item?.id ?? null,
+          tier: order.selectedTier,
         };
       }
 
@@ -48,9 +52,13 @@ export async function POST(req: Request) {
         },
       });
 
+      const item = order.items[0];
+
       return {
         revealed: true,
-        product: order.items[0]?.product,
+        product: item?.product ? serializeProduct(item.product) : null,
+        orderItemId: item?.id ?? null,
+        tier: order.selectedTier,
       };
     });
 

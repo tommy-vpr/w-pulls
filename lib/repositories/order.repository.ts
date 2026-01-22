@@ -4,11 +4,45 @@ import prisma from "@/lib/prisma";
 import { Order, OrderStatus, ProductTier, Prisma } from "@prisma/client";
 import { PaginationParams, PaginatedResult } from "@/types/product";
 
-const hideAbandonedProductCheckouts: Prisma.OrderWhereInput = {
-  NOT: {
-    type: "PRODUCT",
-    status: "PENDING",
-  },
+// const hideUserInvisibleOrders: Prisma.OrderWhereInput = {
+//   NOT: {
+//     OR: [
+//       // 🚫 PRODUCT checkout not completed
+//       {
+//         type: "PRODUCT",
+//         status: "PENDING",
+//       },
+
+//       // 🚫 PACK checkout not yet revealed
+//       {
+//         type: "PACK",
+//         status: { in: ["PENDING", "PROCESSING"] },
+//       },
+//     ],
+//   },
+// };
+
+const hideUserInvisibleOrders: Prisma.OrderWhereInput = {
+  AND: [
+    // Never show abandoned orders
+    { status: { not: "ABANDONED" } },
+
+    // Hide incomplete orders by type
+    {
+      NOT: {
+        OR: [
+          {
+            type: "PRODUCT",
+            status: "PENDING",
+          },
+          {
+            type: "PACK",
+            status: { in: ["PENDING", "PROCESSING"] },
+          },
+        ],
+      },
+    },
+  ],
 };
 
 /* ----------------------------------------
@@ -138,7 +172,7 @@ export class OrderRepository {
     const skip = (page - 1) * limit;
 
     const where: Prisma.OrderWhereInput = {
-      ...hideAbandonedProductCheckouts, // ✅ KEY LINE
+      ...hideUserInvisibleOrders, // ✅ KEY LINE
     };
 
     if (status) where.status = status;
@@ -260,7 +294,7 @@ export class OrderRepository {
   async getRecent(limit: number = 5): Promise<OrderWithItems[]> {
     return prisma.order.findMany({
       where: {
-        ...hideAbandonedProductCheckouts, // ✅ REQUIRED
+        ...hideUserInvisibleOrders, // ✅ REQUIRED
       },
       take: limit,
       orderBy: { createdAt: "desc" },

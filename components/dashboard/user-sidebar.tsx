@@ -13,6 +13,7 @@ import {
   ShoppingBag,
   Sparkles,
   Copy,
+  Wallet,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { signOutAction } from "@/lib/actions/auth.actions";
@@ -36,6 +37,7 @@ interface UserSidebarProps {
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "My Orders", href: "/dashboard/orders", icon: ShoppingBag },
+  { label: "My Wallet", href: "/dashboard/wallet", icon: Wallet },
   { label: "Open Packs", href: "/packs", icon: Sparkles },
   { label: "Collections", href: "/dashboard/collections", icon: Copy },
   { label: "Profile", href: "/dashboard/profile", icon: User },
@@ -51,12 +53,6 @@ export function UserSidebar({ user }: UserSidebarProps) {
 
   return (
     <aside className="fixed inset-y-0 left-0 z-50 hidden w-64 lg:flex lg:flex-col bg-[#0a0a0f] border-r border-purple-500/20">
-      {/* Animated gradient border */}
-      <div className="absolute inset-y-0 right-0 w-[1px] bg-gradient-to-b from-cyan-500 via-purple-500 to-pink-500 opacity-50" />
-
-      {/* Glow effect */}
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-900/10 via-transparent to-cyan-900/10 pointer-events-none" />
-
       {/* Logo */}
       <div className="relative flex h-16 items-center border-b border-purple-500/20 px-6">
         <Link
@@ -95,7 +91,7 @@ export function UserSidebar({ user }: UserSidebarProps) {
               href={item.href}
               className={cn(
                 "group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-300",
-                isActive ? "text-white" : "text-gray-400 hover:text-white"
+                isActive ? "text-white" : "text-gray-400 hover:text-white",
               )}
             >
               {isActive && (
@@ -110,7 +106,7 @@ export function UserSidebar({ user }: UserSidebarProps) {
                 className={cn(
                   "absolute inset-0 rounded-lg bg-gradient-to-r from-purple-600/0 to-cyan-600/0 transition-all duration-300",
                   !isActive &&
-                    "group-hover:from-purple-600/10 group-hover:to-cyan-600/10"
+                    "group-hover:from-purple-600/10 group-hover:to-cyan-600/10",
                 )}
               />
 
@@ -120,7 +116,7 @@ export function UserSidebar({ user }: UserSidebarProps) {
                     "h-4 w-4 transition-all duration-300",
                     isActive
                       ? "text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]"
-                      : "text-gray-500 group-hover:text-purple-400"
+                      : "text-gray-500 group-hover:text-purple-400",
                   )}
                 />
               </div>
@@ -183,7 +179,7 @@ export function UserSidebar({ user }: UserSidebarProps) {
           <ChevronUp
             className={cn(
               "h-4 w-4 text-gray-500 transition-transform duration-300",
-              menuOpen ? "rotate-180" : ""
+              menuOpen ? "rotate-180" : "",
             )}
           />
         </button>
@@ -226,8 +222,6 @@ export function UserSidebar({ user }: UserSidebarProps) {
           </div>
         )}
       </div>
-
-      <div className="h-1 bg-gradient-to-r from-purple-600 via-cyan-500 to-pink-500 opacity-75" />
     </aside>
   );
 }

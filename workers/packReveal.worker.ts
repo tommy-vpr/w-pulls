@@ -77,6 +77,17 @@ const worker = new Worker(
     const oldInventory = selectedProduct.inventory;
     let revealedProduct;
 
+    const shippingAddress = order.shippingLine1
+      ? {
+          line1: order.shippingLine1,
+          line2: order.shippingLine2 ?? undefined,
+          city: order.shippingCity ?? "",
+          state: order.shippingState ?? "",
+          postalCode: order.shippingPostal ?? "",
+          country: order.shippingCountry ?? "",
+        }
+      : undefined;
+
     /**
      * 4️⃣ TRANSACTION (DB mutations only)
      */
@@ -157,16 +168,33 @@ const worker = new Worker(
     /**
      * 6️⃣ Confirmation email (last)
      */
+    if (!order.customerEmail) {
+      console.warn("Missing customer email for order", orderId);
+      return;
+    }
+
+    console.log("📸 revealedProduct:", {
+      id: revealedProduct.id,
+      title: revealedProduct.title,
+      imageUrl: revealedProduct.imageUrl,
+    });
+    console.log(
+      "📸 getProductImageUrl result:",
+      getProductImageUrl(revealedProduct.imageUrl),
+    );
+
     await sendOrderConfirmationEmail({
       to: order.customerEmail!,
       customerName: order.customerName!,
       orderNumber: order.orderNumber.toString(),
       orderDate: new Date().toLocaleDateString("en-US"),
+      orderType: order.type,
+      packPrice: order.type === "PACK" ? order.amount : undefined,
       items: [
         {
           name: revealedProduct.title,
           quantity: 1,
-          price: Number(revealedProduct.price) * 100,
+          price: order.amount, // ✅ PACK PRICE
           image: getProductImageUrl(revealedProduct.imageUrl),
         },
       ],
@@ -174,6 +202,9 @@ const worker = new Worker(
       tax: order.tax ?? 0,
       shipping: order.shipping ?? 0,
       total: order.amount,
+
+      // SHIPPING ADDRESS from DB
+      shippingAddress,
     });
   },
   { connection },

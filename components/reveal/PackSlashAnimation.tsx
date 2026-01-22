@@ -2,10 +2,11 @@
 
 import React, { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronRight, Sparkles } from "lucide-react";
+import { ChevronRight, Sparkles, Wallet } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SerializedProduct } from "@/types/product";
 import { getTierConfig } from "@/lib/tier-config";
+import { BuybackModal } from "./BuybackModal";
 
 type AnimationStage = "idle" | "tearing" | "revealing" | "done";
 
@@ -38,6 +39,21 @@ interface PackRevealAnimationProps {
   orderId: string;
   packTopImage?: string;
   packBottomImage?: string;
+}
+
+// ============================================
+// Buyback Quote Interface
+// ============================================
+interface BuybackQuote {
+  orderItemId: string;
+  productTitle: string;
+  productImageUrl: string | null;
+  productValue: number;
+  buybackRate: number;
+  buybackAmount: number;
+  quoteToken: string;
+  expiresAt: string;
+  expiresInSeconds: number;
 }
 
 // ============================================
@@ -493,6 +509,63 @@ function SwipeToOpenButton({
 }
 
 // ============================================
+// Quote Timer Component
+// ============================================
+function QuoteTimer({
+  expiresAt,
+  onExpired,
+}: {
+  expiresAt: string;
+  onExpired: () => void;
+}) {
+  const [timeRemaining, setTimeRemaining] = useState(() => {
+    const remaining = Math.floor(
+      (new Date(expiresAt).getTime() - Date.now()) / 1000,
+    );
+    return Math.max(0, remaining);
+  });
+
+  useEffect(() => {
+    if (timeRemaining <= 0) return;
+
+    const interval = setInterval(() => {
+      setTimeRemaining((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          onExpired();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [onExpired]);
+
+  if (timeRemaining <= 0) return null;
+
+  const mins = Math.floor(timeRemaining / 60);
+  const secs = timeRemaining % 60;
+  const isUrgent = timeRemaining <= 60;
+
+  return (
+    <div
+      className={cn(
+        "flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono",
+        isUrgent
+          ? "bg-red-500/20 text-red-400 border border-red-500/30"
+          : "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30",
+      )}
+    >
+      <Wallet className="w-3 h-3" />
+      <span>
+        Sell back: {mins}:{secs.toString().padStart(2, "0")}
+      </span>
+    </div>
+  );
+}
+
+// ============================================
 // Main Component
 // ============================================
 export function PackSlashAnimation({
@@ -512,8 +585,18 @@ export function PackSlashAnimation({
 
   const [revealedProduct, setRevealedProduct] =
     useState<SerializedProduct | null>(null);
+  const [revealedOrderItemId, setRevealedOrderItemId] = useState<string | null>(
+    null,
+  );
 
   const [isRevealing, setIsRevealing] = useState(false);
+
+  // Buyback state
+  const [showBuybackModal, setShowBuybackModal] = useState(false);
+  const [buybackQuote, setBuybackQuote] = useState<BuybackQuote | null>(null);
+  const [isLoadingQuote, setIsLoadingQuote] = useState(false);
+  const [buybackExpired, setBuybackExpired] = useState(false);
+  const [buybackCompleted, setBuybackCompleted] = useState(false);
 
   // Preload audio on mount
   useEffect(() => {
@@ -530,6 +613,27 @@ export function PackSlashAnimation({
       });
     }
   }, [stage]);
+
+  // Fetch buyback quote after reveal
+  const fetchBuybackQuote = useCallback(async (orderItemId: string) => {
+    setIsLoadingQuote(true);
+    try {
+      const res = await fetch("/api/buyback/quote", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderItemId }),
+      });
+      const data = await res.json();
+
+      if (data.success && data.quote) {
+        setBuybackQuote(data.quote);
+      }
+    } catch (error) {
+      console.error("Failed to fetch buyback quote:", error);
+    } finally {
+      setIsLoadingQuote(false);
+    }
+  }, []);
 
   const startAnimation = useCallback(async () => {
     if (stage !== "idle" || isRevealing) return;
@@ -552,6 +656,10 @@ export function PackSlashAnimation({
 
     if (data.revealed || data.alreadyRevealed) {
       setRevealedProduct(data.product);
+      // Get the orderItemId from the response
+      if (data.orderItemId) {
+        setRevealedOrderItemId(data.orderItemId);
+      }
     } else {
       console.error("Invalid reveal response", data);
       setIsRevealing(false);
@@ -562,6 +670,7 @@ export function PackSlashAnimation({
       setRevealedProduct(data.product);
       setStage("done");
       setIsRevealing(false);
+      // Don't fetch quote for already revealed
       return;
     }
 
@@ -572,8 +681,12 @@ export function PackSlashAnimation({
     setTimeout(() => {
       setStage("done");
       setIsRevealing(false);
+      // Fetch buyback quote after reveal animation completes
+      if (data.orderItemId) {
+        fetchBuybackQuote(data.orderItemId);
+      }
     }, 2000);
-  }, [stage, isRevealing, orderId]);
+  }, [stage, isRevealing, orderId, fetchBuybackQuote]);
 
   const handleViewOrder = () => {
     router.push(`/dashboard/orders/${orderId}`);
@@ -581,6 +694,33 @@ export function PackSlashAnimation({
 
   const handleOpenAnother = () => {
     router.push("/packs");
+  };
+
+  const handleBuyback = async () => {
+    if (!buybackQuote || !revealedOrderItemId) return;
+
+    const res = await fetch("/api/buyback/accept", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        orderItemId: revealedOrderItemId,
+        quoteToken: buybackQuote.quoteToken,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || "Buyback failed");
+    }
+
+    setBuybackCompleted(true);
+    setShowBuybackModal(false);
+  };
+
+  const handleQuoteExpired = () => {
+    setBuybackExpired(true);
+    setBuybackQuote(null);
   };
 
   const getCardContainerStyles = (): React.CSSProperties => {
@@ -937,8 +1077,16 @@ export function PackSlashAnimation({
       )}
 
       {/* Result Panel */}
-      {stage === "done" && revealedProduct && (
+      {stage === "done" && revealedProduct && !buybackCompleted && (
         <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-4">
+          {/* Buyback Timer */}
+          {buybackQuote && !buybackExpired && (
+            <QuoteTimer
+              expiresAt={buybackQuote.expiresAt}
+              onExpired={handleQuoteExpired}
+            />
+          )}
+
           <span
             className={cn(
               "inline-flex items-center rounded-md px-3 py-1.5 text-sm font-medium border",
@@ -952,53 +1100,120 @@ export function PackSlashAnimation({
           </span>
 
           <div className="text-center">
-            {/* <h2 className="text-xl font-bold text-zinc-100">{product.title}</h2> */}
             <h2 className="text-xl font-bold text-zinc-100">
               {revealedProduct.title}
             </h2>
             <p className="text-emerald-400 font-medium">
-              {/* ${Number(product.price).toFixed(2)} value */}$
-              {Number(revealedProduct.price).toFixed(2)} value
+              ${Number(revealedProduct.price).toFixed(2)} value
             </p>
           </div>
 
-          <div className="flex gap-3 mt-2">
-            <button
-              onClick={handleViewOrder}
-              className="
-                cursor-pointer relative px-6 py-3
-                font-semibold text-violet-400
-                bg-zinc-950
-                border border-violet-500/40
-                rounded-md
-                shadow-[0_0_25px_-10px_rgba(168,85,247,0.9)]
-                hover:bg-violet-500
-                hover:shadow-[0_0_40px_-8px_rgba(168,85,247,1)]
-                hover:text-white
-                transition-all duration-300
-            "
-            >
-              View Order
-            </button>
-            <button
-              onClick={handleOpenAnother}
-              className="
-                cursor-pointer relative px-6 py-3
-                font-semibold text-teal-400
-                bg-zinc-950
-                border border-teal-500/40
-                rounded-md
-                shadow-[0_0_25px_-10px_rgba(20,184,166,0.9)]
-                hover:bg-teal-500
-                hover:shadow-[0_0_40px_-8px_rgba(20,184,166,1)]
-                hover:text-white
-                transition-all duration-300
-            "
-            >
-              Open Another Pack
-            </button>
+          <div className="flex flex-col gap-3 mt-2">
+            <div className="flex gap-3">
+              <button
+                onClick={handleViewOrder}
+                className="
+                  cursor-pointer relative px-6 py-3
+                  font-semibold text-violet-400
+                  bg-zinc-950
+                  border border-violet-500/40
+                  rounded-md
+                  shadow-[0_0_25px_-10px_rgba(168,85,247,0.9)]
+                  hover:bg-violet-500
+                  hover:shadow-[0_0_40px_-8px_rgba(168,85,247,1)]
+                  hover:text-white
+                  transition-all duration-300
+              "
+              >
+                View Order
+              </button>
+              <button
+                onClick={handleOpenAnother}
+                className="
+                  cursor-pointer relative px-6 py-3
+                  font-semibold text-teal-400
+                  bg-zinc-950
+                  border border-teal-500/40
+                  rounded-md
+                  shadow-[0_0_25px_-10px_rgba(20,184,166,0.9)]
+                  hover:bg-teal-500
+                  hover:shadow-[0_0_40px_-8px_rgba(20,184,166,1)]
+                  hover:text-white
+                  transition-all duration-300
+              "
+              >
+                Open Another Pack
+              </button>
+            </div>
+
+            {/* Buyback Button */}
+            {buybackQuote && !buybackExpired && (
+              <button
+                onClick={() => setShowBuybackModal(true)}
+                className="cursor-pointer relative w-full px-6 py-3 font-semibold text-emerald-400 bg-zinc-950 border border-emerald-500/40 rounded-md shadow-[0_0_25px_-10px_rgba(16,185,129,0.9)] hover:bg-emerald-500 hover:shadow-[0_0_40px_-8px_rgba(16,185,129,1)] hover:text-white transition-all duration-300 flex items-center justify-center gap-2"
+              >
+                <Wallet className="w-4 h-4" />
+                Sell Back for ${(buybackQuote.buybackAmount / 100).toFixed(2)}
+              </button>
+            )}
+
+            {isLoadingQuote && (
+              <div className="text-zinc-500 text-sm">
+                Loading buyback offer...
+              </div>
+            )}
           </div>
         </div>
+      )}
+
+      {/* Buyback Success */}
+      {buybackCompleted && (
+        <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-4">
+          <div className="bg-emerald-500/20 border border-emerald-500/40 rounded-xl p-6 text-center">
+            <div className="w-12 h-12 rounded-full bg-emerald-500/30 flex items-center justify-center mx-auto mb-3">
+              <Wallet className="w-6 h-6 text-emerald-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-zinc-100 mb-1">
+              ${(buybackQuote?.buybackAmount ?? 0 / 100).toFixed(2)} Added to
+              Wallet!
+            </h3>
+            <p className="text-zinc-400 text-sm mb-4">
+              Withdraw anytime from your Wallet page.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => router.push("/wallet")}
+                className="cursor-pointer px-4 py-2 bg-emerald-500 text-white rounded font-medium hover:bg-emerald-600 transition-colors"
+              >
+                Go to Wallet
+              </button>
+              <button
+                onClick={handleOpenAnother}
+                className="cursor-pointer px-4 py-2 bg-gray-200 text-gray-700 rounded font-medium hover:bg-gray-300 transition-colors"
+              >
+                Open Another Pack
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Buyback Modal */}
+      {buybackQuote && (
+        <BuybackModal
+          isOpen={showBuybackModal}
+          onClose={() => setShowBuybackModal(false)}
+          onConfirm={handleBuyback}
+          productTitle={buybackQuote.productTitle}
+          productImageUrl={buybackQuote.productImageUrl}
+          productValue={buybackQuote.productValue}
+          buybackAmount={buybackQuote.buybackAmount}
+          buybackRate={buybackQuote.buybackRate}
+          expiresInSeconds={Math.floor(
+            (new Date(buybackQuote.expiresAt).getTime() - Date.now()) / 1000,
+          )}
+          accentColor="#10b981"
+        />
       )}
     </div>
   );
