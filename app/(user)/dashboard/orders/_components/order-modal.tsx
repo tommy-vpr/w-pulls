@@ -7,10 +7,10 @@ import { SerializedProduct } from "@/types/product";
 import { cn } from "@/lib/utils";
 import { getTierConfig, getTierBadgeClass } from "@/lib/tier-config";
 import "./order-modal.css";
-import type { SerializedUserOrder } from "@/lib/actions/user-orders.actions";
+import type { SerializedOrder } from "@/lib/services/order.service";
 
 interface OrderModalProps {
-  order: SerializedUserOrder | null;
+  order: SerializedOrder | null;
   isOpen: boolean;
   onClose: () => void;
 }

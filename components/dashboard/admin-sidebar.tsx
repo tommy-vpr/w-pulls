@@ -184,8 +184,6 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
           </div>
         )}
       </div>
-
-      <div className="h-1 bg-gradient-to-r from-purple-600 via-cyan-500 to-pink-500 opacity-75" />
     </aside>
   );
 }

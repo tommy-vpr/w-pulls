@@ -50,11 +50,19 @@ export function CollectionCard({ item, onQuickView }: CollectionCardProps) {
 
         {/* Sold Back Overlay */}
         {item.isSoldBack && (
-          <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center z-10">
-            <span className="text-red-500 font-bold text-sm">Sold Back</span>
-            <span className="text-green-400 text-xs">
-              +${((item.buybackAmount ?? 0) / 100).toFixed(2)}
-            </span>
+          <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-10">
+            {/* <div className="flex flex-col px-4 py-2 bg-red-500 rounded">
+              <span className="text-red-900 font-bold text-sm">Sold Back</span>
+              <span className="text-white text-xs">
+                +${((item.buybackAmount ?? 0) / 100).toFixed(2)}
+              </span>
+            </div> */}
+            <div className="flex flex-col items-center">
+              <span className="text-red-500 font-bold text-4xl">Sold Back</span>
+              <span className="text-white text-xl">
+                +${((item.buybackAmount ?? 0) / 100).toFixed(2)}
+              </span>
+            </div>
           </div>
         )}
 

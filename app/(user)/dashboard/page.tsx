@@ -27,7 +27,7 @@ export default async function UserDashboardPage() {
       }),
 
       // Recent orders (PACK + PRODUCT, user scoped)
-      orderService.getOrdersByUser(session.user.id, { limit: 6 }),
+      orderService.getOrdersByUser(session.user.id, { limit: 8 }),
 
       // Revenue includes ALL completed orders
       prisma.order.aggregate({
@@ -106,7 +106,7 @@ export default async function UserDashboardPage() {
             <img
               src={user.image}
               alt={user.name || "Avatar"}
-              className="h-14 w-14 rounded-full object-cover ring-2 ring-violet-500/30"
+              className="h-14 w-14 rounded-full object-cover ring-2 ring-white"
             />
           ) : (
             <div className="h-14 w-14 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white text-xl font-bold">
@@ -115,17 +115,20 @@ export default async function UserDashboardPage() {
           )}
           <div>
             <h1 className="text-2xl font-bold text-zinc-100">
-              Welcome back, {user?.name?.split(" ")[0] || "there"}!
+              {/* Welcome back, {user?.name?.split(" ")[0] || "there"}! */}
+              {user?.name}
             </h1>
             <p className="text-zinc-500">
-              Here&apos;s what&apos;s happening with your packs
+              {/* Here&apos;s what&apos;s happening with your packs */}
+              {user?.email}
             </p>
           </div>
         </div>
 
         <Link
           href="/packs"
-          className="flex items-center gap-2 px-6 h-10 rounded-md bg-gradient-to-br from-violet-600 to-purple-600 text-white text-sm font-medium hover:opacity-90 transition"
+          className="flex items-center gap-2 px-6 h-10 rounded-md bg-gradient-to-br border border-purple-500
+          from-violet-600 to-purple-600 text-white text-sm font-medium hover:opacity-90 transition"
         >
           <Sparkles className="h-4 w-4" />
           Open Packs
@@ -182,7 +185,7 @@ export default async function UserDashboardPage() {
               <img
                 src={bestProduct.imageUrl}
                 alt={bestProduct.title}
-                className="h-24 w-24 rounded-lg object-cover border border-zinc-700"
+                className="h-24 w-24 rounded-lg object-contain"
               />
             ) : (
               <div className="h-24 w-24 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center">
@@ -201,9 +204,7 @@ export default async function UserDashboardPage() {
               >
                 {getTierConfig(bestProduct.tier).label}
               </span>
-              <h3 className="text-xl font-bold text-zinc-100">
-                {bestProduct.title}
-              </h3>
+              <h3 className="text-xl text-gray-200">{bestProduct.title}</h3>
               <p className="text-emerald-400 font-medium">
                 ${Number(bestProduct.price).toFixed(2)} value
               </p>
@@ -268,7 +269,7 @@ function StatCard({
           <Icon className={cn("h-4 w-4", color)} />
         </div>
       </div>
-      <div className="text-2xl font-bold text-zinc-100">{value}</div>
+      <div className="text-2xl text-zinc-100">{value}</div>
     </div>
   );
 }

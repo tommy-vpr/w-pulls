@@ -333,7 +333,7 @@ function WithdrawalItem({ withdrawal }: { withdrawal: Withdrawal }) {
       },
       PROCESSING: {
         color: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-        icon: <Loader2 className="w-3 h-3" />,
+        icon: <Clock className="w-3 h-3" />,
         label: "Processing",
       },
       PAID: {
@@ -571,7 +571,7 @@ function WithdrawModal({
                 >
                   {isProcessing ? (
                     <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <Clock className="w-4 h-4 animate-spin" />
                       Processing...
                     </>
                   ) : (

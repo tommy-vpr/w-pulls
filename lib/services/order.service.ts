@@ -253,6 +253,47 @@ export class OrderService {
   }
 
   /**
+   * Get order statistics for a user
+   */
+  async getUserOrderStats(userId: string): Promise<
+    ActionResponse<{
+      total: number;
+      completed: number;
+      processing: number;
+      totalSpent: number;
+      tierStats: Record<string, number>;
+    }>
+  > {
+    try {
+      const stats = await this.repository.getUserStats(userId);
+
+      const tierStats = stats.tierCounts.reduce(
+        (acc, curr) => {
+          if (curr.selectedTier) {
+            acc[curr.selectedTier] = curr._count;
+          }
+          return acc;
+        },
+        {} as Record<string, number>,
+      );
+
+      return {
+        success: true,
+        data: {
+          total: stats.total,
+          completed: stats.completed,
+          processing: stats.processing,
+          totalSpent: stats.totalSpentCents / 100,
+          tierStats,
+        },
+      };
+    } catch (error) {
+      console.error("Error fetching user order stats:", error);
+      return { success: false, error: "Failed to fetch stats" };
+    }
+  }
+
+  /**
    * Delete an order (admin only)
    */
   async deleteOrder(id: string): Promise<ActionResponse<Order>> {

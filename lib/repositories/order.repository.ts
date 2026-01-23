@@ -315,6 +315,48 @@ export class OrderRepository {
       where: { id },
     });
   }
+
+  /**
+   * Get user order statistics
+   */
+  async getUserStats(userId: string) {
+    const [total, completed, processing, totalSpent, tierCounts] =
+      await Promise.all([
+        prisma.order.count({
+          where: {
+            userId,
+            status: { notIn: ["PENDING", "ABANDONED"] },
+          },
+        }),
+        prisma.order.count({
+          where: { userId, status: "COMPLETED" },
+        }),
+        prisma.order.count({
+          where: { userId, status: "PROCESSING" },
+        }),
+        prisma.order.aggregate({
+          where: { userId, status: "COMPLETED" },
+          _sum: { amount: true },
+        }),
+        prisma.order.groupBy({
+          by: ["selectedTier"],
+          where: {
+            userId,
+            status: "COMPLETED",
+            selectedTier: { not: null },
+          },
+          _count: true,
+        }),
+      ]);
+
+    return {
+      total,
+      completed,
+      processing,
+      totalSpentCents: totalSpent._sum.amount || 0,
+      tierCounts,
+    };
+  }
 }
 
 export const orderRepository = new OrderRepository();

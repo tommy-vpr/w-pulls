@@ -7,6 +7,8 @@ import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { redirect } from "next/navigation";
 import { AuthError } from "next-auth";
+import { sendEmail } from "../sendEmail";
+import { passwordResetEmail } from "../emails/passwordResetEmail";
 
 export async function signUpAction(formData: FormData) {
   const name = formData.get("name") as string;
@@ -102,7 +104,7 @@ export async function signInAction(formData: FormData) {
  */
 function getRedirectUrl(
   role: string | undefined,
-  callbackUrl: string | null
+  callbackUrl: string | null,
 ): string {
   const isAdmin = role === "ADMIN";
 
@@ -175,10 +177,22 @@ export async function forgotPasswordAction(formData: FormData) {
     },
   });
 
-  // TODO: Send email
-  console.log(
-    `Reset link: ${process.env.NEXT_PUBLIC_APP_URL}/auth/reset-password?token=${token}`
-  );
+  // Send email
+  const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/reset-password?token=${token}`;
+
+  try {
+    await sendEmail({
+      to: user.email,
+      subject: "Reset your W-Pull password",
+      html: passwordResetEmail({
+        resetUrl,
+        email: user.email,
+      }),
+      from: "W-Pull Security <security@emails.teevong.com>",
+    });
+  } catch (error) {
+    console.error("Password reset email failed:", error);
+  }
 
   return { success: true };
 }

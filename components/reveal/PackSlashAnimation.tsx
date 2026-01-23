@@ -582,6 +582,7 @@ export function PackSlashAnimation({
 
   // Sound Effect Tearing
   const tearSoundRef = useRef<HTMLAudioElement | null>(null);
+  const winningSoundRef = useRef<HTMLAudioElement | null>(null);
 
   const [revealedProduct, setRevealedProduct] =
     useState<SerializedProduct | null>(null);
@@ -602,6 +603,11 @@ export function PackSlashAnimation({
   useEffect(() => {
     tearSoundRef.current = new Audio("/audio/tearing-effect.mp3");
     tearSoundRef.current.preload = "auto";
+    tearSoundRef.current.volume = 0.5;
+
+    winningSoundRef.current = new Audio("/audio/winning-sound.mp3");
+    winningSoundRef.current.preload = "auto";
+    winningSoundRef.current.volume = 0.5;
   }, []);
 
   // Play when stage becomes "tearing"
@@ -609,6 +615,16 @@ export function PackSlashAnimation({
     if (stage === "tearing" && tearSoundRef.current) {
       tearSoundRef.current.currentTime = 0;
       tearSoundRef.current.play().catch((err) => {
+        console.warn("Audio play failed:", err);
+      });
+    }
+  }, [stage]);
+
+  // Play winning sound when stage becomes "revealing"
+  useEffect(() => {
+    if (stage === "done" && winningSoundRef.current) {
+      winningSoundRef.current.currentTime = 0;
+      winningSoundRef.current.play().catch((err) => {
         console.warn("Audio play failed:", err);
       });
     }
@@ -844,7 +860,7 @@ export function PackSlashAnimation({
   };
 
   return (
-    <div className="relative min-h-screen w-full bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 flex flex-col items-center justify-center overflow-hidden">
+    <div className="relative min-h-screen w-full flex flex-col items-center justify-center overflow-hidden">
       <style>{`
         @keyframes cardReveal {
           0% { transform: translateX(-50%) translateY(-50%); }
@@ -1182,7 +1198,7 @@ export function PackSlashAnimation({
             </p>
             <div className="flex gap-3">
               <button
-                onClick={() => router.push("/wallet")}
+                onClick={() => router.push("/dashboard/wallet")}
                 className="cursor-pointer px-4 py-2 bg-emerald-500 text-white rounded font-medium hover:bg-emerald-600 transition-colors"
               >
                 Go to Wallet
