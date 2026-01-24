@@ -46,7 +46,7 @@ export default async function RevealPage({ params }: RevealPageProps) {
   // 3️⃣ Pending payment state
   if (order.status === "PENDING") {
     return (
-      <div className="min-h-screen bg-accent-foreground flex flex-col items-center justify-center p-6 gap-4">
+      <div className="min-h-screen flex flex-col items-center justify-center p-6 gap-4">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary" />
         <p className="text-lg text-muted-foreground">
           Processing your payment...
@@ -58,7 +58,7 @@ export default async function RevealPage({ params }: RevealPageProps) {
 
   if (order.status !== "COMPLETED") {
     return (
-      <div className="min-h-screen bg-accent-foreground flex flex-col items-center justify-center p-6 gap-4">
+      <div className="min-h-screen flex flex-col items-center justify-center p-6 gap-4">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary" />
         <p className="text-lg text-muted-foreground">Opening your pack...</p>
         <meta httpEquiv="refresh" content="2" />
@@ -79,7 +79,7 @@ export default async function RevealPage({ params }: RevealPageProps) {
 
   // 8️⃣ Render reveal
   return (
-    <div className="min-h-screen w-full overflow-x-hidden bg-accent-foreground flex items-center justify-center">
+    <div className="min-h-screen w-full overflow-x-hidden flex items-center justify-center">
       <PackSlashAnimation
         // product={serializeProduct(item.product)}
         tier={order.selectedTier}

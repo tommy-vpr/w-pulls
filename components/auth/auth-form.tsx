@@ -36,6 +36,32 @@ export function AuthForm() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl");
 
+  const message = searchParams.get("message");
+  const urlError = searchParams.get("error");
+
+  <AnimatePresence>
+    {message === "password_reset" && (
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -10 }}
+        className="mb-4 p-3 rounded-xl bg-green-500/10 border border-green-500/20 text-green-400 text-sm"
+      >
+        Password reset successfully. Please sign in.
+      </motion.div>
+    )}
+    {urlError === "invalid_token" && (
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -10 }}
+        className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm"
+      >
+        Reset link has expired. Please request a new one.
+      </motion.div>
+    )}
+  </AnimatePresence>;
+
   const handleSubmit = async (formData: FormData) => {
     setError(null);
     setSuccess(null);

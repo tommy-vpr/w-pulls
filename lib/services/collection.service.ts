@@ -1,5 +1,5 @@
 // lib/services/collection.service.ts
-import { ProductTier } from "@prisma/client";
+import { ProductTier, ItemDisposition } from "@prisma/client";
 import { collectionRepository } from "@/lib/repositories/collections.repository";
 
 export interface SerializedCollectionItem {
@@ -13,12 +13,19 @@ export interface SerializedCollectionItem {
   packName: string | null;
   category: string;
   acquiredAt: string;
+  // Disposition tracking
+  disposition: ItemDisposition;
+  buybackAmount: number | null;
+  isSoldBack: boolean;
 }
 
 export interface CollectionSummary {
   totalItems: number;
   totalValue: number;
   tierCounts: Record<ProductTier, number>;
+  // Sold-back tracking
+  soldBackCount: number;
+  soldBackValue: number;
 }
 
 export class CollectionService {
@@ -37,6 +44,8 @@ export class CollectionService {
     };
 
     let totalValue = 0;
+    let soldBackCount = 0;
+    let soldBackValue = 0;
 
     for (const order of orders) {
       for (const item of order.items) {
@@ -44,9 +53,7 @@ export class CollectionService {
         if (!product) continue;
 
         const value = Number(item.unitPrice);
-
-        totalValue += value;
-        tierCounts[product.tier] += 1;
+        const isSoldBack = item.disposition === "SOLD_BACK";
 
         items.push({
           orderId: order.id,
@@ -59,15 +66,30 @@ export class CollectionService {
           packName: order.packName ?? null,
           category: product.category,
           acquiredAt: item.createdAt.toISOString(),
+          // Disposition fields
+          disposition: item.disposition,
+          buybackAmount: item.buybackAmount,
+          isSoldBack,
         });
+
+        // Only count non-sold-back items in active portfolio
+        if (isSoldBack) {
+          soldBackCount++;
+          soldBackValue += item.buybackAmount ? item.buybackAmount / 100 : 0;
+        } else {
+          totalValue += value;
+          tierCounts[product.tier] += 1;
+        }
       }
     }
 
     return {
       summary: {
-        totalItems: items.length,
+        totalItems: items.length - soldBackCount, // Only kept items
         totalValue,
         tierCounts,
+        soldBackCount,
+        soldBackValue,
       },
       items,
     };

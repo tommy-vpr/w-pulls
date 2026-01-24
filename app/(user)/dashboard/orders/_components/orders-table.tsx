@@ -31,11 +31,14 @@ import { SerializedProduct } from "@/types/product";
 import { cn } from "@/lib/utils";
 import { getTierConfig, getTierBadgeClass } from "@/lib/tier-config";
 import { OrderModal } from "./order-modal";
-import { OrderStatus } from "@/types/order";
-import type { SerializedUserOrder } from "@/lib/actions/user-orders.actions";
+// import { OrderStatus } from "@/types/order";
+import { OrderStatus } from "@prisma/client";
+
+// import type { SerializedUserOrder } from "@/lib/actions/user-orders.actions";
+import type { SerializedOrder } from "@/lib/services/order.service"; // Updated import
 
 interface OrdersTableProps {
-  orders: SerializedUserOrder[];
+  orders: SerializedOrder[];
   pagination: {
     page: number;
     totalPages: number;
@@ -64,6 +67,12 @@ const statusConfig: Record<
     bgColor: "bg-amber-900/40",
     label: "Pending",
   },
+  PROCESSING: {
+    icon: Clock,
+    color: "text-blue-400",
+    bgColor: "bg-blue-900/40",
+    label: "Processing",
+  },
   FAILED: {
     icon: XCircle,
     color: "text-red-400",
@@ -76,14 +85,21 @@ const statusConfig: Record<
     bgColor: "bg-blue-900/40",
     label: "Refunded",
   },
+  ABANDONED: {
+    icon: XCircle,
+    color: "text-zinc-400",
+    bgColor: "bg-zinc-800/40",
+    label: "Abandoned",
+  },
 };
 
 export function OrdersTable({ orders, pagination }: OrdersTableProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [selectedOrder, setSelectedOrder] =
-    useState<SerializedUserOrder | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<SerializedOrder | null>(
+    null,
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handlePageChange = (newPage: number) => {
@@ -92,7 +108,7 @@ export function OrdersTable({ orders, pagination }: OrdersTableProps) {
     router.push(`${pathname}?${params.toString()}`);
   };
 
-  const handleQuickView = (order: SerializedUserOrder) => {
+  const handleQuickView = (order: SerializedOrder) => {
     setSelectedOrder(order);
     setIsModalOpen(true);
   };
@@ -143,7 +159,9 @@ export function OrdersTable({ orders, pagination }: OrdersTableProps) {
           <TableBody>
             {orders.map((order) => {
               const tier = getTierConfig(order.selectedTier);
-              const status = statusConfig[order.status] || statusConfig.PENDING;
+              const status =
+                statusConfig[order.status as OrderStatus] ||
+                statusConfig.PENDING;
               const StatusIcon = status.icon;
               const isRevealed = order.status === "COMPLETED" && order.product;
 
@@ -191,7 +209,7 @@ export function OrdersTable({ orders, pagination }: OrdersTableProps) {
                       <span
                         className={cn(
                           "inline-flex items-center rounded-md px-2 py-1 text-xs font-medium border",
-                          getTierBadgeClass(order.selectedTier)
+                          getTierBadgeClass(order.selectedTier),
                         )}
                       >
                         {tier.label}
@@ -206,7 +224,7 @@ export function OrdersTable({ orders, pagination }: OrdersTableProps) {
                     <span
                       className={cn(
                         "font-semibold",
-                        isRevealed ? "text-emerald-400" : "text-zinc-500"
+                        isRevealed ? "text-emerald-400" : "text-zinc-500",
                       )}
                     >
                       {isRevealed
@@ -228,7 +246,7 @@ export function OrdersTable({ orders, pagination }: OrdersTableProps) {
                       className={cn(
                         "inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium border border-current/20",
                         status.bgColor,
-                        status.color
+                        status.color,
                       )}
                     >
                       <StatusIcon className="h-3 w-3" />
@@ -282,7 +300,7 @@ export function OrdersTable({ orders, pagination }: OrdersTableProps) {
             <button
               onClick={() => handlePageChange(pagination.page - 1)}
               disabled={pagination.page <= 1}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-900 text-sm text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-900 text-sm text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <ChevronLeft className="h-4 w-4" />
               Previous
@@ -293,7 +311,7 @@ export function OrdersTable({ orders, pagination }: OrdersTableProps) {
             <button
               onClick={() => handlePageChange(pagination.page + 1)}
               disabled={pagination.page >= pagination.totalPages}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-900 text-sm text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-900 text-sm text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Next
               <ChevronRight className="h-4 w-4" />

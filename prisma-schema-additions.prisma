@@ -1,0 +1,167 @@
+// ===========================================
+// SCHEMA ADDITIONS FOR BUYBACK SYSTEM
+// ===========================================
+// Add these to your schema.prisma file
+
+// ----- UPDATE: User model -----
+model User {
+  // ... existing fields ...
+
+  // Stripe Connect for payouts
+  stripeConnectedAccountId String?
+  stripeConnectOnboardedAt DateTime?
+
+  // Relations
+  wallet              UserWallet?
+  walletTransactions  WalletTransaction[]
+  withdrawals         Withdrawal[]
+}
+
+// ----- UPDATE: OrderItem model -----
+model OrderItem {
+  id        String   @id @default(cuid())
+  orderId   String
+  productId String
+
+  quantity  Int      @default(1)
+  unitPrice Decimal  @db.Decimal(10, 2)
+
+  // NEW: Asset disposition tracking
+  disposition    ItemDisposition @default(KEPT)
+  buybackAmount  Int?            // Amount credited in cents (stored for audit)
+  dispositionAt  DateTime?       // When disposition changed
+
+  createdAt DateTime @default(now())
+
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id])
+
+  walletTransactions WalletTransaction[]
+
+  @@index([orderId])
+  @@index([productId])
+  @@index([disposition])
+}
+
+// NEW: Item disposition enum
+enum ItemDisposition {
+  KEPT            // Default - user is keeping the item
+  SOLD_BACK       // User sold back for wallet credit
+  SHIP_REQUESTED  // User requested shipping
+  SHIPPED         // Item has been shipped
+  DELIVERED       // Item delivered to user
+}
+
+// ----- NEW: UserWallet model -----
+model UserWallet {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  
+  balance   Int      @default(0)  // Balance in cents
+  
+  // Hold period settings (optional, for fraud prevention)
+  holdUntil DateTime?  // Credits before this date can't be withdrawn
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ----- NEW: WalletTransaction model (ledger) -----
+model WalletTransaction {
+  id        String   @id @default(cuid())
+  userId    String
+  
+  type      WalletTransactionType
+  amount    Int                       // Always positive, type determines direction
+  
+  reason    WalletTransactionReason
+  
+  // References for traceability
+  orderItemId   String?
+  withdrawalId  String?
+  
+  // Balance snapshot (for reconciliation)
+  balanceAfter  Int
+  
+  notes     String?
+  
+  createdAt DateTime @default(now())
+
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orderItem   OrderItem?        @relation(fields: [orderItemId], references: [id])
+  withdrawal  Withdrawal?       @relation(fields: [withdrawalId], references: [id])
+
+  @@index([userId])
+  @@index([orderItemId])
+  @@index([withdrawalId])
+  @@index([createdAt])
+}
+
+enum WalletTransactionType {
+  CREDIT
+  DEBIT
+}
+
+enum WalletTransactionReason {
+  BUYBACK           // Sold back an item
+  WITHDRAWAL        // Withdrew to bank
+  WITHDRAWAL_FAILED // Withdrawal failed, funds returned
+  ADJUSTMENT        // Manual adjustment by admin
+  BONUS             // Promotional credit
+  REFUND            // Refund credited to wallet
+}
+
+// ----- NEW: Withdrawal model -----
+model Withdrawal {
+  id        String   @id @default(cuid())
+  userId    String
+  
+  amount    Int                  // Amount in cents
+  status    WithdrawalStatus     @default(PENDING)
+  
+  // Stripe payout details
+  stripeTransferId  String?
+  stripePayoutId    String?
+  
+  // Processing info
+  processedAt       DateTime?
+  failedAt          DateTime?
+  failureReason     String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user                User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  walletTransactions  WalletTransaction[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+enum WithdrawalStatus {
+  PENDING     // Requested, not yet processed
+  PROCESSING  // Worker picked it up
+  PAID        // Successfully paid out
+  FAILED      // Payout failed
+  CANCELED    // User canceled or admin canceled
+}
+
+// ----- UPDATE: OrderAction enum -----
+enum OrderAction {
+  CREATED
+  STATUS_CHANGED
+  PAYMENT_INITIATED
+  PAYMENT_COMPLETED
+  PAYMENT_FAILED
+  REFUND_INITIATED
+  REFUND_COMPLETED
+  PRODUCT_REVEALED
+  PRODUCT_SHIPPED
+  PRODUCT_DELIVERED
+  BUYBACK_ACCEPTED    // NEW: User sold back item
+}

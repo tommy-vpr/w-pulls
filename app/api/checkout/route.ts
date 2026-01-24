@@ -5,6 +5,7 @@ import prisma from "@/lib/prisma";
 import { getPackById } from "@/lib/packs/config";
 import { auditService } from "@/lib/services/audit.service";
 import { auth } from "@/lib/auth";
+import { orderAbandonQueue } from "@/lib/queue/orderAbandon.queue";
 
 export async function POST(request: NextRequest) {
   try {
@@ -44,6 +45,16 @@ export async function POST(request: NextRequest) {
         customerEmail: session.user.email ?? null,
       },
     });
+
+    // Add abandon worker
+    await orderAbandonQueue.add(
+      "abandon-check",
+      { orderId: order.id },
+      {
+        delay: 30 * 60 * 1000,
+        jobId: `abandon_${order.id}`, // ✅ no colon
+      },
+    );
 
     await auditService.logOrderCreated(order, {
       performedBy: session.user.id,

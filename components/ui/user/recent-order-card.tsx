@@ -32,7 +32,8 @@ export function RecentOrderCard({ order }: RecentOrderProps) {
           <img
             src={order.product.imageUrl}
             alt={order.product.title}
-            className="h-full w-full object-contain transition-transform duration-150 group-hover:scale-105"
+            className="h-full w-full object-contain transition duration-150
+            opacity-60 group-hover:opacity-100"
           />
         ) : isPack ? (
           <div className="h-full w-full flex items-center justify-center">
@@ -82,7 +83,7 @@ export function RecentOrderCard({ order }: RecentOrderProps) {
       </div>
 
       {/* Card Content */}
-      <div className="p-3 bg-zinc-950">
+      <div className="p-3 bg-zinc-950/40">
         <p className="text-xs text-zinc-500">
           {isPack ? order.packName : "Product Order"}
         </p>

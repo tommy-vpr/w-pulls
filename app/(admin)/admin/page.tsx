@@ -57,7 +57,7 @@ export default async function PacksAdminPage() {
   const oddsData = packStats.map((pack) => ({
     name: pack.name,
     ...Object.fromEntries(
-      TIER_ORDER.map((tier) => [tier, pack.odds[tier] || 0])
+      TIER_ORDER.map((tier) => [tier, pack.odds[tier] || 0]),
     ),
   }));
 
@@ -67,17 +67,17 @@ export default async function PacksAdminPage() {
   }));
 
   const tierColors = Object.fromEntries(
-    TIER_ORDER.map((tier) => [tier, getTierConfig(tier).hexColor])
+    TIER_ORDER.map((tier) => [tier, getTierConfig(tier).hexColor]),
   );
 
   // Calculate totals for summary
   const totalInventory = Object.values(tierStats).reduce(
     (sum, t) => sum + t.inventoryCount,
-    0
+    0,
   );
   const totalValue = Object.values(tierStats).reduce(
     (sum, t) => sum + t.totalValue,
-    0
+    0,
   );
   const avgMargin =
     packStats.reduce((sum, p) => sum + p.marginPercentage, 0) /
@@ -87,7 +87,7 @@ export default async function PacksAdminPage() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-zinc-100">Pack Analytics</h1>
+        <h1 className="text-3xl font-bold text-zinc-100">Admin</h1>
         <p className="text-zinc-500">
           Expected values, profit margins, and inventory analysis
         </p>
@@ -153,8 +153,8 @@ export default async function PacksAdminPage() {
                 avgMargin > 20
                   ? "#10b981"
                   : avgMargin > 0
-                  ? "#f59e0b"
-                  : "#ef4444",
+                    ? "#f59e0b"
+                    : "#ef4444",
             }}
           />
           <div className="relative">
@@ -165,8 +165,8 @@ export default async function PacksAdminPage() {
                   avgMargin > 20
                     ? "bg-emerald-900/30 border-emerald-700/50"
                     : avgMargin > 0
-                    ? "bg-amber-900/30 border-amber-700/50"
-                    : "bg-red-900/30 border-red-700/50"
+                      ? "bg-amber-900/30 border-amber-700/50"
+                      : "bg-red-900/30 border-red-700/50"
                 }`}
               >
                 <TrendingUp
@@ -174,8 +174,8 @@ export default async function PacksAdminPage() {
                     avgMargin > 20
                       ? "text-emerald-400"
                       : avgMargin > 0
-                      ? "text-amber-400"
-                      : "text-red-400"
+                        ? "text-amber-400"
+                        : "text-red-400"
                   }`}
                 />
               </div>
@@ -185,8 +185,8 @@ export default async function PacksAdminPage() {
                 avgMargin > 20
                   ? "text-emerald-400"
                   : avgMargin > 0
-                  ? "text-amber-400"
-                  : "text-red-400"
+                    ? "text-amber-400"
+                    : "text-red-400"
               }`}
             >
               {avgMargin.toFixed(1)}%
@@ -243,8 +243,8 @@ export default async function PacksAdminPage() {
                   pack.marginPercentage > 20
                     ? "bg-emerald-900/30 text-emerald-400 border-emerald-700/50"
                     : pack.marginPercentage > 0
-                    ? "bg-amber-900/30 text-amber-400 border-amber-700/50"
-                    : "bg-red-900/30 text-red-400 border-red-700/50"
+                      ? "bg-amber-900/30 text-amber-400 border-amber-700/50"
+                      : "bg-red-900/30 text-red-400 border-red-700/50"
                 }`}
               >
                 {pack.marginPercentage.toFixed(1)}% margin
@@ -292,7 +292,7 @@ export default async function PacksAdminPage() {
                           }}
                           title={`${tier}: ${pack.odds[tier]}%`}
                         />
-                      )
+                      ),
                   )}
                 </div>
                 <div className="flex flex-wrap gap-2 mt-2">
@@ -306,7 +306,7 @@ export default async function PacksAdminPage() {
                         >
                           {getTierConfig(tier).label}: {pack.odds[tier]}%
                         </span>
-                      )
+                      ),
                   )}
                 </div>
               </div>

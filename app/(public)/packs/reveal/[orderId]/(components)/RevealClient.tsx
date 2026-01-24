@@ -27,7 +27,7 @@ export default function RevealClient({ orderId }: { orderId: string }) {
 
   if (!order || order.status === "PENDING" || order.status === "PROCESSING") {
     return (
-      <div className="min-h-screen bg-accent-foreground flex flex-col items-center justify-center gap-4">
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-primary" />
         <p className="text-muted-foreground">Opening your pack…</p>
       </div>

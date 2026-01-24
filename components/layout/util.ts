@@ -1,8 +1,6 @@
 import * as THREE from "three";
 import { extend } from "@react-three/fiber";
 
-// Paul West @prisoner849 https://discourse.threejs.org/u/prisoner849
-// https://discourse.threejs.org/t/simple-curved-plane/26647/10
 class BentPlaneGeometry extends THREE.PlaneGeometry {
   constructor(
     radius: number,
@@ -57,7 +55,7 @@ class MeshSineMaterial extends THREE.MeshBasicMaterial {
     `;
     shader.vertexShader = shader.vertexShader.replace(
       "#include <begin_vertex>",
-      `vec3 transformed = vec3(position.x, position.y + sin(time + uv.x * PI * 4.0) / 4.0, position.z);`
+      `vec3 transformed = vec3(position.x, position.y + sin(time + uv.x * PI * 4.0) / 4.0, position.z);`,
     );
   }
 }

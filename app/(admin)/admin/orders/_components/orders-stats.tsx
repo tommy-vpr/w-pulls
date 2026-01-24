@@ -87,7 +87,7 @@ export function OrdersStats({ stats }: OrdersStatsProps) {
                 <stat.icon className={`h-4 w-4 ${stat.color}`} />
               </div>
             </div>
-            <div className="text-2xl font-bold text-zinc-100">{stat.value}</div>
+            <div className="text-2xl text-zinc-100">{stat.value}</div>
             <p className="text-xs text-zinc-500 mt-1">{stat.description}</p>
           </div>
         </div>

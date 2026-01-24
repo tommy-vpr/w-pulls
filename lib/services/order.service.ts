@@ -32,6 +32,7 @@ export interface SerializedOrderItem {
 export interface SerializedOrder {
   id: string;
   type: string;
+  orderNumber: number;
 
   packId: string | null;
   packName: string | null;
@@ -47,6 +48,14 @@ export interface SerializedOrder {
   stripeSessionId: string | null;
   customerEmail: string | null;
   customerName: string | null;
+
+  // 📦 Shipping address (persisted on Order)
+  shippingLine1: string | null;
+  shippingLine2: string | null;
+  shippingCity: string | null;
+  shippingState: string | null;
+  shippingPostal: string | null;
+  shippingCountry: string | null;
 
   createdAt: string;
   updatedAt: string;
@@ -87,6 +96,7 @@ export class OrderService {
     return {
       id: order.id,
       type: order.type,
+      orderNumber: order.orderNumber,
 
       packId: order.packId,
       packName: order.packName,
@@ -101,6 +111,13 @@ export class OrderService {
       stripeSessionId: order.stripeSessionId,
       customerEmail: order.customerEmail,
       customerName: order.customerName,
+
+      shippingLine1: order.shippingLine1,
+      shippingLine2: order.shippingLine2,
+      shippingCity: order.shippingCity,
+      shippingState: order.shippingState,
+      shippingPostal: order.shippingPostal,
+      shippingCountry: order.shippingCountry,
 
       createdAt: order.createdAt.toISOString(),
       updatedAt: order.updatedAt.toISOString(),
@@ -232,6 +249,47 @@ export class OrderService {
     } catch (error) {
       console.error("Error fetching user orders:", error);
       return { success: false, error: "Failed to fetch user orders" };
+    }
+  }
+
+  /**
+   * Get order statistics for a user
+   */
+  async getUserOrderStats(userId: string): Promise<
+    ActionResponse<{
+      total: number;
+      completed: number;
+      processing: number;
+      totalSpent: number;
+      tierStats: Record<string, number>;
+    }>
+  > {
+    try {
+      const stats = await this.repository.getUserStats(userId);
+
+      const tierStats = stats.tierCounts.reduce(
+        (acc, curr) => {
+          if (curr.selectedTier) {
+            acc[curr.selectedTier] = curr._count;
+          }
+          return acc;
+        },
+        {} as Record<string, number>,
+      );
+
+      return {
+        success: true,
+        data: {
+          total: stats.total,
+          completed: stats.completed,
+          processing: stats.processing,
+          totalSpent: stats.totalSpentCents / 100,
+          tierStats,
+        },
+      };
+    } catch (error) {
+      console.error("Error fetching user order stats:", error);
+      return { success: false, error: "Failed to fetch stats" };
     }
   }
 

@@ -16,7 +16,7 @@ export function HudFrame({
   className = "",
 }: HudFrameProps) {
   return (
-    <div className={`relative ${className}`}>
+    <div className={`relative min-h-[400px] ${className}`}>
       {/* Outer border shape */}
       <div
         className="absolute inset-0"
@@ -52,38 +52,29 @@ export function HudFrame({
         }}
       />
 
-      {/* Inner cutout (background) */}
       <div
         className="absolute inset-[3px]"
         style={{
-          background:
-            "linear-gradient(135deg, rgba(3, 8, 18, 0.98), rgba(5, 10, 25, 0.99))",
+          background: `
+      radial-gradient(
+        ellipse 50% 40% at 50% 50%,
+        #67e8f9 0%,
+        #22d3ee 15%,
+        #06b6d4 30%,
+        #0891b2 45%,
+        #0e7490 55%,
+        #155e75 65%,
+        #083344 80%,
+        #020617 100%
+      )
+    `,
           clipPath: `polygon(
-            5% 0%,
-            35% 0%,
-            40% 3%,
-            60% 3%,
-            65% 0%,
-            95% 0%,
-            100% 3%,
-            100% 25%,
-            98% 28%,
-            98% 72%,
-            100% 75%,
-            100% 97%,
-            95% 100%,
-            65% 100%,
-            60% 97%,
-            40% 97%,
-            35% 100%,
-            5% 100%,
-            0% 97%,
-            0% 75%,
-            2% 72%,
-            2% 28%,
-            0% 25%,
-            0% 3%
-          )`,
+      5% 0%, 35% 0%, 40% 3%, 60% 3%, 65% 0%, 95% 0%,
+      100% 3%, 100% 25%, 98% 28%, 98% 72%, 100% 75%,
+      100% 97%, 95% 100%, 65% 100%, 60% 97%, 40% 97%,
+      35% 100%, 5% 100%, 0% 97%, 0% 75%, 2% 72%,
+      2% 28%, 0% 25%, 0% 3%
+    )`,
         }}
       />
 
@@ -135,39 +126,6 @@ export function HudFrame({
         }}
       />
 
-      {/* Corner accents - Top Left */}
-      {/* <div
-        className="absolute top-[3%] left-[1%] w-6 h-6"
-        style={{
-          borderTop: `2px solid ${accentColor}`,
-          borderLeft: `2px solid ${accentColor}`,
-        }}
-      /> */}
-      {/* Corner accents - Top Right */}
-      {/* <div
-        className="absolute top-[3%] right-[1%] w-6 h-6"
-        style={{
-          borderTop: `2px solid ${accentColor}`,
-          borderRight: `2px solid ${accentColor}`,
-        }}
-      /> */}
-      {/* Corner accents - Bottom Left */}
-      {/* <div
-        className="absolute bottom-[3%] left-[1%] w-6 h-6"
-        style={{
-          borderBottom: `2px solid ${accentColor}`,
-          borderLeft: `2px solid ${accentColor}`,
-        }}
-      /> */}
-      {/* Corner accents - Bottom Right */}
-      {/* <div
-        className="absolute bottom-[3%] right-[1%] w-6 h-6"
-        style={{
-          borderBottom: `2px solid ${accentColor}`,
-          borderRight: `2px solid ${accentColor}`,
-        }}
-      /> */}
-
       {/* Title bar */}
       {title && (
         <div
@@ -181,47 +139,6 @@ export function HudFrame({
           {title}
         </div>
       )}
-
-      {/* Scan line animation */}
-      {/* <div
-        className="absolute inset-[3px] overflow-hidden pointer-events-none"
-        style={{
-          clipPath: `polygon(
-            5% 0%,
-            35% 0%,
-            40% 3%,
-            60% 3%,
-            65% 0%,
-            95% 0%,
-            100% 3%,
-            100% 25%,
-            98% 28%,
-            98% 72%,
-            100% 75%,
-            100% 97%,
-            95% 100%,
-            65% 100%,
-            60% 97%,
-            40% 97%,
-            35% 100%,
-            5% 100%,
-            0% 97%,
-            0% 75%,
-            2% 72%,
-            2% 28%,
-            0% 25%,
-            0% 3%
-          )`,
-        }}
-      >
-        <div
-          className="absolute left-0 right-0 h-[2px] animate-scan"
-          style={{
-            background: `linear-gradient(90deg, transparent, ${accentColor}80, transparent)`,
-            boxShadow: `0 0 10px ${accentColor}`,
-          }}
-        />
-      </div> */}
 
       {/* Content area */}
       <div className="relative z-10 h-full w-full p-4">{children}</div>
@@ -259,28 +176,6 @@ export function HudFrame({
           }}
         />
       </div>
-
-      <style jsx>{`
-        @keyframes scan {
-          0% {
-            top: 0%;
-            opacity: 0;
-          }
-          10% {
-            opacity: 1;
-          }
-          90% {
-            opacity: 1;
-          }
-          100% {
-            top: 100%;
-            opacity: 0;
-          }
-        }
-        .animate-scan {
-          animation: scan 4s linear infinite;
-        }
-      `}</style>
     </div>
   );
 }
@@ -292,7 +187,7 @@ export function HudFrameSimple({
   className = "",
 }: Omit<HudFrameProps, "title">) {
   return (
-    <div className={`relative ${className}`}>
+    <div className={`relative min-h-[200px] ${className}`}>
       {/* Border */}
       <div
         className="absolute inset-0"

@@ -1,11 +1,10 @@
+// app/dashboard/orders/page.tsx
 import { Suspense } from "react";
 import { Metadata } from "next";
 import {
   getUserOrders,
   getUserOrderStats,
-} from "@/lib/actions/user-orders.actions";
-import { OrdersGrid } from "./_components/orders-grid";
-// import { OrdersStats } from "./_components/orders-stats";
+} from "@/lib/actions/user-orders.actions"; // Updated path (singular)
 import { OrdersFilter } from "./_components/orders-filter";
 import { Package } from "lucide-react";
 import { OrdersTable } from "./_components/orders-table";
@@ -47,23 +46,16 @@ export default async function MyOrdersPage({
         </div>
       </div>
 
-      {/* Stats */}
-      {/* <Suspense fallback={<StatsLoading />}>
-        {statsResult.success && statsResult.data && (
-          <OrdersStats stats={statsResult.data} />
-        )}
-      </Suspense> */}
-
       {/* Filter */}
       <OrdersFilter currentStatus={status} />
 
-      {/* Orders Grid */}
+      {/* Orders Table */}
       <div className="w-full">
         <Suspense fallback={<GridLoading />}>
           {ordersResult.success && ordersResult.data ? (
-            ordersResult.data.orders.length > 0 ? (
+            ordersResult.data.data.length > 0 ? (
               <OrdersTable
-                orders={ordersResult.data.orders}
+                orders={ordersResult.data.data}
                 pagination={{
                   page: ordersResult.data.page,
                   totalPages: ordersResult.data.totalPages,
@@ -80,16 +72,6 @@ export default async function MyOrdersPage({
           )}
         </Suspense>
       </div>
-    </div>
-  );
-}
-
-function StatsLoading() {
-  return (
-    <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-      {[...Array(4)].map((_, i) => (
-        <div key={i} className="h-24 rounded-xl bg-zinc-800/50 animate-pulse" />
-      ))}
     </div>
   );
 }
