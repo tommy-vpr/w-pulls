@@ -194,7 +194,7 @@ export function PackCard({ pack }: PackCardProps) {
         delay: Math.random() * 2,
         size: 1 + Math.random() * 2,
       })),
-    []
+    [],
   );
 
   return (
@@ -204,7 +204,7 @@ export function PackCard({ pack }: PackCardProps) {
         ref={cardRef}
         className={cn(
           "relative rounded-xl overflow-hidden cursor-pointer transition-all duration-300 ease-out flex-1",
-          isHovering && "scale-[1.02]"
+          isHovering && "scale-[1.02]",
         )}
         style={{
           transform: `perspective(1000px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
@@ -218,7 +218,7 @@ export function PackCard({ pack }: PackCardProps) {
         <div
           className={cn(
             "absolute -inset-px rounded-xl transition-opacity duration-300",
-            isHovering ? "opacity-100" : "opacity-50"
+            isHovering ? "opacity-100" : "opacity-50",
           )}
           style={{
             background: style.gradient,
@@ -246,7 +246,7 @@ export function PackCard({ pack }: PackCardProps) {
           <div
             className={cn(
               "absolute inset-0 opacity-0 transition-opacity duration-300 pointer-events-none",
-              isHovering && "opacity-100"
+              isHovering && "opacity-100",
             )}
             style={{
               background: `
@@ -274,7 +274,7 @@ export function PackCard({ pack }: PackCardProps) {
                 key={p.id}
                 className={cn(
                   "absolute rounded-full transition-opacity duration-500",
-                  isHovering ? "opacity-100" : "opacity-0"
+                  isHovering ? "opacity-100" : "opacity-0",
                 )}
                 style={{
                   left: `${p.left}%`,
@@ -412,7 +412,7 @@ export function PackCard({ pack }: PackCardProps) {
           "cursor-pointer relative w-full py-3 rounded-lg font-bold text-sm uppercase tracking-wider transition-all duration-300",
           "border backdrop-blur-sm",
           buttonHover && "scale-[1.02]",
-          loading && "opacity-50 cursor-not-allowed"
+          loading && "opacity-50 cursor-not-allowed",
         )}
         style={{
           background: `linear-gradient(135deg, ${style.accentColor}20, ${style.accentColor}10)`,
@@ -431,7 +431,7 @@ export function PackCard({ pack }: PackCardProps) {
         ) : (
           <span className="flex items-center justify-center gap-2">
             <Zap className="w-4 h-4" />
-            Purchase Pack
+            Purchase
           </span>
         )}
       </button>

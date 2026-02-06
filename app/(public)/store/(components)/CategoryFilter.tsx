@@ -4,20 +4,29 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
 import { cn } from "@/lib/utils";
 
-// Adjust these to match your actual categories
-const CATEGORIES = [
-  { value: "", label: "All" },
-  { value: "SPORTS", label: "Sports" },
-  { value: "POKEMON", label: "Pokémon" },
-  { value: "TRADING_CARDS", label: "Trading Cards" },
-  { value: "COLLECTIBLES", label: "Collectibles" },
-];
+const CATEGORY_LABELS: Record<string, string> = {
+  BASEBALL: "Baseball",
+  BASKETBALL: "Basketball",
+  FOOTBALL: "Football",
+  HOCKEY: "Hockey",
+  SOCCER: "Soccer",
+  POKEMON: "Pokémon",
+  YUGIOH: "Yu-Gi-Oh!",
+  MAGIC_THE_GATHERING: "Magic: The Gathering",
+  ONE_PIECE: "One Piece",
+  DRAGON_BALL: "Dragon Ball",
+  OTHER: "Other",
+};
 
 interface CategoryFilterProps {
   currentCategory?: string;
+  categories: string[];
 }
 
-export function CategoryFilter({ currentCategory }: CategoryFilterProps) {
+export function CategoryFilter({
+  currentCategory,
+  categories,
+}: CategoryFilterProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
@@ -30,7 +39,7 @@ export function CategoryFilter({ currentCategory }: CategoryFilterProps) {
     } else {
       params.delete("category");
     }
-    params.delete("page"); // Reset to page 1
+    params.delete("page");
 
     startTransition(() => {
       router.push(`/store?${params.toString()}`);
@@ -39,28 +48,35 @@ export function CategoryFilter({ currentCategory }: CategoryFilterProps) {
 
   return (
     <div className="flex flex-wrap gap-2">
-      {CATEGORIES.map((category) => {
-        const isActive =
-          currentCategory === category.value ||
-          (!currentCategory && !category.value);
-
-        return (
-          <button
-            key={category.value}
-            onClick={() => handleCategoryChange(category.value)}
-            disabled={isPending}
-            className={cn(
-              "cursor-pointer px-4 py-2 rounded-lg text-sm font-medium transition-all",
-              "border disabled:opacity-50",
-              isActive
-                ? "bg-violet-600 border-violet-500 text-white"
-                : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 hover:border-zinc-700"
-            )}
-          >
-            {category.label}
-          </button>
-        );
-      })}
+      <button
+        onClick={() => handleCategoryChange("")}
+        disabled={isPending}
+        className={cn(
+          "cursor-pointer px-4 py-2 rounded-lg text-sm font-medium transition-all",
+          "border disabled:opacity-50",
+          !currentCategory
+            ? "bg-violet-600 border-violet-500 text-white"
+            : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 hover:border-zinc-700",
+        )}
+      >
+        All
+      </button>
+      {categories.map((cat) => (
+        <button
+          key={cat}
+          onClick={() => handleCategoryChange(cat)}
+          disabled={isPending}
+          className={cn(
+            "cursor-pointer px-4 py-2 rounded-lg text-sm font-medium transition-all",
+            "border disabled:opacity-50",
+            currentCategory === cat
+              ? "bg-violet-600 border-violet-500 text-white"
+              : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 hover:border-zinc-700",
+          )}
+        >
+          {CATEGORY_LABELS[cat] || cat}
+        </button>
+      ))}
     </div>
   );
 }

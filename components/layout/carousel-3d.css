@@ -9,9 +9,9 @@
   transform-style: preserve-3d;
 }
 
-.carousel-rotate:hover {
+/* .carousel-rotate:hover {
   animation-play-state: paused;
-}
+} */
 
 .carousel-item {
   transform-style: preserve-3d;

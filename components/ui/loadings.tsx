@@ -279,7 +279,7 @@ export const OrdersLoading = () => {
 
 export const OrderDetailLoading = () => {
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
+    <div className="space-y-6">
       {/* Back link */}
       <Skeleton className="h-4 w-32 bg-zinc-800" />
 
@@ -339,7 +339,7 @@ export function LoadingSpinner({
     <div
       className={cn(
         "flex flex-col items-center justify-center gap-3",
-        className
+        className,
       )}
     >
       <Loader2
@@ -419,7 +419,7 @@ export function SectionLoader({
     <div
       className={cn(
         "flex h-96 w-full flex-col items-center justify-center",
-        className
+        className,
       )}
     >
       <Loader2 className="h-10 w-10 animate-spin text-violet-500" />

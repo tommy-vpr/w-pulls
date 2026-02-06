@@ -22,17 +22,20 @@ export default async function StorePage({ searchParams }: StorePageProps) {
   const page = Number(params.page) || 1;
   const limit = 12;
 
-  const { success, data } = await productService.getProducts(
-    {
-      isActive: true,
-      category: params.category as any,
-      tier: params.tier as any,
-      search: params.search,
-    },
-    { page, limit }
-  );
+  const [productsResult, categoriesResult] = await Promise.all([
+    productService.getProducts(
+      {
+        isActive: true,
+        category: params.category as any,
+        tier: params.tier as any,
+        search: params.search,
+      },
+      { page, limit },
+    ),
+    productService.getCategories(),
+  ]);
 
-  if (!success || !data) {
+  if (!productsResult.success || !productsResult.data) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -42,12 +45,14 @@ export default async function StorePage({ searchParams }: StorePageProps) {
     );
   }
 
-  const { data: products, totalPages, total } = data;
+  const { data: products, totalPages, total } = productsResult.data;
+  const activeCategories = categoriesResult.success
+    ? categoriesResult.data!
+    : [];
 
   return (
     <div className="min-h-screen mt-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-20">
-        {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-zinc-100">Store</h1>
           <p className="mt-2 text-zinc-400">
@@ -55,11 +60,13 @@ export default async function StorePage({ searchParams }: StorePageProps) {
           </p>
         </div>
 
-        {/* Filters Bar */}
         <div className="flex flex-col gap-4 mb-8">
           <div className="flex flex-col sm:flex-row gap-4">
             <SearchInput defaultValue={params.search} />
-            <CategoryFilter currentCategory={params.category} />
+            <CategoryFilter
+              currentCategory={params.category}
+              categories={activeCategories}
+            />
           </div>
           <div>
             <p className="text-sm text-zinc-500 mb-2">Filter by tier</p>
@@ -67,20 +74,17 @@ export default async function StorePage({ searchParams }: StorePageProps) {
           </div>
         </div>
 
-        {/* Active Filters */}
         <ActiveFilters
           search={params.search}
           category={params.category}
           tier={params.tier}
         />
 
-        {/* Products Grid */}
         <StoreContent
           products={products.map(serializeProduct)}
           hasFilters={!!(params.search || params.category || params.tier)}
         />
 
-        {/* Pagination */}
         {totalPages > 1 && (
           <div className="mt-8">
             <Pagination page={page} totalPages={totalPages} />

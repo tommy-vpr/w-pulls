@@ -19,7 +19,7 @@ export interface PackConfig {
 export const PACK_CONFIGS: PackConfig[] = [
   {
     id: "starter",
-    name: "Starter Pack",
+    name: "Starter Pull",
     price: 500,
     displayPrice: "$5",
     description: "Commons & Uncommons only",
@@ -38,7 +38,7 @@ export const PACK_CONFIGS: PackConfig[] = [
 
   {
     id: "premium",
-    name: "Premium Pack",
+    name: "Premium Pull",
     price: 2000,
     displayPrice: "$20",
     description: "Chance to pull a Rare",
@@ -56,7 +56,7 @@ export const PACK_CONFIGS: PackConfig[] = [
   },
   {
     id: "elite",
-    name: "Elite Pack",
+    name: "Elite Pull",
     price: 10000,
     displayPrice: "$100",
     description: "Rare or better guaranteed",
@@ -74,7 +74,7 @@ export const PACK_CONFIGS: PackConfig[] = [
   },
   {
     id: "legendary",
-    name: "Legendary Pack",
+    name: "Legendary Pull",
     price: 20000,
     displayPrice: "$200",
     description: "Ultra Rare or better. Guaranteed heat 🔥",

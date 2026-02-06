@@ -14,6 +14,7 @@ import {
   ChevronUp,
   User,
   Settings,
+  MousePointer,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { signOutAction } from "@/lib/actions/auth.actions";
@@ -30,6 +31,7 @@ const navItems = [
   { label: "Profile", href: "/admin/profile", icon: User },
   { label: "Settings", href: "/admin/settings", icon: Settings },
   { label: "Users", href: "/admin/users", icon: Users },
+  { label: "View Site", href: "/", icon: MousePointer },
 ];
 
 interface AdminSidebarProps {
@@ -79,9 +81,8 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
       <nav className="flex-1 space-y-1 p-4 overflow-y-auto scrollbar-thin scrollbar-thumb-purple-500/20">
         {navItems.map((item) => {
           const isActive =
-            item.href === "/admin"
-              ? pathname === "/admin"
-              : pathname.startsWith(item.href);
+            pathname === item.href ||
+            (item.href !== "/" && pathname.startsWith(item.href + "/"));
 
           return (
             <Link
