@@ -20,7 +20,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { auth } from "@/lib/auth";
-import { getOrderById } from "@/lib/actions/order.actions";
+import { getUserOrderById } from "@/lib/actions/order.actions";
 import { cn } from "@/lib/utils";
 import { getTierBadgeClass, getTierConfig } from "@/lib/tier-config";
 import { CopyButton } from "@/components/ui/copy-button";
@@ -79,7 +79,7 @@ export default async function UserOrderDetailPage({
 }: UserOrderDetailPageProps) {
   const session = await auth();
   const { orderId } = await params;
-  const result = await getOrderById(orderId);
+  const result = await getUserOrderById(orderId);
 
   if (!result.success || !result.data) {
     notFound();
